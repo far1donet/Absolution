@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="One in a Computer: a reverse-trivia game for IB Computer Science A1.1.1 and A1.1.5. Rarer correct answers sink your virus deeper into the computer.">
+<meta name="description" content="One in a Computer: a reverse-trivia revision game for the whole IB Computer Science syllabus. Rarer correct answers sink your virus deeper into the computer.">
 <style>body{margin:0}</style>
 </head>
 <body>
@@ -204,6 +204,31 @@ button{font:inherit;color:inherit}
 .recap .a{font:600 13.5px var(--f-mono)}
 .recap .t{grid-row:span 2;align-self:center;text-align:right;font:700 11px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
 .recap .t small{display:block;font:600 12px var(--f-mono);color:var(--fg);letter-spacing:0}
+.picker{display:flex;flex-direction:column;gap:12px}
+.pick-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.pick-title{font:700 17px var(--f-display);letter-spacing:.06em;margin:0 0 2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.seg button{background:none;border:0;padding:8px 16px;font:700 12px var(--f-mono);letter-spacing:.12em;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#05080a}
+.seg button:focus-visible,.mini:focus-visible,.unit-h:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mini{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 11px;font:600 11px var(--f-mono);letter-spacing:.08em;cursor:pointer;color:var(--fg)}
+.theme h3{font:700 10.5px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--you);margin:8px 0 4px}
+.unit{display:flex;flex-direction:column;gap:3px;margin-bottom:6px}
+.unit-h{background:none;border:0;text-align:left;cursor:pointer;font:700 14px var(--f-display);letter-spacing:.03em;color:var(--fg);padding:6px 2px;display:flex;gap:8px;align-items:baseline}
+.unit-h span{color:var(--accent);font-family:var(--f-mono);font-size:12px}
+.unit-h[aria-pressed="true"]::after{content:"all selected";font:600 9.5px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-left:auto}
+.unit-h:disabled{opacity:.5;cursor:default}
+.topic{display:grid;grid-template-columns:18px 40px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:7px;background:rgb(255 255 255 / .03);cursor:pointer;font-size:13.5px;line-height:1.3}
+.topic:has(input:checked){background:var(--accent-dim);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent)}
+.topic.off{opacity:.45;cursor:default}
+.topic input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+.topic .code{font:600 12px var(--f-mono);color:var(--accent)}
+.topic .nm{min-width:0;overflow-wrap:anywhere}
+.topic .cnt{font:500 10.5px var(--f-mono);color:var(--muted);white-space:nowrap}
+.hl{font:700 9px var(--f-mono);font-style:normal;letter-spacing:.1em;color:var(--t-trojan);border:1px solid currentColor;border-radius:3px;padding:0 4px;margin-left:4px;vertical-align:1px}
+details.how{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.btn:disabled{opacity:.45;cursor:default;filter:none}
 .share{font:400 13px/1.5 var(--f-mono);background:rgb(0 0 0 / .35);border:1px solid var(--line);border-radius:8px;padding:10px 12px;white-space:pre-wrap;margin:0}
 
 @media (max-width:480px){
@@ -234,6 +259,7 @@ button{font:inherit;color:inherit}
 </div>
 <div id="ui"></div>
 
+<script src="prompts.js"></script>
 <script>
 /* ================= ranks ================= */
 const TIERS = {
@@ -247,86 +273,6 @@ const TIERS = {
 const TIER_ORDER = ["gem","rootkit","trojan","adware","spam","blocked"];
 const LINE_TIERS = ["spam","adware","trojan","rootkit","gem"];
 
-/* ================= prompts: A1.1.1 and A1.1.5 =================
-   Each answer: [label, expected popularity weight, ...aliases]. gem = label of the hidden gem. */
-const PROMPTS = [
- {id:"c01",spec:"A1.1.1",cat:"CPU components",q:"Name a component or register inside the CPU.",gem:"Instruction register",ans:[
-  ["ALU",30,"arithmetic logic unit","arithmetic and logic unit"],["Control unit",26,"cu"],["Registers",10,"register"],
-  ["Cache",9,"cache memory","l1","l2","l3","l1 cache","l2 cache","l3 cache"],["Program counter",7,"pc"],["Accumulator",5,"acc","ac"],
-  ["MAR",5,"memory address register"],["MDR",4,"memory data register","mbr","memory buffer register"],["Core",2,"cores","processor core"],
-  ["Internal buses",1.5,"bus","buses","internal bus"],["Clock",1.5,"system clock"],["Instruction register",.4,"ir","cir","current instruction register"]],
-  traps:[[["ram","rom","hdd","ssd","hard drive","gpu","motherboard","power supply","psu","main memory"],"That's outside the CPU, on the motherboard or in a separate device."]]},
- {id:"c02",spec:"A1.1.1",cat:"The ALU",q:"Name something the ALU does.",gem:"Sets status flags",ans:[
-  ["Arithmetic / calculations",30,"arithmetic","calculations","calculation","calculates","maths","math","arithmetic operations","does calculations","performs calculations"],
-  ["Addition",12,"add","adding","adds","adds numbers"],["Subtraction",8,"subtract","subtracting","subtracts"],
-  ["Logic operations",12,"logic","logical operations","logical","boolean logic","boolean","and or not","logic gates"],
-  ["Comparisons",10,"compare","comparing","compares","compares values","comparison","greater than","less than"],
-  ["Multiplication / division",4,"multiply","multiplication","divide","division"],
-  ["Stores results in the accumulator",4,"accumulator","result to accumulator","stores result","saves result"],
-  ["Bit shifts",1.5,"shift","shifting","bit shift","binary shift","shift left","shift right"],["Increment / decrement",1,"increment","decrement","add one"],
-  ["Sets status flags",.4,"flags","status flags","sets flags","overflow flag","zero flag","carry flag","overflow","sets the flags"]],
-  traps:[[["fetch","fetches","fetches instructions","decode","decodes","decoding","decodes instructions","control signals","sends control signals","controls the cpu"],"That's the Control Unit's job, not the ALU's."]]},
- {id:"c03",spec:"A1.1.1",cat:"The Control Unit",q:"Name a job the Control Unit does.",gem:"Handles interrupts",ans:[
-  ["Decodes instructions",28,"decode","decoding","decodes","decode instructions"],["Sends control signals",18,"control signals","control signal","sends signals","signals"],
-  ["Controls / coordinates the CPU",16,"controls","coordinates","controls the cpu","coordinates components","manages","directs","controls components","control","controls everything"],
-  ["Fetches instructions",12,"fetch","fetching","fetches","fetch instructions"],
-  ["Runs the fetch-decode-execute cycle",6,"fde","fde cycle","fetch decode execute","fetch decode execute cycle","machine cycle","instruction cycle"],
-  ["Directs the flow of data",5,"data flow","moves data","directs data","controls data flow","flow of data"],
-  ["Tells the ALU what to do",4,"controls the alu","tells the alu","tells the alu what to do","alu"],
-  ["Syncs with the clock",3,"clock","timing","synchronises","synchronizes","clock signal","uses the clock"],
-  ["Tells memory to read or write",2,"read","write","read write","read signal","write signal","memory read"],
-  ["Updates the program counter",1.5,"program counter","pc","increment pc","increments pc","updates pc"],["Handles interrupts",.4,"interrupts","interrupt","interrupt handling"]],
-  traps:[[["calculations","calculation","arithmetic","maths","math","adds numbers","does calculations","performs calculations","logic operations"],"That's the ALU's job. The Control Unit decides what happens; the ALU does the maths."]]},
- {id:"c04",spec:"A1.1.1",cat:"Registers",q:"Name a register in the CPU.",gem:"Status register",ans:[
-  ["Program counter",28,"pc"],["MAR",18,"memory address register"],["MDR",16,"memory data register","mbr","memory buffer register"],
-  ["Accumulator",14,"acc","ac"],["Instruction register",10,"ir","cir","current instruction register"],
-  ["General-purpose register",3,"general purpose register","general purpose","gpr","r0","r1","eax"],["Stack pointer",1,"sp"],["Index register",.6,"index"],
-  ["Status register",.4,"flags register","flag register","flags","sr","psw","status","status flags"]],
-  traps:[[["alu","cu","control unit","cache","ram","rom","bus"],"That's a CPU part or memory, not a register."]]},
- {id:"c05",spec:"A1.1.1",cat:"Buses",q:"Name one of the three system buses, or something one of them carries.",gem:"Interrupt signal",ans:[
-  ["Data bus",28,"data","data and instructions","instructions"],["Address bus",22,"address","addresses","memory address","memory addresses"],
-  ["Control bus",20,"control","control signals","control signal"],["Read signal",4,"read","read request","memory read"],
-  ["Write signal",3,"write","write request","memory write"],["Clock signal",3,"clock","clock pulse","timing signal"],
-  ["Bus request / grant",.8,"bus request","bus grant"],["Interrupt signal",.4,"interrupt","interrupts","irq"]],
-  traps:[[["usb","pci","pcie","sata","usb bus"],"That's a peripheral or expansion bus. The CPU's three system buses are address, data and control."]]},
- {id:"c06",spec:"A1.1.1",cat:"Processors",q:"Name a type of processor or co-processor.",gem:"Neural processing unit",ans:[
-  ["Multi-core processor",25,"multi core","multicore","multi core processor","dual core","quad core","octa core"],
-  ["Single-core processor",20,"single core","single core processor","uniprocessor"],["GPU",20,"graphics card","graphics processor","graphics processing unit"],
-  ["CPU",10,"central processing unit"],["Co-processor",6,"coprocessor","co processor"],
-  ["FPU / maths co-processor",2,"fpu","floating point unit","maths coprocessor","math coprocessor","math co processor"],
-  ["DSP",1,"digital signal processor","sound processor","audio processor"],["Security processor",1,"crypto processor","security chip","tpm","secure enclave"],
-  ["Microcontroller",1,"mcu","arduino"],["Neural processing unit",.4,"npu","tpu","ai accelerator","neural engine","ai chip"]],
-  traps:[[["ram","ssd","hdd","rom","cache"],"That's memory or storage, not a processor."]]},
- {id:"c07",spec:"A1.1.5",cat:"Fetch-decode-execute",q:"Name a stage or step of the fetch-decode-execute cycle.",gem:"Check for interrupts",ans:[
-  ["Fetch",28],["Decode",22],["Execute",22],
-  ["Increment the PC",6,"increment pc","pc increments","pc incremented","add 1 to pc","increment program counter","update pc","increment the program counter"],
-  ["Copy PC to MAR",4,"pc to mar","address to mar","copy address to mar","copy pc to mar"],
-  ["Read instruction into MDR",3,"instruction to mdr","load into mdr","memory to mdr","mdr"],
-  ["Copy MDR to IR",2,"mdr to ir","mdr to cir","copy to ir","copy mdr to ir"],["Store / write back",2,"store","write back","writeback","store result"],
-  ["Send read signal",1,"read signal","control bus read","send read signal"],["Check for interrupts",.4,"interrupts","interrupt check","interrupt","check interrupts"]],
-  traps:[]},
- {id:"c08",spec:"A1.1.5",cat:"The fetch stage",q:"Name a component used during the FETCH stage.",gem:"Control bus",ans:[
-  ["Program counter",22,"pc"],["MAR",16,"memory address register"],["MDR",14,"memory data register","mbr"],
-  ["RAM / main memory",14,"ram","main memory","memory","primary memory"],["Instruction register",8,"ir","cir","current instruction register"],
-  ["Address bus",7,"address"],["Data bus",6,"data"],["Control unit",6,"cu"],["Cache",3,"cache memory"],["Control bus",.4,"read signal","control signal"]],
-  traps:[[["alu","accumulator","acc","ac"],"The ALU and accumulator do their work in the execute stage, not fetch."]]},
- {id:"c09",spec:"A1.1.5",cat:"The execute stage",q:"Name something that can happen in the EXECUTE stage.",gem:"PC overwritten by a jump",ans:[
-  ["ALU does a calculation",30,"calculation","calculations","calculate","arithmetic","alu","maths","add","addition","subtract","subtraction","alu calculates"],
-  ["Result stored in accumulator",14,"accumulator","acc","stored in accumulator","result stored","store result","saved in accumulator"],
-  ["Logic operation",6,"logic","logical operation","logic operations"],["Comparison",6,"compare","comparing","comparison"],
-  ["Data loaded from memory",6,"load","load data","loading data","read from memory","data loaded"],
-  ["Data written to memory",5,"write to memory","save to memory","written to memory","store to memory","store in memory"],
-  ["Output to a device",2,"output","display","print"],["Halt",1,"stop","halt the program","end program"],
-  ["PC overwritten by a jump",.4,"jump","branch","jmp","pc changed","pc overwritten","goto","jump instruction"]],
-  traps:[[["decode","fetch","decoding","fetching"],"That happens earlier in the cycle, before execute."]]},
- {id:"c10",spec:"A1.1.5",cat:"The program counter",q:"Name a reason the program counter changes.",gem:"Returning from a subroutine",ans:[
-  ["Incremented after each fetch",35,"increment","increments","incremented","add 1","plus 1","next instruction","goes to next instruction","increased","increases","adds one","add one","incremented after fetch"],
-  ["Jump / branch instruction",15,"jump","branch","jmp","goto","jump instruction","branch instruction"],
-  ["IF statement or loop",6,"if statement","loop","loops","selection","iteration","condition"],
-  ["Interrupt",5,"interrupts","interrupt occurs"],["Calling a subroutine",3,"subroutine","function call","calling a function","procedure call","call"],
-  ["Reset / boot",1.5,"reset","boot","restart","power on","startup"],["Returning from a subroutine",.4,"return","ret","return from function","returning"]],
-  traps:[]},
-];
 const TIME = 25, PRIOR = 20, PER_DIVE = 7, COUNTDOWN = 3;
 
 /* ================= the computer, surface → deepest (in points) ================= */
@@ -412,7 +358,8 @@ function match(p, raw){
 
 /* ================= class stats (shared db) ================= */
 let db=null, me=null, canWrite=false, live={}, liveTotal={}, players=0, myAns={}, statusState="loading", writeChain=Promise.resolve();
-function share(p, a){ const lt=liveTotal[p.id]||0, lc=(live[p.id]||{})[a.key]||0; return (a.prior*PRIOR + lc)/(PRIOR + lt); }
+const liveCount = (pid, k) => { const m = live[pid]; return m && Object.prototype.hasOwnProperty.call(m, k) ? m[k] : 0; };
+function share(p, a){ const lt=liveTotal[p.id]||0, lc=liveCount(p.id, a.key); return (a.prior*PRIOR + lc)/(PRIOR + lt); }
 function tierOf(p, a){ if (a.gem) return "gem"; const s=share(p,a); return s>=.18?"spam":s>=.08?"adware":s>=.03?"trojan":"rootkit"; }
 function recount(docs){
   live={}; liveTotal={}; players=0;
@@ -420,7 +367,7 @@ function recount(docs){
     if (id===me){ myAns = {...((data&&data.a)||{})}; continue; }
     const a = data && data.a; if (!a || typeof a!=="object") continue;
     players++;
-    for (const pid in a){ const k=String(a[pid]); (live[pid]??={}); live[pid][k]=(live[pid][k]||0)+1; liveTotal[pid]=(liveTotal[pid]||0)+1; }
+    for (const pid in a){ const k=String(a[pid]); (live[pid]??=Object.create(null)); live[pid][k]=liveCount(pid,k)+1; liveTotal[pid]=(liveTotal[pid]||0)+1; }
   }
 }
 function statusHTML(){
@@ -463,7 +410,7 @@ const dayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}
 const diveNo = Math.max(1, Math.floor((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()) - Date.UTC(2026,10,23))/864e5)+1);
 function rng(seed){ let h=2166136261; for (const c of seed){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } h=h||1;
   return ()=>{ h^=h<<13; h^=h>>>17; h^=h<<5; return (h>>>0)/4294967296; }; }
-function pick(r){ const a=PROMPTS.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a.slice(0,PER_DIVE); }
+function pick(r, arr, n){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a.slice(0,n); }
 const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
 
 /* ================= building the world ================= */
@@ -580,27 +527,78 @@ function entity(t){
 let S = null, raf = null, flowId = 0;
 function clearUI(){ ui.innerHTML = ""; $("#lines").innerHTML = ""; const tg=$("#tag"); if (tg) tg.remove(); stopTimer(); }
 
+/* ---------- syllabus picker ---------- */
+const TOPIC_NAME = {};
+CATALOG.forEach(th=>th.units.forEach(u=>u.topics.forEach(([c,n])=>{ TOPIC_NAME[c]=n; })));
+const topicOf = p => p.spec.split(".").slice(0,2).join(".");
+let pickState = {level:"HL", sel:["A1.1"]};
+try { const saved = store.get("oiac-pick"); if (saved && Array.isArray(saved.sel) && (saved.level==="SL"||saved.level==="HL")) pickState = saved; } catch(e){}
+const savePick = () => store.set("oiac-pick", pickState);
+const inLevel = p => pickState.level==="HL" || !p.hl;
+const countFor = code => PROMPTS.filter(p=>topicOf(p)===code && inLevel(p)).length;
+function pool(){ const sel=new Set(pickState.sel); return PROMPTS.filter(p=>sel.has(topicOf(p)) && inLevel(p)); }
+function activeTopics(){ return pickState.sel.filter(c=>countFor(c)>0).sort(); }
+const scopeKey = () => pickState.level+":"+activeTopics().join(",");
+function scopeLabel(){ const t=activeTopics(); return t.length<=3 ? t.join(" + ") : `${t.length} topics`; }
+
 function titleScreen(){
   flowId++; S = null; clearUI(); curBand=-1; setBand(0,false); setVirus(START_Y); look(START_Y, .7); hud(0,0); pips();
   $("#hPrompt").textContent = "Ready to infect";
-  const done = store.get("oiac3-day-"+dayStr);
-  ui.innerHTML = `<div class="overlay"><section class="sheet" aria-labelledby="tt">
-    <div><div class="eyebrow">IB Computer Science · A1.1.1 &amp; A1.1.5 · Dive #${diveNo}</div><h1 id="tt">One in a <em>Computer</em></h1></div>
-    <p class="lede">You're a virus on the open internet. Each prompt has many correct answers. <b>Obvious answers barely sink. Valid answers your classmates didn't think of plunge you deeper</b>, through the case, the motherboard, RAM and the buses, into the CPU's registers.</p>
-    <div class="row"><button class="btn" id="daily">${done?"Replay today's dive":"Start today's dive"} ▼</button><button class="btn ghost" id="practice">Practice dive</button></div>
-    <p class="small">${PER_DIVE} prompts · ${TIME} seconds each · one answer per prompt${done?` · Today's best: <b>${done.score}</b> pts, reached ${esc(done.layer)}`:""}</p>
-    <span data-status>${statusHTML()}</span>
-    <div class="ladder">${TIER_ORDER.map(t=>`<div style="--c:${TIERS[t].hex}"><b>${TIERS[t].name}</b><span class="n">+${TIERS[t].pts}</span><span>${TIERS[t].desc}</span></div>`).join("")}</div>
-    <p class="small">Rarity comes from what everyone playing this page has answered, blended with built-in estimates so it works from the first game. Your first answer to each prompt joins the class stats. Small typos and short phrases are accepted.</p>
+  ui.innerHTML = `<div class="overlay" id="ov"><section class="sheet" aria-labelledby="tt">
+    <div><div class="eyebrow">IB Computer Science · Revision dive #${diveNo}</div><h1 id="tt">One in a <em>Computer</em></h1></div>
+    <p class="lede">You're a virus on the open internet. Each prompt has many correct answers. <b>Obvious answers barely sink. Valid answers other players didn't think of plunge you deeper</b>, through the case, the motherboard, RAM and the buses, into the CPU's registers.</p>
+    <div class="picker" id="picker"></div>
+    <details class="how"><summary>How scoring works</summary>
+      <div class="ladder">${TIER_ORDER.map(t=>`<div style="--c:${TIERS[t].hex}"><b>${TIERS[t].name}</b><span class="n">+${TIERS[t].pts}</span><span>${TIERS[t].desc}</span></div>`).join("")}</div>
+      <p class="small">${TIME} seconds per prompt, one answer each. Rarity comes from built-in estimates of how often each answer is given, blended with live answers where class stats are available. Small typos and short phrases are accepted.</p>
+    </details>
   </section></div>`;
+  renderPicker();
+}
+
+function renderPicker(focusSel){
+  const el = $("#picker"); if (!el) return;
+  const sel = new Set(pickState.sel), n = pool().length, per = Math.min(PER_DIVE, n);
+  const done = n ? store.get("oiac4-day-"+dayStr+"-"+scopeKey()) : null;
+  el.innerHTML = `
+    <div class="pick-top">
+      <div><h2 class="pick-title">Choose what to revise</h2>
+        <p class="small" aria-live="polite">${n ? `<b>${esc(scopeLabel())}</b> · ${n} prompt${n===1?"":"s"} · each dive uses ${per}` : "Tick at least one topic below."}</p></div>
+      <div class="seg" role="group" aria-label="Course level">
+        <button data-lv="SL" aria-pressed="${pickState.level==="SL"}">SL</button><button data-lv="HL" aria-pressed="${pickState.level==="HL"}">HL</button></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="daily" ${n?"":"disabled"}>${done?"Replay today's dive":"Today's dive"} ▼</button>
+      <button class="btn ghost" id="practice" ${n?"":"disabled"}>Practice dive</button>
+    </div>
+    <p class="small">${done?`Today's best on these topics: <b>${done.score}</b> pts, reached ${esc(done.layer)}. `:""}Everyone who picks the same topics and level gets the same prompts in today's dive. Practice dives are random.</p>
+    <span data-status>${statusHTML()}</span>
+    <div class="row"><button class="mini" id="pAll">Select all</button><button class="mini" id="pNone">Clear</button></div>
+    ${CATALOG.map(th=>`<div class="theme"><h3>Theme ${th.code} · ${esc(th.name)}</h3>${th.units.map(u=>{
+      const codes = u.topics.map(t=>t[0]).filter(c=>countFor(c)>0);
+      const all = codes.length>0 && codes.every(c=>sel.has(c));
+      return `<div class="unit"><button class="unit-h" data-unit="${u.code}" aria-pressed="${all}" ${codes.length?"":"disabled"}><span>${u.code}</span>${esc(u.name)}</button>
+        ${u.topics.map(([c,nm,hl])=>{ const k=countFor(c); return `<label class="topic${k?"":" off"}"><input type="checkbox" data-topic="${c}" ${sel.has(c)&&k?"checked":""} ${k?"":"disabled"}><span class="code">${c}</span><span class="nm">${esc(nm)}${hl?' <i class="hl">HL</i>':""}</span><span class="cnt">${k?k+" prompts":"HL only"}</span></label>`; }).join("")}</div>`; }).join("")}</div>`).join("")}`;
+  const set = (codes, on) => { const s2=new Set(pickState.sel); codes.forEach(c=> on ? s2.add(c) : s2.delete(c)); pickState.sel=[...s2]; savePick(); };
   $("#daily").onclick = () => newGame(true);
   $("#practice").onclick = () => newGame(false);
+  el.querySelectorAll("[data-lv]").forEach(b=> b.onclick = () => { pickState.level=b.dataset.lv; savePick(); renderPicker(`[data-lv="${b.dataset.lv}"]`); });
+  $("#pAll").onclick = () => { set(Object.keys(TOPIC_NAME).filter(c=>countFor(c)>0), true); renderPicker("#pAll"); };
+  $("#pNone").onclick = () => { pickState.sel=[]; savePick(); renderPicker("#pNone"); };
+  el.querySelectorAll("[data-unit]").forEach(b=> b.onclick = () => {
+    const u = CATALOG.flatMap(t=>t.units).find(x=>x.code===b.dataset.unit);
+    const codes = u.topics.map(t=>t[0]).filter(c=>countFor(c)>0);
+    set(codes, b.getAttribute("aria-pressed")!=="true"); renderPicker(`[data-unit="${u.code}"]`); });
+  el.querySelectorAll("[data-topic]").forEach(cb=> cb.onchange = () => { set([cb.dataset.topic], cb.checked); renderPicker(`[data-topic="${cb.dataset.topic}"]`); });
+  if (focusSel){ const f = el.querySelector(focusSel); if (f) f.focus({preventScroll:true}); }
 }
 
 function newGame(daily){
+  const P = pool(); if (!P.length){ titleScreen(); return; }
   flowId++;
-  const set = daily ? pick(rng("oiac2"+dayStr)) : pick(rng(String(Math.random())));
-  S = {daily, set, i:0, score:0, results:[], id:flowId};
+  const n = Math.min(PER_DIVE, P.length);
+  const set = daily ? pick(rng("oiac4"+dayStr+scopeKey()), P, n) : pick(rng(String(Math.random())), P, n);
+  S = {daily, set, i:0, score:0, results:[], id:flowId, scope:scopeKey(), label:scopeLabel()};
   clearUI(); curBand=-1; setBand(0,false); setVirus(START_Y); look(START_Y, .42); hud(0,0); pips();
   showPrompt();
 }
@@ -610,7 +608,7 @@ async function showPrompt(){
   pips(); $("#hPrompt").textContent = `Prompt ${S.i+1} of ${S.set.length}`;
   ui.innerHTML = `
     <section class="card" id="card" aria-live="polite">
-      <div class="eyebrow">Prompt ${S.i+1} of ${S.set.length}<span class="spec">${p.spec}</span><span style="color:var(--muted);letter-spacing:.1em">${esc(p.cat)}</span></div>
+      <div class="eyebrow">Prompt ${S.i+1} of ${S.set.length}<span class="spec">${p.spec}${p.hl?" · HL":""}</span><span style="color:var(--muted);letter-spacing:.1em">${esc(TOPIC_NAME[topicOf(p)]||"")}</span></div>
       <p class="q">${esc(p.q)}</p>
       <p class="hint">▼ rarer answers sink deeper ▼</p>
     </section>
@@ -646,7 +644,7 @@ async function submit(timeout){
   let tier="blocked", msg="", ans=null;
   if (m.kind==="ok"){
     ans = m.ans; tier = tierOf(p, ans); const sh = share(p, ans);
-    const lc = (live[p.id]||{})[ans.key]||0, lt = liveTotal[p.id]||0;
+    const lc = liveCount(p.id, ans.key), lt = liveTotal[p.id]||0;
     msg = TIERS[tier].note + (lt ? ` ${lc} of ${lt} classmate${lt===1?"":"s"} said this.` : ans.gem ? "" : ` About ${pct(sh)} of answers.`);
     if (m.fuzzy) msg = `Accepted as “${ans.label}”. ` + msg;
     record(p.id, ans.key);
@@ -733,11 +731,11 @@ async function descend(){
 function report(){
   const b = bandFor(S.score), where = S.score===0 ? "the open internet" : BANDS[b].name;
   const counts = {}; S.results.forEach(r=>counts[r.tier]=(counts[r.tier]||0)+1);
-  const shareText = `One in a Computer · ${S.daily?"Dive #"+diveNo:"Practice"}\n🦠 ${S.score} pts · ${UM(S.score)} · reached ${where}\n${S.results.map(r=>TIERS[r.tier].sq).join("")}`;
-  if (S.daily){ const prev = store.get("oiac3-day-"+dayStr); if (!prev || S.score>prev.score) store.set("oiac3-day-"+dayStr, {score:S.score, layer:where}); }
+  const shareText = `One in a Computer · ${S.label} · ${S.daily?"Dive #"+diveNo:"Practice"}\n🦠 ${S.score} pts · ${UM(S.score)} · reached ${where}\n${S.results.map(r=>TIERS[r.tier].sq).join("")}`;
+  if (S.daily){ const dk = "oiac4-day-"+dayStr+"-"+S.scope; const prev = store.get(dk); if (!prev || S.score>prev.score) store.set(dk, {score:S.score, layer:where}); }
   $("#hPrompt").textContent = "Dive complete";
   ui.innerHTML = `<div class="overlay"><section class="sheet" aria-labelledby="rt">
-    <div><div class="eyebrow">Infection report · ${S.daily?"Dive #"+diveNo:"Practice"}</div><h1 id="rt">Reached <em>${esc(where)}</em></h1></div>
+    <div><div class="eyebrow">Infection report · ${esc(S.label)} · ${S.daily?"Dive #"+diveNo:"Practice"}</div><h1 id="rt">Reached <em>${esc(where)}</em></h1></div>
     <div class="stats3"><div><b>${S.score}</b><span>Points</span></div><div><b>${UM(S.score)}</b><span>Depth</span></div><div><b>${(counts.gem||0)+(counts.rootkit||0)}</b><span>Rootkit or better</span></div></div>
     <div class="recap">${S.results.map(r=>`<div style="--c:${TIERS[r.tier].hex}"><span class="p"><span class="spec">${r.p.spec}</span> ${esc(r.p.q)}</span><span class="t">${TIERS[r.tier].name}<small>+${r.pts}</small></span><span class="a">${esc(r.label)}</span></div>`).join("")}</div>
     <pre class="share" id="sharetext">${esc(shareText)}</pre>
