@@ -477,7 +477,8 @@ registerSubject({
   start:{bg:"linear-gradient(#162433,#1f2230 70%,#3a1f1a)", label:'Start · 0 <span style="text-transform:none">µm</span>', zone:"Outside the body", color:"#9ad0ff"},
   zone0:46, endBg:"#0b040e",
   bands:BANDS, facts:FACTS, deco:(i,len)=>wall(i,len,"l")+wall(i,len,"r"), avatar,
-  extras:({pos})=>`<div class="coreglow" style="top:${pos(690)}px;--glow:rgb(200 80 255 / .25)"></div><div class="floor" style="top:${pos(760)}px;--fc:#c86bff;background:linear-gradient(#24062e,#0b040e)"></div>`,
+  extras:({pos, WMAX})=>`<div class="coreglow" style="top:${pos(690)}px;--glow:rgb(200 80 255 / .25)"></div><div class="floor" style="top:${pos(WMAX)}px;--fc:#c86bff;background:linear-gradient(#24062e,#0b040e)"></div>`,
+  beyond:"Deep genome",
   catalog:CATALOG, prompts:PROMPTS,
 });
 })();

@@ -740,7 +740,8 @@ registerSubject({
   start:{bg:"linear-gradient(#0b1d38,#081426 70%,#0c1a2a)", label:'Start · 0 <span style="text-transform:none">µm</span>', zone:"The open internet", color:"#6cb6ff", deco:network},
   zone0:190, endBg:"#0a0103",
   bands:BANDS, facts:FACTS, deco:(i,len)=>wallSVG(i,len,"l")+wallSVG(i,len,"r"), avatar:virusGlyph, entity,
-  extras:({pos})=>`<div class="usb" style="top:${pos(0)-8}px"></div><div class="pins" style="top:${pos(250)+4}px"></div><div class="coreglow" style="top:${pos(700)}px"></div><div class="floor" style="top:${pos(760)}px;background:linear-gradient(#3a0610,#0a0103)"></div>`,
+  extras:({pos, WMAX})=>`<div class="usb" style="top:${pos(0)-8}px"></div><div class="pins" style="top:${pos(250)+4}px"></div><div class="coreglow" style="top:${pos(700)}px"></div><div class="floor" style="top:${pos(WMAX)}px;background:linear-gradient(#3a0610,#0a0103)"></div>`,
+  beyond:"Deep core",
   catalog:CATALOG, prompts:PROMPTS,
 });
 })();

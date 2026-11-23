@@ -146,6 +146,8 @@ button{font:inherit;color:inherit}
 .pips{display:flex;gap:4px}
 .pips i{width:12px;height:12px;border-radius:2px;background:#1b2730;border:1px solid #2b3b46}
 .pips i.cur{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.pips .hp{font-size:17px;line-height:14px;color:#33414a;transition:color .4s,text-shadow .4s}
+.pips .hp.on{color:#ff4f6e;text-shadow:0 0 8px rgb(255 79 110 / .7)}
 .mid small{font:600 9px var(--f-mono);letter-spacing:.18em;color:var(--muted);text-transform:uppercase;text-align:center}
 .menu-btn{margin-top:6px;width:34px;height:28px;border-radius:6px;border:1px solid var(--line);background:rgb(6 10 13 / .8);cursor:pointer;display:grid;place-items:center}
 .menu-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -343,7 +345,7 @@ const TIER_ORDER = ["gem","rootkit","trojan","adware","spam","blocked"];
 const LINE_TIERS = ["spam","adware","trojan","rootkit","gem"];
 const tierName = t => t==="blocked" ? M.blocked : M.tiers[t];
 const tierNote = t => (M.notes && M.notes[t]) || TIER_BASE[t].note;
-const TIME = 25, PRIOR = 20, PER_DIVE = 7, COUNTDOWN = 3;
+const TIME = 25, PRIOR = 20, PER_DIVE = 7, COUNTDOWN = 3, LIVES = 3;
 
 /* ================= helpers ================= */
 const $ = s => document.querySelector(s);
@@ -447,7 +449,8 @@ function rng(seed){ let h=2166136261; for (const c of seed){ h^=c.charCodeAt(0);
 function pick(r, arr, n){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a.slice(0,n); }
 
 /* ================= world geometry ================= */
-const PX = 14, LEAD = 760, TAIL = 420, L = LEAD + 760*PX + TAIL;
+const PX = 14, LEAD = 760, TAIL = 420, EXT = 70;
+let WMAX = 760, L = LEAD + WMAX*PX + TAIL, BX = [];   // WMAX grows in endless practice; BX = bands incl. extra deep layers
 let M = null, AX = "down", DIR = 1;
 const isV = () => AX !== "right";
 const pos = p => AX==="up" ? L - LEAD - p*PX : LEAD + p*PX;
@@ -455,26 +458,32 @@ const avPos = p => p===0 ? pos(0) - DIR*(isV()?130:150) : pos(p);
 const FR = {av:{down:.42, up:.6, right:.28}, sink:{down:.46, up:.54, right:.5}, title:{down:.7, up:.45, right:.3}, land:{down:.8, up:.8, right:.5}};
 const along = c => isV() ? `top:${c}px` : `left:${c}px`;
 function span(a,b){ const s=Math.min(a,b), n=Math.abs(b-a); return isV() ? `top:${s}px;height:${n}px` : `left:${s}px;width:${n}px`; }
-const bandFor = pts => { let i=0; M.bands.forEach((b,k)=>{ if(pts>=b.from) i=k; }); return i; };
+const bandFor = pts => { let i=0; BX.forEach((b,k)=>{ if(pts>=b.from) i=k; }); return i; };
+function extBands(){
+  const out = M.bands.map((b,i)=>({...b, d:i})), last = M.bands[M.bands.length-1];
+  for (let f = 760, k = 1; f < WMAX; f += EXT, k++) out.push({...last, d:M.bands.length-1, from:f, to:f+EXT, hue:(last.hue + k*32) % 360, name:`${M.beyond||"Deeper"} ${k}`, zone:`${M.beyond||"Deeper"} · ${k}`});
+  return out;
+}
 
 function buildWorld(){
   AX = M.axis; DIR = AX==="up" ? -1 : 1;
+  L = LEAD + WMAX*PX + TAIL; BX = extBands();
   world.className = "ax-"+AX;
   world.style.cssText = isV() ? `height:${L}px` : `width:${L}px`;
   let h = "";
   const startSpan = AX==="up" ? span(L-LEAD, L) : span(0, LEAD);
   h += `<div class="band" style="${startSpan};background:${M.start.bg}">${M.start.deco ? M.start.deco(LEAD) : ""}</div>`;
-  M.bands.forEach((b,i)=>{
+  BX.forEach((b,i)=>{
     const a = pos(b.from), e = pos(b.to), len = Math.abs(e-a);
     const dirn = AX==="down" ? "180deg" : AX==="up" ? "0deg" : "90deg";
-    h += `<div class="band" style="${span(a,e)};background:linear-gradient(${dirn},${b.bg[0]},${b.bg[1]})">${M.deco(i,len)}<div class="boundary" style="border-color:hsl(${b.hue} 70% 55% / .45)"></div></div>`;
+    h += `<div class="band" style="${span(a,e)};background:linear-gradient(${dirn},${b.bg[0]},${b.bg[1]})">${M.deco(b.d,len)}<div class="boundary" style="border-color:hsl(${b.hue} 70% 55% / .45)"></div></div>`;
   });
-  const tailSpan = AX==="up" ? span(0, pos(760)) : span(pos(760), L);
+  const tailSpan = AX==="up" ? span(0, pos(WMAX)) : span(pos(WMAX), L);
   h += `<div class="band" style="${tailSpan};background:${M.endBg||"#020304"}"></div>`;
   // zone labels
   const startZone = AX==="down" ? `top:${LEAD-560}px` : AX==="up" ? `top:${L-LEAD+300}px` : `left:40px;top:22%`;
   h += `<div class="zone ${isV()?"":"h"}" style="${startZone};color:${M.start.color||"#6cb6ff"}">${M.start.label}<b>${esc(M.start.zone)}</b></div>`;
-  M.bands.forEach((b,i)=>{
+  BX.forEach((b,i)=>{
     const a = pos(b.from);
     const st = AX==="down" ? `top:${a+(i===0?(M.zone0||46):46)}px` : AX==="up" ? `top:${a-170}px` : `left:${a+30}px;top:22%`;
     h += `<div class="zone ${isV()?"":"h"}" style="${st};color:hsl(${b.hue} 85% 68%)">${M.meter.zone(b.from)}<b>${esc(b.zone)}</b></div>`;
@@ -482,12 +491,12 @@ function buildWorld(){
   M.facts.forEach(([p,t],k)=> h += `<div class="fact ${isV()?"":"h"}" style="${along(pos(p))}${isV()?"":`;top:${k%2?46:34}%`}">${esc(t)}</div>`);
   // ruler
   let ru = "";
-  for (let p=0; p<=760; p+=10){ const c = pos(p), big = p%50===0;
+  for (let p=0; p<=WMAX; p+=10){ const c = pos(p), big = p%50===0;
     if (isV()){ ru += `<line x1="${big?36:46}" x2="58" y1="${c}" y2="${c}" stroke="rgb(220 232 238 / ${big?.6:.28})"/>`; if (big && p>0) ru += `<text x="33" y="${c+3}" text-anchor="end">${esc(M.meter.tick(p))}</text>`; }
     else { ru += `<line y1="${big?12:22}" y2="34" x1="${c}" x2="${c}" stroke="rgb(220 232 238 / ${big?.6:.28})"/>`; if (big && p>0) ru += `<text x="${c+4}" y="10">${esc(M.meter.tick(p))}</text>`; }
   }
   h += isV() ? `<svg class="ruler" width="58" height="${L}" aria-hidden="true">${ru}</svg>` : `<svg class="ruler" width="${L}" height="34" aria-hidden="true">${ru}</svg>`;
-  if (M.extras) h += M.extras({pos, L, LEAD, PX});
+  if (M.extras) h += M.extras({pos, L, LEAD, PX, WMAX});
   h += `<div id="lines"></div><div id="you"><span>YOU</span></div><div id="virus"></div>`;
   world.innerHTML = h;
   document.title = M.gemTitle;
@@ -518,14 +527,24 @@ function setBand(pts, animate){
   const b = pts===0 ? 0 : bandFor(pts);
   if (b === curBand) return false;
   curBand = b; const v=$("#virus");
-  v.innerHTML = M.avatar(b, M.bands[b].hue); setHue(M.bands[b].hue);
+  v.innerHTML = M.avatar(Math.min(b, 10), BX[b].hue); setHue(BX[b].hue);
   if (animate){ v.classList.remove("mutate"); void v.offsetWidth; v.classList.add("mutate"); }
   return true;
 }
 
+// endless practice: add deeper layers ahead of the player, keeping the view exactly where it was
+function ensureWorld(need){
+  if (need <= WMAX) return;
+  WMAX = 760 + Math.ceil((need - 760 + 280)/EXT)*EXT;
+  buildWorld(); curBand = -1; setBand(S.score, false); setAvatar(avPos(S.score)); look(avPos(S.score), FR.av[AX], true);
+}
+function resetWorld(){ if (WMAX !== 760){ WMAX = 760; buildWorld(); curBand = -1; } }
+
 /* ================= HUD ================= */
 function hud(at, score){ $("#hMeterLabel").textContent = M.meter.label; $("#hMeter").textContent = M.meter.fmt(at); $("#hScore").textContent = Math.round(score); }
-function pips(){ const n = S ? S.set.length : PER_DIVE;
+function pips(){
+  if (S && S.endless){ $("#pips").innerHTML = Array.from({length:LIVES},(_,i)=>`<b class="hp ${i<S.hearts?"on":""}" aria-label="${i<S.hearts?"heart":"lost heart"}">♥</b>`).join(""); return; }
+  const n = S ? S.set.length : PER_DIVE;
   $("#pips").innerHTML = Array.from({length:n},(_,i)=>{ const r=S&&S.results[i]; return `<i class="${S&&i===S.i&&!r?"cur":""}" style="${r?`background:${TIER_BASE[r.tier].hex};border-color:${TIER_BASE[r.tier].hex}`:""}"></i>`; }).join(""); }
 
 /* ================= reveal art ================= */
@@ -547,7 +566,7 @@ function clearUI(){ ui.innerHTML = ""; const ln=$("#lines"); if (ln) ln.innerHTM
 /* ---------- subjects + syllabus picker ---------- */
 function setMode(key){
   if (!SUBJECTS[key]) key = SUBJECT_ORDER[0];
-  M = SUBJECTS[key]; store.set("oiac-mode", key);
+  M = SUBJECTS[key]; store.set("oiac-mode", key); WMAX = 760;
   if (!M.topicName){ const o={}; M.catalog.forEach(th=>th.units.forEach(u=>u.topics.forEach(([c,n])=>{ o[c]=n; }))); M.topicName=o; }
   buildWorld(); curBand = -1;
 }
@@ -568,10 +587,12 @@ const anyFor = code => M.prompts.some(p=>topicOf(p)===code);
 function pool(){ const sel=new Set(pickState.sel); return M.prompts.filter(p=>sel.has(topicOf(p)) && inLevel(p)); }
 function activeTopics(){ return pickState.sel.filter(c=>countFor(c)>0).sort(); }
 const scopeKey = () => M.key+":"+pickState.level+":"+activeTopics().join(",");
+const dailyKey = () => M.key+":"+pickState.level;
+const dailyPool = () => M.prompts.filter(inLevel);
 function scopeLabel(){ const t=activeTopics(); return t.length<=3 ? t.join(" + ") : `${t.length} topics`; }
 
 function titleScreen(){
-  flowId++; S = null; clearUI(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.title[AX], true); hud(0,0); pips();
+  flowId++; S = null; clearUI(); resetWorld(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.title[AX], true); hud(0,0); pips();
   pickState = getPick();
   $("#hPrompt").textContent = "Choose a subject";
   ui.innerHTML = `<div class="overlay" id="ov"><section class="sheet" aria-labelledby="tt">
@@ -582,7 +603,7 @@ function titleScreen(){
     <div class="picker" id="picker"></div>
     <details class="how"><summary>How scoring works</summary>
       <div class="ladder">${TIER_ORDER.map(t=>`<div style="--c:${TIER_BASE[t].hex}"><b>${esc(tierName(t))}</b><span class="n">+${TIER_BASE[t].pts}</span><span>${TIER_BASE[t].desc}</span></div>`).join("")}</div>
-      <p class="small">${TIME} seconds per prompt, one answer each. Rarity comes from built-in estimates of how often each answer is given, blended with live answers where class stats are available. Small typos and short phrases are accepted.</p>
+      <p class="small">${TIME} seconds per prompt, one answer each. Today's dive is ${PER_DIVE} prompts, up to ${PER_DIVE*100} points. Practice is endless until you lose all ${LIVES} hearts. Rarity comes from built-in estimates of how often each answer is given, blended with live answers where class stats are available. Small typos and short phrases are accepted.</p>
     </details>
   </section></div>`;
   $("#classBtn").onclick = () => { if (window.openClassroom) window.openClassroom(); };
@@ -592,20 +613,20 @@ function titleScreen(){
 
 function renderPicker(focusSel){
   const el = $("#picker"); if (!el) return;
-  const sel = new Set(pickState.sel), n = pool().length, per = Math.min(PER_DIVE, n);
-  const done = n ? store.get("oiac5-day-"+dayStr+"-"+scopeKey()) : null;
+  const sel = new Set(pickState.sel), n = pool().length;
+  const done = store.get("oiac6-day-"+dayStr+"-"+dailyKey()), best = store.get("oiac6-best-"+dailyKey());
   el.innerHTML = `
     <div class="pick-top">
       <div><h2 class="pick-title">Choose what to revise</h2>
-        <p class="small" aria-live="polite">${n ? `<b>${esc(M.name)} · ${esc(scopeLabel())}</b> · ${n} prompt${n===1?"":"s"} · each dive uses ${per}` : "Tick at least one topic below."}</p></div>
+        <p class="small" aria-live="polite">${n ? `Practice mix: <b>${esc(M.name)} · ${esc(scopeLabel())}</b> · ${n} prompt${n===1?"":"s"}` : "Tick at least one topic below to practise."}</p></div>
       <div class="seg" role="group" aria-label="Course level">
         <button data-lv="SL" aria-pressed="${pickState.level==="SL"}">SL</button><button data-lv="HL" aria-pressed="${pickState.level==="HL"}">HL</button></div>
     </div>
     <div class="row">
-      <button class="btn" id="daily" ${n?"":"disabled"}>${done?"Replay today's dive":"Today's dive"} ${M.arrow}</button>
-      <button class="btn ghost" id="practice" ${n?"":"disabled"}>Practice dive</button>
+      <button class="btn" id="daily">${done?"Replay today's dive":"Today's dive"} ${M.arrow}</button>
+      <button class="btn ghost" id="practice" ${n?"":"disabled"}>Practice · endless</button>
     </div>
-    <p class="small">${done?`Today's best on these topics: <b>${done.score}</b> pts, reached ${esc(done.layer)}. `:""}Everyone who picks the same subject, topics and level gets the same prompts in today's dive. Practice dives are random.</p>
+    <p class="small"><b>Today's dive:</b> ${PER_DIVE} prompts from all of ${esc(M.name)} (${pickState.level}), the same for everyone today, up to ${PER_DIVE*100} points.${done?` Your best today: <b>${done.score}</b> pts, reached ${esc(done.layer)}.`:""}<br><b>Practice:</b> endless prompts from the topics you tick below. You have ${LIVES} hearts, and a wrong answer or running out of time costs one. Go as far as you can.${best?` Your best: <b>${best.score}</b> pts over ${best.prompts} prompts.`:""}</p>
     <span data-status>${statusHTML()}</span>
     <div class="row"><button class="mini" id="pAll">Select all</button><button class="mini" id="pNone">Clear</button></div>
     ${M.catalog.map(th=>`<div class="theme"><h3>${esc(th.label || `Theme ${th.code} · ${th.name}`)}</h3>${th.units.map(u=>{
@@ -628,21 +649,31 @@ function renderPicker(focusSel){
 }
 
 function newGame(daily){
-  const Pl = pool(); if (!Pl.length){ titleScreen(); return; }
+  const Pl = daily ? dailyPool() : pool(); if (!Pl.length){ titleScreen(); return; }
   flowId++;
-  const n = Math.min(PER_DIVE, Pl.length);
-  const set = daily ? pick(rng("oiac5"+dayStr+scopeKey()), Pl, n) : pick(rng(String(Math.random())), Pl, n);
-  S = {daily, set, i:0, score:0, results:[], id:flowId, scope:scopeKey(), label:scopeLabel()};
-  clearUI(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.av[AX]); hud(0,0); pips();
+  const set = daily ? pick(rng("oiac6"+dayStr+dailyKey()), Pl, Math.min(PER_DIVE, Pl.length)) : [];
+  S = {daily, endless:!daily, pool:Pl, queue:[], hearts:LIVES, set, i:0, score:0, results:[], id:flowId,
+       scope: daily ? dailyKey() : scopeKey(), label: daily ? `All topics (${pickState.level})` : scopeLabel()};
+  clearUI(); resetWorld(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.av[AX]); hud(0,0); pips();
   showPrompt();
 }
 
+// practice draws prompts endlessly, reshuffling the mix each time it runs out
+function drawPractice(){
+  if (!S.queue.length){ const lastId = S.set.length ? S.set[S.set.length-1].id : null;
+    S.queue = pick(rng(String(Math.random())), S.pool, S.pool.length);
+    if (S.queue.length > 1 && S.queue[0].id === lastId) S.queue.push(S.queue.shift()); }
+  return S.queue.shift();
+}
+const promptLabel = () => S.endless ? `Prompt ${S.i+1}` : `Prompt ${S.i+1} of ${S.set.length}`;
 async function showPrompt(){
+  if (S.endless && S.i >= S.set.length) S.set.push(drawPractice());
+  if (S.endless) ensureWorld(S.score + 120);
   const id = flowId, p = S.set[S.i];
-  pips(); $("#hPrompt").textContent = `${M.name} · Prompt ${S.i+1} of ${S.set.length}`;
+  pips(); $("#hPrompt").textContent = `${M.name} · ${S.endless ? "Practice · " : ""}${promptLabel()}`;
   ui.innerHTML = `
     <section class="card" id="card" aria-live="polite">
-      <div class="eyebrow">Prompt ${S.i+1} of ${S.set.length}<span class="spec">${esc(p.spec)}${p.hl?" · HL":""}</span><span style="color:var(--muted);letter-spacing:.1em">${esc(M.topicName[topicOf(p)]||"")}</span></div>
+      <div class="eyebrow">${promptLabel()}<span class="spec">${esc(p.spec)}${p.hl?" · HL":""}</span><span style="color:var(--muted);letter-spacing:.1em">${esc(M.topicName[topicOf(p)]||"")}</span></div>
       <p class="q">${esc(p.q)}</p>
       <p class="hint">${esc(M.verbs.hint)}</p>
     </section>
@@ -693,6 +724,7 @@ async function submit(timeout){
   else if (m.kind==="empty") msg = "Out of time, so you didn't move.";
   else msg = "That isn't one of the accepted answers, so you didn't move.";
   const pts = TIER_BASE[tier].pts;
+  if (S.endless && tier === "blocked"){ S.hearts = Math.max(0, S.hearts - 1); msg += S.hearts ? ` You lost a heart: ${S.hearts} left.` : " That was your last heart."; }
   S.results[S.i] = {p, raw, tier, pts, msg, ans, label: ans ? ans.label : (raw || "—")};
   $("#card").classList.add("out"); $("#bar").classList.add("out");
   await sleep(350); if (id!==flowId) return;
@@ -738,14 +770,14 @@ function showReveal(){
   const from = S.score; S.score += r.pts; hud(from, S.score); pips();
   const rows = p.list.map(a=>({a, s:share(p,a), t:tierOf(p,a)})).sort((x,y)=>(x.a.gem-y.a.gem) || (y.s-x.s));
   const max = Math.max(...rows.map(x=>x.s));
-  const last = S.i === S.set.length-1;
+  const last = S.endless ? S.hearts <= 0 : S.i === S.set.length-1;
   const art = (M.entity && M.entity(t, c)) || defaultEntity(t);
   ui.innerHTML = `
     <section class="reveal" style="--c:${c}" aria-live="polite">
       <div class="entity" style="--c:${c}">${art}</div>
       <div class="rank">${t==="blocked" ? esc(r.raw ? M.blocked : "Timed out") : esc(tierName(t))}</div>
       <div class="quote">${r.raw ? `“${esc(r.ans ? r.ans.label : r.raw)}”` : "no answer"}</div>
-      <div class="gain"><b>+${r.pts} PTS</b> · ${r.pts ? esc(M.meter.gain(from, S.score)) : "no movement"}</div>
+      <div class="gain"><b>+${r.pts} PTS</b> · ${r.pts ? esc(M.meter.gain(from, S.score)) : "no movement"}${S.endless && !r.pts ? ` · <b style="color:#ff4f6e">−1 ♥</b>` : ""}</div>
       <div class="note">${esc(r.msg)}</div>
       <button class="linkbtn" id="specBtn" aria-expanded="false">All accepted answers ▾</button>
       <div class="spectrum" id="spec" hidden><ul>${rows.map(x=>`<li class="${r.ans && x.a.key===r.ans.key?"mine":""}" style="--c:${TIER_BASE[x.t].hex}"><span class="lab"><i class="sw"></i><span>${esc(x.a.label)}${x.a.gem?" · <b>gem</b>":""}</span></span><span class="b"><i style="width:${x.a.gem?3:Math.max(3,x.s/max*100)}%"></i></span><span class="pc">${x.a.gem?"gem":pct(x.s)}</span></li>`).join("")}</ul></div>
@@ -770,22 +802,24 @@ async function descend(){
   } else look(avC, FR.av[AX]);
   $("#lines").innerHTML = "";
   S.i++;
-  if (S.i >= S.set.length) report(); else showPrompt();
+  if (S.endless ? S.hearts <= 0 : S.i >= S.set.length) report(); else showPrompt();
 }
 
 function report(){
-  const b = bandFor(S.score), where = S.score===0 ? M.start.zone : M.bands[b].name;
+  const b = bandFor(S.score), where = S.score===0 ? M.start.zone : BX[b].name, n = S.results.length;
   const counts = {}; S.results.forEach(r=>counts[r.tier]=(counts[r.tier]||0)+1);
-  const shareText = `One in a ${M.gemWord} · ${M.name} ${S.label} · ${S.daily?"Dive #"+diveNo:"Practice"}\n${M.emoji} ${S.score} pts · ${M.meter.fmt(S.score)} · reached ${where}\n${S.results.map(r=>TIER_BASE[r.tier].sq).join("")}`;
-  if (S.daily){ const dk = "oiac5-day-"+dayStr+"-"+S.scope; const prev = store.get(dk); if (!prev || S.score>prev.score) store.set(dk, {score:S.score, layer:where}); }
+  const shareText = `One in a ${M.gemWord} · ${M.name} ${S.label} · ${S.daily?"Dive #"+diveNo:`Practice · ${n} prompts`}\n${M.emoji} ${S.score} pts · ${M.meter.fmt(S.score)} · reached ${where}\n${S.results.map(r=>TIER_BASE[r.tier].sq).join("")}`;
+  let newBest = false;
+  if (S.daily){ const dk = "oiac6-day-"+dayStr+"-"+S.scope; const prev = store.get(dk); if (!prev || S.score>prev.score) store.set(dk, {score:S.score, layer:where}); }
+  else { const bk = "oiac6-best-"+M.key+":"+pickState.level, prev = store.get(bk); if (!prev || S.score>prev.score){ store.set(bk, {score:S.score, prompts:n}); newBest = S.score > 0; } }
   $("#hPrompt").textContent = "Dive complete";
   ui.innerHTML = `<div class="overlay"><section class="sheet" aria-labelledby="rt">
-    <div><div class="eyebrow">${esc(M.name)} report · ${esc(S.label)} · ${S.daily?"Dive #"+diveNo:"Practice"}</div><h1 id="rt">Reached <em>${esc(where)}</em></h1></div>
-    <div class="stats3"><div><b>${S.score}</b><span>Points</span></div><div><b>${esc(M.meter.fmt(S.score))}</b><span>${esc(M.meter.label.toLowerCase())}</span></div><div><b>${(counts.gem||0)+(counts.rootkit||0)}</b><span>${esc(tierName("rootkit"))} or better</span></div></div>
+    <div><div class="eyebrow">${esc(M.name)} report · ${esc(S.label)} · ${S.daily?"Dive #"+diveNo:"Practice"}${newBest?" · new best!":""}</div><h1 id="rt">${S.endless ? "Out of hearts at" : "Reached"} <em>${esc(where)}</em></h1></div>
+    <div class="stats3"><div><b>${S.score}</b><span>Points${S.daily?` / ${PER_DIVE*100}`:""}</span></div><div><b>${esc(M.meter.fmt(S.score))}</b><span>${esc(M.meter.label.toLowerCase())}</span></div>${S.endless ? `<div><b>${n}</b><span>Prompts answered</span></div>` : `<div><b>${(counts.gem||0)+(counts.rootkit||0)}</b><span>${esc(tierName("rootkit"))} or better</span></div>`}</div>
     <div class="recap">${S.results.map(r=>`<div style="--c:${TIER_BASE[r.tier].hex}"><span class="p"><span class="spec">${esc(r.p.spec)}</span> ${esc(r.p.q)}</span><span class="t">${esc(tierName(r.tier))}<small>+${r.pts}</small></span><span class="a">${esc(r.label)}</span></div>`).join("")}</div>
     <pre class="share" id="sharetext">${esc(shareText)}</pre>
     <div class="row"><button class="btn" id="copy">Copy result</button><span class="small" id="copied" aria-live="polite"></span></div>
-    <div class="row"><button class="btn ghost" id="again">Practice dive</button><button class="btn ghost" id="surface">Back to the start</button></div>
+    <div class="row"><button class="btn ghost" id="again">${S.endless ? "Practise again" : "Practice · endless"}</button><button class="btn ghost" id="surface">Back to the start</button></div>
   </section></div>`;
   $("#copy").onclick = () => {
     const ok = () => $("#copied").textContent = "Copied. Paste it in your class chat.";

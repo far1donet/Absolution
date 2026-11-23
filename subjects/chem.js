@@ -290,7 +290,8 @@ registerSubject({
   start:{bg:"linear-gradient(#1b232b,#182028 70%,#16202a)", label:'Start · 10⁰ <span style="text-transform:none">m</span>', zone:"The chemistry lab", color:"#9fd8ff"},
   zone0:46, endBg:"#0a0207",
   bands:BANDS, facts:FACTS, deco:(i,len)=>wall(i,len,"l")+wall(i,len,"r"), avatar,
-  extras:({pos})=>`<div class="coreglow" style="top:${pos(690)}px;--glow:rgb(255 80 180 / .25)"></div><div class="floor" style="top:${pos(760)}px;--fc:#ff6ac8;background:linear-gradient(#2a0620,#0a0207)"></div>`,
+  extras:({pos, WMAX})=>`<div class="coreglow" style="top:${pos(690)}px;--glow:rgb(255 80 180 / .25)"></div><div class="floor" style="top:${pos(WMAX)}px;--fc:#ff6ac8;background:linear-gradient(#2a0620,#0a0207)"></div>`,
+  beyond:"Quantum foam",
   catalog:CATALOG, prompts:PROMPTS,
 });
 })();

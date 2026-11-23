@@ -299,6 +299,7 @@ registerSubject({
   start:{bg:"linear-gradient(90deg,#0a182c,#0e2440)", label:'Start · 0 <span style="text-transform:none">m</span>', zone:"The firing range", color:"#9fd0ff", deco:len=>hscene(`<rect x="0" y="${GY}" width="${len}" height="${420-GY}" fill="#3d5a2a"/><path d="M${len-420} ${GY} q200 -70 420 0" fill="#4a6a34"/>`, len)},
   endBg:"linear-gradient(90deg,#1a1430,#07060f)",
   bands:BANDS, facts:FACTS, deco:scene, avatar,
+  beyond:"Over the horizon",
   catalog:CATALOG, prompts:PROMPTS,
 });
 })();

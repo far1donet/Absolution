@@ -278,6 +278,7 @@ function avatar(level, hue){
   return avatarSVG(s);
 }
 function yearAt(p){
+  if (p >= 760) return 2100 + (p - 760);
   const b = BANDS.find(x => p >= x.from && p < x.to) || BANDS[BANDS.length-1];
   const k = Math.min(1, Math.max(0, (p - b.from) / (b.to - b.from)));
   return b.years[0] + (b.years[1] - b.years[0]) * k;
@@ -304,6 +305,7 @@ registerSubject({
     deco:len=>hscene(`<rect x="0" y="${GY}" width="${len}" height="${420-GY}" fill="#3a2a14"/><rect x="${len-260}" y="${GY-150}" width="90" height="150" rx="10" fill="#2a2a4a" stroke="#c9a3ff" stroke-width="3"/><circle cx="${len-215}" cy="${GY-110}" r="22" fill="none" stroke="#c9a3ff" stroke-width="3" class="blink"/>`, len)},
   endBg:"linear-gradient(90deg,#30106a,#0a0420)",
   bands:BANDS, facts:FACTS, deco:scene, avatar,
+  beyond:"The far future",
   catalog:CATALOG, prompts:PROMPTS,
 });
 })();

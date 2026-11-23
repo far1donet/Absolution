@@ -13,7 +13,7 @@ A reverse-trivia revision game for **IB Diploma** subjects. Every prompt has man
 | Business Management | A bottle of money that fills and rises, from $1 to $1 trillion | up |
 | History | A time traveller crossing the ages, from the dinosaurs to the new generation | sideways |
 
-Pick a subject, tick syllabus topics, and switch between **SL** and **HL**. Each dive draws 7 prompts from your selection.
+Pick a subject and switch between **SL** and **HL**. **Today's dive** is 7 prompts from the whole subject (up to 700 points), the same for everyone that day. **Practice** is endless: prompts come from the topics you tick, the world keeps going deeper, and you play until you lose all 3 hearts.
 
 ## Join the classroom (multiplayer)
 

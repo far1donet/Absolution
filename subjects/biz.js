@@ -373,6 +373,7 @@ function avatar(level, hue){
 }
 const money = p => Math.pow(10, p*12/700);
 function fmt$(v){
+  if (v >= 1e15){ const e = Math.floor(Math.log10(v)); return "$" + (v / Math.pow(10, e)).toFixed(1) + "×10" + sup(e); }
   if (v < 1000) return "$" + (v < 10 ? v.toFixed(2) : Math.round(v).toString());
   const u = [["T",1e12],["B",1e9],["M",1e6],["K",1e3]].find(([,d]) => v >= d);
   const n = v / u[1]; return "$" + (n < 10 ? n.toFixed(1) : Math.round(n)) + u[0];
@@ -388,9 +389,10 @@ registerSubject({
   start:{bg:"linear-gradient(0deg,#120c0a,#2b1f25)", label:"Start · $1.00", zone:"Pocket money", color:"#ffd85a"},
   endBg:"#05060f",
   bands:BANDS, facts:FACTS, deco:(i,len)=>wall(i,len,"l")+wall(i,len,"r"), avatar,
-  extras:({pos, L})=>{ const bottom = pos(0) + 90, top = pos(735);
+  extras:({pos, L, WMAX})=>{ const bottom = pos(0) + 90, top = pos(WMAX - 25);
     return `<div class="bottle" style="top:${top}px;height:${bottom-top}px"></div><div class="fill" style="bottom:${L-bottom+3}px"></div>
       <div class="bottle-neck" style="top:${top-150}px;height:150px"></div><div class="cork" style="top:${top-190}px"></div>`; },
+  beyond:"Galactic fortune",
   catalog:CATALOG, prompts:PROMPTS,
 });
 })();
