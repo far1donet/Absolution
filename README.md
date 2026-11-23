@@ -4,7 +4,7 @@ A reverse-trivia revision game for **IB Computer Science** (syllabus for first a
 
 Every prompt has many correct answers. Obvious answers barely sink. Valid answers that few people think of send your virus deeper into the computer, from the open internet down to the CPU's registers.
 
-**Play:** https://far1donet.github.io/absolution/
+**Play:** https://far1donet.github.io/Absolution/
 
 ## Choosing what to revise
 
