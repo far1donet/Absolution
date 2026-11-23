@@ -6,7 +6,7 @@
 <meta name="description" content="One in a Computer: a reverse-trivia revision game for IB Computer Science, Biology, Chemistry, Physics, Business Management and History. Rarer correct answers take you further.">
 <title>One in a Computer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <style>
 /* Layout: one full-screen world per subject (down, up or sideways). The camera follows the answer, then the player.
    HUD on top, answer bar at the bottom, reveals in the middle. Single dark look; the accent hue follows the current layer. */
@@ -288,6 +288,7 @@ details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:
   #virus .bob,#virus .vspin,.flow,.blink,.drift,.beat,.bits i,.entity svg,.reveal > *{animation:none!important}
 }
 </style>
+<link rel="stylesheet" href="classroom.css">
 </head>
 <body>
 <div class="viewport" id="vp"><div id="world"></div></div>
@@ -301,6 +302,7 @@ details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:
   <div class="box right"><small>SCORE</small><b id="hScore">0</b></div>
 </header>
 <div class="menu" id="menu" hidden>
+  <button id="mClass">Join the classroom</button>
   <button id="mRestart">Restart this dive</button>
   <button id="mTitle">Back to the start</button>
 </div>
@@ -574,6 +576,7 @@ function titleScreen(){
   $("#hPrompt").textContent = "Choose a subject";
   ui.innerHTML = `<div class="overlay" id="ov"><section class="sheet" aria-labelledby="tt">
     <div><div class="eyebrow">IB revision dive #${diveNo}</div><h1 id="tt">One in a <em>${esc(M.gemWord)}</em></h1></div>
+    <button class="btn class-cta" id="classBtn">Join the classroom <small>Multiplayer</small></button>
     <div class="subjects" role="group" aria-label="Subject">${SUBJECT_ORDER.map(k=>{ const s=SUBJECTS[k]; return `<button class="subj" data-subj="${k}" aria-pressed="${k===M.key}" style="--sh:${s.bands[2].hue}"><span class="ic">${s.avatar(3, s.bands[2].hue)}</span><span><b>${esc(s.name)}</b><small>${esc(s.theme)}</small></span></button>`; }).join("")}</div>
     <p class="lede">${M.blurb}</p>
     <div class="picker" id="picker"></div>
@@ -582,6 +585,7 @@ function titleScreen(){
       <p class="small">${TIME} seconds per prompt, one answer each. Rarity comes from built-in estimates of how often each answer is given, blended with live answers where class stats are available. Small typos and short phrases are accepted.</p>
     </details>
   </section></div>`;
+  $("#classBtn").onclick = () => { if (window.openClassroom) window.openClassroom(); };
   document.querySelectorAll("[data-subj]").forEach(b=> b.onclick = async () => { const k=b.dataset.subj; if (k===M.key) return; vp.style.opacity="0"; ui.style.pointerEvents="none"; await sleep(200); setMode(k); titleScreen(); ui.style.pointerEvents=""; requestAnimationFrame(()=>{ vp.style.opacity="1"; }); const f=document.querySelector(`[data-subj="${k}"]`); if (f) f.focus({preventScroll:true}); });
   renderPicker();
 }
@@ -795,10 +799,13 @@ function report(){
 /* ================= menu ================= */
 $("#menuBtn").onclick = () => { const m=$("#menu"); m.hidden=!m.hidden; $("#menuBtn").setAttribute("aria-expanded", String(!m.hidden)); };
 $("#mTitle").onclick = () => { $("#menu").hidden=true; titleScreen(); };
+$("#mClass").onclick = () => { $("#menu").hidden=true; if (window.openClassroom) window.openClassroom(); };
 $("#mRestart").onclick = () => { $("#menu").hidden=true; if (S) newGame(S.daily); else newGame(false); };
 
 setMode(store.get("oiac-mode") || "cs");
 titleScreen();
 </script>
+<script src="vendor/peerjs.min.js"></script>
+<script src="classroom.js"></script>
 </body>
 </html>
