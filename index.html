@@ -10,8 +10,10 @@
 <style>
 /* Layout: one full-screen world per subject (down, up or sideways). The camera follows the answer, then the player.
    HUD on top, answer bar at the bottom, reveals in the middle. Single dark look; the accent hue follows the current layer. */
+@property --hue{syntax:"<number>";inherits:true;initial-value:205}
 :root{
   color-scheme:dark;
+  transition:--hue .9s ease;
   --bg:#04070a;
   --panel:rgba(9,15,20,.88);
   --line:#22323d;
@@ -35,11 +37,11 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);fon
 button{font:inherit;color:inherit}
 
 /* ---------- world ---------- */
-.viewport{position:fixed;inset:0;overflow:hidden;background:var(--bg)}
+.viewport{position:fixed;inset:0;overflow:hidden;background:var(--bg);transition:opacity .25s ease}
 #world{position:absolute;left:0;top:0;will-change:transform}
 #world.ax-down,#world.ax-up{right:0}
 #world.ax-right{bottom:0}
-.band{position:absolute;overflow:hidden}
+.band{position:absolute;overflow:hidden;content-visibility:auto}
 .ax-down .band,.ax-up .band{left:0;right:0}
 .ax-right .band{top:0;bottom:0}
 .wall{position:absolute;top:0;height:100%;width:clamp(52px,13vw,150px)}
@@ -60,16 +62,16 @@ button{font:inherit;color:inherit}
 .ruler text{font:500 9.5px var(--f-mono);fill:rgb(220 232 238 / .6)}
 .ax-down .ruler,.ax-up .ruler{right:0;top:0;width:58px}
 .ax-right .ruler{left:0;bottom:0;height:34px}
-#you{position:absolute;height:0;pointer-events:none}
+#you{position:absolute;top:0;height:0;pointer-events:none;will-change:transform}
 .ax-down #you,.ax-up #you{right:0;width:70px;border-top:2px solid var(--you)}
 #you span{position:absolute;font:700 10px var(--f-mono);letter-spacing:.12em;color:var(--you)}
 .ax-down #you span,.ax-up #you span{right:62px;top:-9px}
-.ax-right #you{bottom:182px;width:0}
+.ax-right #you{top:auto;left:0;bottom:182px;width:0}
 .ax-right #you span{left:-15px;top:-6px}
 .ax-right #you span::after{content:" ▾"}
-#virus{position:absolute;width:74px;height:74px;z-index:3;filter:drop-shadow(0 0 14px hsl(var(--hue) 95% 60% / .8))}
-.ax-down #virus,.ax-up #virus{left:68%;margin:-37px 0 0 -37px}
-.ax-right #virus{bottom:84px;margin:0 0 0 -37px}
+#virus{position:absolute;top:0;width:74px;height:74px;z-index:3;will-change:transform;filter:drop-shadow(0 0 14px hsl(var(--hue) 95% 60% / .8))}
+.ax-down #virus,.ax-up #virus{left:68%}
+.ax-right #virus{top:auto;left:0;bottom:84px}
 #virus .bob{animation:bob 2.8s ease-in-out infinite;transform-origin:37px 37px}
 #virus .vspin{animation:spin 16s linear infinite;transform-origin:0 0}
 #virus.mutate .bob{animation:mutate .9s}
@@ -103,9 +105,9 @@ button{font:inherit;color:inherit}
 .tline.fw span{color:var(--t-rootkit)}
 #lines.quiet .tline span{opacity:0;transition:opacity .4s}
 #lines.quiet .tline:not(.hit){opacity:.3}
-#tag{position:absolute;z-index:4;pointer-events:none}
-.ax-down #tag,.ax-up #tag{left:46%;transform:translate(-50%,-50%) rotate(-3deg)}
-.ax-right #tag{transform:translate(-50%,50%) rotate(-3deg)}
+#tag{position:absolute;top:0;z-index:4;pointer-events:none;will-change:transform}
+.ax-down #tag,.ax-up #tag{left:46%}
+.ax-right #tag{top:auto;left:0;bottom:0}
 #tag .pill{position:relative;display:inline-flex;gap:10px;align-items:center;white-space:nowrap;max-width:76vw;overflow:hidden;text-overflow:ellipsis;
   font:700 clamp(14px,3.8vw,19px)/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--tc,#7ff3ff);
   padding:11px 16px;border-radius:8px;background:rgb(4 8 11 / .84);border:1.5px solid color-mix(in srgb,var(--tc,#7ff3ff) 60%,transparent);
@@ -154,7 +156,7 @@ button{font:inherit;color:inherit}
 /* ---------- prompt card + answer bar ---------- */
 .card{position:fixed;z-index:15;top:calc(env(safe-area-inset-top,0px) + 92px);left:50%;transform:translateX(-50%);width:min(540px,calc(100% - 32px));
   background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px 14px;backdrop-filter:blur(6px);
-  box-shadow:0 10px 40px rgb(0 0 0 / .5);transition:opacity .35s,transform .35s}
+  box-shadow:0 10px 40px rgb(0 0 0 / .5);transition:opacity .4s cubic-bezier(.2,.7,.2,1),transform .4s cubic-bezier(.2,.7,.2,1)}
 .card.out{opacity:0;transform:translate(-50%,-12px);pointer-events:none}
 .card .eyebrow{font:700 10px var(--f-mono);letter-spacing:.2em;color:var(--you);text-transform:uppercase;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .spec{font:600 10px var(--f-mono);letter-spacing:.08em;color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
@@ -162,7 +164,7 @@ button{font:inherit;color:inherit}
 .card .hint{font:500 10.5px var(--f-mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:0}
 .bar{position:fixed;z-index:16;left:0;right:0;bottom:0;display:flex;gap:10px;align-items:center;justify-content:center;
   padding-top:14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  background:linear-gradient(transparent,rgb(3 5 7 / .92) 40%);transition:opacity .3s,transform .3s}
+  background:linear-gradient(transparent,rgb(3 5 7 / .92) 40%);transition:opacity .35s cubic-bezier(.2,.7,.2,1),transform .35s cubic-bezier(.2,.7,.2,1)}
 .bar.out{opacity:0;transform:translateY(20px);pointer-events:none}
 .bar form{display:flex;gap:10px;align-items:center;width:min(560px,100%)}
 .ring{position:relative;width:46px;height:46px;flex:none}
@@ -179,12 +181,14 @@ button{font:inherit;color:inherit}
 .btn.ghost{background:rgb(6 10 13 / .7);color:var(--fg);border:1.5px solid var(--line)}
 .btn.descend{background:rgb(4 8 11 / .85);color:var(--accent);border:2px solid var(--accent);padding:13px 26px;box-shadow:0 0 18px var(--accent-dim)}
 .countdown{position:fixed;z-index:16;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);text-align:center;font:600 11px var(--f-mono);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
-.countdown b{color:var(--accent)}
+.countdown b{color:var(--accent);display:inline-block;animation:tick .55s cubic-bezier(.2,.7,.2,1)}
+@keyframes tick{from{transform:scale(1.7);opacity:.2}}
+.leave{opacity:0!important;transform:translateY(-10px);transition:opacity .22s ease,transform .22s ease}
 
 /* ---------- reveal ---------- */
 .reveal{background:radial-gradient(ellipse 70% 55% at 50% 32%,rgb(3 5 7 / .8),transparent 75%);position:fixed;z-index:15;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 96px);bottom:96px;overflow-y:auto;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px 12px}
-.reveal > *{animation:rise .5s both}
+.reveal > *{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
 .reveal > *:nth-child(2){animation-delay:.08s}.reveal > *:nth-child(3){animation-delay:.16s}.reveal > *:nth-child(4){animation-delay:.24s}.reveal > *:nth-child(5){animation-delay:.32s}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}}
 .entity{height:104px;display:grid;place-items:center}
@@ -345,8 +349,11 @@ const world = $("#world"), vp = $("#vp"), ui = $("#ui");
 const esc = escH;
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep = ms => new Promise(r => setTimeout(r, RM ? Math.min(ms,150) : ms));
-const easeInOut = k => k<.5 ? 4*k*k*k : 1-Math.pow(-2*k+2,3)/2;
-const easeSink = k => k<.25 ? 8*k*k : 1 - Math.pow(1-k,2.4)*(1/Math.pow(.75,2.4))*.5;
+function bezier(x1,y1,x2,y2){ const cx=3*x1, bx=3*(x2-x1)-cx, ax=1-cx-bx, cy=3*y1, by=3*(y2-y1)-cy, ay=1-cy-by;
+  const sx=t=>((ax*t+bx)*t+cx)*t, sy=t=>((ay*t+by)*t+cy)*t, dx=t=>(3*ax*t+2*bx)*t+cx;
+  return x=>{ if (x<=0) return 0; if (x>=1) return 1; let t=x; for (let i=0;i<8;i++){ const e=sx(t)-x, d=dx(t); if (Math.abs(e)<1e-5 || Math.abs(d)<1e-6) break; t-=e/d; } return sy(Math.min(1,Math.max(0,t))); }; }
+const EASE = {sink:bezier(.38,0,.16,1), move:bezier(.62,0,.3,1), soft:bezier(.4,0,.2,1)};
+const easeInOut = EASE.move, CAM_K = 8;
 function tween(dur, fn, ease=easeInOut){ if (RM) dur = Math.min(dur,200);
   return new Promise(res=>{ const t0=performance.now(); const step=now=>{ const k=Math.min(1,(now-t0)/dur); fn(ease(k)); if(k<1) requestAnimationFrame(step); else res(); }; requestAnimationFrame(step); }); }
 const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
@@ -485,13 +492,24 @@ function buildWorld(){
 }
 
 /* ================= camera + actors ================= */
-let cam = 0, focusC = 0, focusFrac = .5, curBand = -1, avC = 0;
+let cam = 0, camT = 0, camRAF = 0, camLast = 0, focusC = 0, focusFrac = .5, curBand = -1, avC = 0;
 const vsz = () => isV() ? vp.clientHeight : vp.clientWidth;
-function setCam(v){ cam = Math.max(0, Math.min(L - vsz(), v)); world.style.transform = isV() ? `translate3d(0,${-cam}px,0)` : `translate3d(${-cam}px,0,0)`; }
-function look(c, frac){ focusC = c; if (frac!=null) focusFrac = frac; setCam(c - vsz()*focusFrac); }
-addEventListener("resize", () => setCam(focusC - vsz()*focusFrac));
+const clampCam = v => Math.max(0, Math.min(L - vsz(), v));
+function applyCam(){ world.style.transform = isV() ? `translate3d(0,${(-cam).toFixed(2)}px,0)` : `translate3d(${(-cam).toFixed(2)}px,0,0)`; }
+function camStep(t){
+  const dt = camLast ? Math.min(.05, (t - camLast)/1000) : 1/60; camLast = t;
+  cam += (camT - cam) * (1 - Math.exp(-dt*CAM_K));
+  if (Math.abs(camT - cam) < .3){ cam = camT; applyCam(); camRAF = 0; camLast = 0; return; }
+  applyCam(); camRAF = requestAnimationFrame(camStep);
+}
+// the camera eases towards its target like a spring; instant jumps only on resets and resizes
+function look(c, frac, instant){ focusC = c; if (frac!=null) focusFrac = frac; camT = clampCam(c - vsz()*focusFrac);
+  if (instant || RM){ if (camRAF){ cancelAnimationFrame(camRAF); camRAF = 0; camLast = 0; } cam = camT; applyCam(); return; }
+  if (!camRAF) camRAF = requestAnimationFrame(camStep); }
+addEventListener("resize", () => look(focusC, focusFrac, true));
 function setAvatar(c){ const v=$("#virus"), you=$("#you"); avC = c;
-  if (isV()){ v.style.top=c+"px"; v.style.left=M.avX||""; you.style.top=c+"px"; } else { v.style.left=c+"px"; you.style.left=c+"px"; }
+  if (isV()){ v.style.left = M.avX||""; v.style.transform = `translate3d(-37px,${(c-37).toFixed(2)}px,0)`; you.style.transform = `translate3d(0,${c.toFixed(2)}px,0)`; }
+  else { v.style.transform = `translate3d(${(c-37).toFixed(2)}px,0,0)`; you.style.transform = `translate3d(${c.toFixed(2)}px,0,0)`; }
   world.style.setProperty("--av", c+"px"); }
 function setHue(h){ document.documentElement.style.setProperty("--hue", h); }
 function setBand(pts, animate){
@@ -551,7 +569,7 @@ const scopeKey = () => M.key+":"+pickState.level+":"+activeTopics().join(",");
 function scopeLabel(){ const t=activeTopics(); return t.length<=3 ? t.join(" + ") : `${t.length} topics`; }
 
 function titleScreen(){
-  flowId++; S = null; clearUI(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.title[AX]); hud(0,0); pips();
+  flowId++; S = null; clearUI(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.title[AX], true); hud(0,0); pips();
   pickState = getPick();
   $("#hPrompt").textContent = "Choose a subject";
   ui.innerHTML = `<div class="overlay" id="ov"><section class="sheet" aria-labelledby="tt">
@@ -564,7 +582,7 @@ function titleScreen(){
       <p class="small">${TIME} seconds per prompt, one answer each. Rarity comes from built-in estimates of how often each answer is given, blended with live answers where class stats are available. Small typos and short phrases are accepted.</p>
     </details>
   </section></div>`;
-  document.querySelectorAll("[data-subj]").forEach(b=> b.onclick = () => { const k=b.dataset.subj; if (k===M.key) return; setMode(k); titleScreen(); const f=document.querySelector(`[data-subj="${k}"]`); if (f) f.focus({preventScroll:true}); });
+  document.querySelectorAll("[data-subj]").forEach(b=> b.onclick = async () => { const k=b.dataset.subj; if (k===M.key) return; vp.style.opacity="0"; ui.style.pointerEvents="none"; await sleep(200); setMode(k); titleScreen(); ui.style.pointerEvents=""; requestAnimationFrame(()=>{ vp.style.opacity="1"; }); const f=document.querySelector(`[data-subj="${k}"]`); if (f) f.focus({preventScroll:true}); });
   renderPicker();
 }
 
@@ -630,7 +648,7 @@ async function showPrompt(){
       <input id="ans" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type your answer" aria-label="Your answer" maxlength="80">
       <button class="btn inject" type="submit">${esc(M.verbs.inject)}</button>
     </form></div>`;
-  for (let n=COUNTDOWN; n>0; n--){ if (id!==flowId) return; const el=$("#cdn"); if (el) el.textContent=n; await sleep(1000); }
+  for (let n=COUNTDOWN; n>0; n--){ if (id!==flowId) return; const el=$("#cdn"); if (el){ el.textContent=n; el.style.animation="none"; void el.offsetWidth; el.style.animation=""; } await sleep(1000); }
   if (id!==flowId) return;
   $("#cd").remove(); $("#bar").classList.remove("out");
   $("#f").onsubmit = e => { e.preventDefault(); submit(false); };
@@ -647,9 +665,12 @@ function startTimer(){
 function stopTimer(){ if (raf) cancelAnimationFrame(raf); raf=null; }
 const pct = s => s>=.1 ? Math.round(s*100)+"%" : s>=.01 ? (s*100).toFixed(1)+"%" : "<1%";
 
-function placeTag(tag, c, k, arc){
-  if (isV()) tag.style.top = c+"px";
-  else { tag.style.left = c+"px"; tag.style.bottom = (150 + arc*4*k*(1-k))+"px"; }
+// vertical worlds: the answer sways as it falls and settles; sideways worlds: it flies an arc and tilts along it
+function placeTag(tag, c, k, arc, dist){
+  if (isV()){ const damp = 1-k, sw = Math.sin(k*Math.PI*3)*16*damp, rot = -3 + Math.cos(k*Math.PI*3)*5*damp;
+    tag.style.transform = `translate3d(calc(-50% + ${sw.toFixed(2)}px), calc(${c.toFixed(2)}px - 50%), 0) rotate(${rot.toFixed(2)}deg)`; }
+  else { const hgt = 150 + arc*4*k*(1-k), slope = dist ? arc*4*(1-2*k)/Math.abs(dist) : 0, rot = Math.max(-30, Math.min(30, -Math.atan(slope)*57.3)) - 3;
+    tag.style.transform = `translate3d(calc(${c.toFixed(2)}px - 50%), calc(${(-hgt).toFixed(2)}px + 50%), 0) rotate(${rot.toFixed(2)}deg)`; }
 }
 async function submit(timeout){
   if (!S || S.locked) return;
@@ -692,17 +713,16 @@ async function submit(timeout){
     const dur = pts>0 ? 1300 + pts*30 : 700;
     await tween(dur, k=>{
       if (id!==flowId) return;
-      const c = startC + (endC-startC)*k; placeTag(tag, c, k, arc); look(c, FR.sink[AX]);
+      const c = startC + (endC-startC)*k; placeTag(tag, c, k, arc, endC-startC); look(c, FR.sink[AX]);
       const lead = c + off;
       lineEls.forEach(l=>{ const lc = parseFloat(isV() ? l.style.top : l.style.left);
         if ((DIR>0 ? lead>=lc-2 : lead<=lc+2) && !l.classList.contains("hit") && (l.dataset.t!=="fw" || pts===0)){ l.classList.add("hit"); setTimeout(()=>l.classList.remove("hit"), 500); } });
-    }, pts>0 ? easeSink : easeInOut);
+    }, pts>0 ? EASE.sink : EASE.soft);
     if (id!==flowId) return;
     if (pts===0) tag.classList.add("denied");
     else { tag.style.setProperty("--tc", TIER_BASE[tier].hex); const ln = lineEls.find(l=>l.dataset.t===tier); if (ln) ln.classList.add("hit"); }
-    await sleep(500);
-    const tc = parseFloat(isV() ? tag.style.top : tag.style.left), f0 = focusFrac;
-    await tween(600, k=>{ if (id===flowId) look(tc, f0 + (FR.land[AX]-f0)*k); });
+    await sleep(420); if (id!==flowId) return;
+    look(endC, FR.land[AX]); await sleep(650);
   }
   if (id!==flowId) return;
   showReveal();
@@ -733,13 +753,15 @@ function showReveal(){
 
 async function descend(){
   const id = flowId, r = S.results[S.i];
+  const go = $("#go"); if (go) go.disabled = true;
+  document.querySelectorAll(".reveal,.dock").forEach(e=>e.classList.add("leave")); await sleep(230); if (id!==flowId) return;
   ui.innerHTML = "";
   const tg = $("#tag"); if (tg){ tg.style.transition="opacity .5s"; tg.style.opacity="0"; setTimeout(()=>tg.remove(),500); }
   $("#lines").querySelectorAll(".tline").forEach(l=>l.classList.remove("on"));
   const from = S.score - r.pts, to = S.score;
   if (r.pts > 0){
     const c0 = avPos(from), c1 = avPos(to);
-    await tween(900 + r.pts*16, k=>{ if (id!==flowId) return; const c = c0+(c1-c0)*k, pnow = from + (to-from)*k; setAvatar(c); look(c, FR.av[AX]); hud(pnow, S.score); setBand(pnow, true); });
+    await tween(900 + r.pts*16, k=>{ if (id!==flowId) return; const c = c0+(c1-c0)*k, pnow = from + (to-from)*k; setAvatar(c); look(c, FR.av[AX]); hud(pnow, S.score); setBand(pnow, true); }, EASE.move);
     if (id!==flowId) return;
   } else look(avC, FR.av[AX]);
   $("#lines").innerHTML = "";
@@ -767,7 +789,7 @@ function report(){
     try { navigator.clipboard.writeText(shareText).then(ok, fallback); } catch(e){ fallback(); }
   };
   $("#again").onclick = () => newGame(false);
-  $("#surface").onclick = async () => { ui.innerHTML=""; const c0=focusC, f0=focusFrac, c1=avPos(0); await tween(1600, k=>look(c0+(c1-c0)*k, f0+(FR.title[AX]-f0)*k)); titleScreen(); };
+  $("#surface").onclick = async () => { ui.innerHTML=""; const c0=focusC, f0=focusFrac, c1=avPos(0); await tween(1700, k=>look(c0+(c1-c0)*k, f0+(FR.title[AX]-f0)*k), EASE.move); await sleep(250); titleScreen(); };
 }
 
 /* ================= menu ================= */

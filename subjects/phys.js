@@ -100,6 +100,142 @@ P("ph24","A.5","Name an idea from special relativity.","Spacetime interval",[
   ["Time dilation",25],["Length contraction",20],["The speed of light is constant",18,"speed of light","c is constant","constant speed of light"],["E = mc²",12,"emc2","e mc2","mass energy"],
   ["Lorentz factor",8,"lorentz","gamma","lorentz transformation"],["Relativity of simultaneity",5,"simultaneity"],["Spacetime",5,"spacetime diagram"],["Twin paradox",4,"twins"],
   ["Muon decay",2,"muons","muon"],["Spacetime interval",.4,"invariant interval"]], [], HL),
+P("ph25","A.2","Name a situation where momentum is conserved.","Decay of a nucleus at rest",[
+  ["Collisions",25,"car crash","snooker","collision"],["Explosions",20,"explosion"],["Recoil of a gun or cannon",15,"recoil","gun","cannon"],["Rocket propulsion",12,"rockets","rocket"],
+  ["Newton's cradle",8,"newtons cradle"],["Skaters pushing apart",6,"ice skaters"],["Decay of a nucleus at rest",.4,"radioactive decay","alpha decay"]]),
+P("ph26","A.3","Name a term about energy transfers or efficiency.","Coefficient of performance",[
+  ["Efficiency",25],["Work done",20,"work"],["Power",15],["Useful energy",12,"useful output"],["Wasted energy",12,"wasted","heat losses"],["Sankey diagram",8,"sankey"],["Conservation of energy",8],
+  ["Coefficient of performance",.4,"cop"]]),
+P("ph27","A.4","Name an everyday example of torque or rotation.","Diver tucking in a somersault",[
+  ["Opening a door",20,"door","door handle"],["Using a spanner",18,"spanner","wrench"],["See-saw",12,"seesaw"],["Bicycle pedals",10,"bike pedals","pedals"],["Spinning ice skater",10,"ice skater","figure skater"],
+  ["Steering wheel",8],["Gyroscope",4],["Diver tucking in a somersault",.4,"diver","somersault"]], [], HL),
+P("ph28","A.4","Name a condition for a rigid body to be in equilibrium.","Torques balance about any point",[
+  ["No resultant torque",35,"moments balance","no net torque","sum of torques is zero","clockwise equals anticlockwise"],["No resultant force",30,"forces balance","no net force"],
+  ["Principle of moments",15,"moments"],["Constant angular velocity",10],["Torques balance about any point",.4,"any point"]], [], HL),
+P("ph29","A.5","Name a concept from Galilean or special relativity.","Minkowski diagram",[
+  ["Reference frame",25,"frame of reference"],["Galilean transformation",15,"galilean"],["Relative velocity",15],["Inertial frame",10,"inertial reference frame"],["Postulates of relativity",10,"postulates"],
+  ["Proper time",8],["Proper length",6],["Minkowski diagram",.4,"minkowski","spacetime diagram"]], [], HL),
+P("ph30","A.5","Name evidence for, or a use of, relativity.","Relativistic Doppler effect",[
+  ["Muons reaching the ground",20,"muon","muons","muon decay"],["GPS clock corrections",20,"gps","satellites"],["Particle accelerators",12,"cern","lhc"],["Nuclear energy (E = mc²)",10,"nuclear power","e mc2"],
+  ["Atomic clocks on planes",6,"hafele keating","atomic clocks"],["Gravitational lensing",4,"lensing"],["Relativistic Doppler effect",.4,"relativistic doppler"]], [], HL),
+P("ph31","B.1","Name a good thermal conductor or insulator.","Aerogel",[
+  ["Copper",20],["Air",12],["Wood",12],["Plastic",10],["Aluminium",10,"aluminum"],["Wool",8],["Polystyrene",8],["Silver",4],["Glass",4],["Aerogel",.4]]),
+P("ph32","B.1","Name a term about changes of state or heating curves.","Supercooling",[
+  ["Latent heat of fusion",20,"fusion"],["Latent heat of vaporisation",20,"vaporisation","vaporization"],["Melting point",15],["Boiling point",15],["Flat section on a heating curve",10,"plateau","flat section"],
+  ["Specific latent heat",10,"latent heat"],["Internal energy",6],["Supercooling",.4,"supercooled"]]),
+P("ph33","B.2","Name a factor in Earth's energy balance.","Ice–albedo feedback",[
+  ["Albedo",20],["Incoming solar radiation",20,"sunlight","solar radiation"],["Infrared emitted by Earth",15,"infrared","outgoing radiation"],["Greenhouse gases",15],["Emissivity",8],
+  ["Solar constant",8],["Clouds",6],["Ice–albedo feedback",.4,"ice albedo feedback","feedback"]]),
+P("ph34","B.2","Name a way to reduce the enhanced greenhouse effect.","Enhanced rock weathering",[
+  ["Renewable energy",30,"solar","wind","renewables"],["Planting trees",15,"reforestation"],["Carbon capture",12,"ccs"],["Nuclear power",10,"nuclear"],["Energy efficiency",10],["Electric vehicles",8,"electric cars"],
+  ["Eating less meat",4],["Enhanced rock weathering",.4,"enhanced weathering"]]),
+P("ph35","B.3","Name an everyday example of a gas law.","Popcorn popping",[
+  ["Tyre pressure rising when hot",20,"tyres","tires"],["Balloon shrinking in the cold",18,"balloon"],["Squeezing a syringe",15,"syringe"],["Aerosol can warnings",10,"aerosol"],["Hot-air balloon",10,"hot air balloon"],
+  ["Bike pump getting warm",8,"bike pump"],["Crisp packet swelling on a plane",6,"crisp packet"],["Popcorn popping",.4,"popcorn"]]),
+P("ph36","B.3","Name an idea from the kinetic theory of gases.","Root-mean-square speed",[
+  ["Particles move randomly",25,"random motion"],["Collisions with walls cause pressure",25,"collisions cause pressure","pressure"],["Temperature ∝ average kinetic energy",20,"kinetic energy","temperature"],
+  ["Absolute zero",10],["Elastic collisions",8],["Boltzmann constant",6,"boltzmann"],["Root-mean-square speed",.4,"rms speed","root mean square"]]),
+P("ph37","B.4","Name a law or process in thermodynamics.","Third law",[
+  ["First law",25,"first law of thermodynamics"],["Second law",20,"second law of thermodynamics"],["Entropy",15],["Isothermal",10],["Adiabatic",10],["Carnot cycle",6,"carnot"],["Isobaric",6],
+  ["Isovolumetric",5,"isochoric"],["Third law",.4,"third law of thermodynamics"]], [], HL),
+P("ph38","B.4","Name a heat engine, or a term about heat engines.","Stirling engine",[
+  ["Car engine",20,"petrol engine","internal combustion engine"],["Steam engine",18],["Efficiency",15],["Hot and cold reservoirs",10,"reservoirs"],["Refrigerator or heat pump",10,"fridge","heat pump"],
+  ["Carnot efficiency",8],["Jet engine",6],["Stirling engine",.4,"stirling"]], [], HL),
+P("ph39","B.4","Name something that increases entropy.","Shuffling cards",[
+  ["Ice melting",20,"melting"],["Heat flowing from hot to cold",20,"heat flow"],["Gas expanding",15,"expansion"],["Mixing",15],["Burning fuel",10,"combustion"],["Dissolving",8],["Shuffling cards",.4,"cards"]], [], HL),
+P("ph40","B.5","Name a rule for series or parallel circuits.","Kirchhoff's first law",[
+  ["Same current everywhere in series",20,"current same in series"],["Voltage shared in series",20,"voltage splits in series"],["Same voltage across parallel branches",18,"voltage same in parallel"],
+  ["Current splits in parallel",18,"current splits"],["Resistances add in series",12,"r1 r2","resistance adds"],["1/R = 1/R₁ + 1/R₂ in parallel",10,"1 r 1 r1 1 r2","parallel resistance"],
+  ["Kirchhoff's first law",.4,"kirchhoffs first law","junction rule"]]),
+P("ph41","C.1","Name an example of simple harmonic motion.","Quartz crystal in a watch",[
+  ["Pendulum",35],["Mass on a spring",30,"spring"],["Guitar string",8],["Tuning fork",8],["Swing",8],["Bungee jumper",4,"bungee"],["Atoms vibrating in a solid",3,"atoms"],["Quartz crystal in a watch",.4,"quartz"]]),
+P("ph42","C.1","Name a quantity used to describe simple harmonic motion.","Damping coefficient",[
+  ["Amplitude",20],["Period",20,"time period"],["Frequency",18],["Displacement",12],["Angular frequency",10,"omega"],["Phase",8,"phase difference"],["Restoring force",8],["Damping coefficient",.4,"damping"]]),
+P("ph43","C.1","Name a defining feature of simple harmonic motion.","Isochronous",[
+  ["Acceleration ∝ −displacement",30,"acceleration proportional to displacement","a kx"],["Restoring force towards equilibrium",25,"restoring force"],["Period doesn't depend on amplitude",15,"period independent"],
+  ["Energy swaps between KE and PE",15,"energy changes","kinetic and potential"],["Sinusoidal graph",8,"sine wave"],["Isochronous",.4]]),
+P("ph44","C.2","Name a difference between transverse and longitudinal waves.","S-waves can't cross liquids",[
+  ["Direction of oscillation",35,"oscillation direction","vibrations"],["Examples: light vs sound",20,"light","sound"],["Compressions and rarefactions",15,"compressions","rarefactions"],
+  ["Only transverse waves can be polarised",12,"polarisation","polarization"],["Longitudinal waves need a medium",8,"medium"],["S-waves can't cross liquids",.4,"s waves","seismic"]]),
+P("ph45","C.2","Name a use of an electromagnetic wave.","Terahertz security scanners",[
+  ["Radio broadcasting",15,"radio"],["Microwave cooking",15,"microwave oven","cooking"],["X-ray imaging",15,"x rays","x ray"],["Remote controls (infrared)",10,"remote control","infrared"],
+  ["Sterilising with UV",8,"uv","sterilising"],["Radiotherapy with gamma rays",8,"gamma","cancer treatment"],["Fibre optics",6,"optical fibres"],["Wi-Fi",6,"wifi"],["Terahertz security scanners",.4,"terahertz"]]),
+P("ph46","C.3","Name an example of diffraction, refraction or interference.","Noise-cancelling headphones",[
+  ["Rainbow",15],["A straw looks bent in water",15,"bent straw","straw"],["Hearing sound round corners",12,"round corners"],["Double-slit experiment",12,"double slit","youngs double slit"],
+  ["Colours in soap bubbles",10,"soap bubbles","thin film"],["Lenses",8,"glasses"],["Mirage",6],["Rainbow pattern on a CD",6,"cd"],["Noise-cancelling headphones",.4,"noise cancelling"]]),
+P("ph47","C.3","Name a law or equation about wave behaviour.","Huygens' principle",[
+  ["Snell's law",30,"snells law","n1 sin"],["Law of reflection",20,"angle of incidence equals angle of reflection"],["Wave equation (v = fλ)",15,"v f lambda","wave equation"],["Critical angle",10],
+  ["Double-slit equation",8,"s lambda d d","fringe spacing"],["Diffraction grating equation",6,"grating"],["Huygens' principle",.4,"huygens"]]),
+P("ph48","C.4","Name a term about standing waves.","Open and closed pipes",[
+  ["Node",25,"nodes"],["Antinode",25,"antinodes"],["Harmonic",15,"harmonics"],["Fundamental frequency",15,"fundamental","first harmonic"],["Resonance",10],["Overtones",6,"overtone"],
+  ["Open and closed pipes",.4,"pipes","closed pipe"]]),
+P("ph49","C.4","Name an example of damping, or a reason to add it.","Tuned mass damper",[
+  ["Car shock absorbers",30,"shock absorbers","suspension"],["Earthquake-proof buildings",15,"buildings"],["Bridge dampers",10,"bridges"],["Door closers",8],["A swing slowing down",8,"swing"],
+  ["Pendulum slowing in air",6,"pendulum"],["Tuned mass damper",.4,"taipei 101"]]),
+P("ph50","C.5","Name an application of the Doppler effect.","Sonar tracking",[
+  ["Speed guns",25,"speed camera","radar gun"],["Red shift of galaxies",20,"expanding universe","redshift"],["Siren pitch changing",15,"siren","ambulance"],["Doppler ultrasound",15,"blood flow","ultrasound"],
+  ["Weather radar",10],["Finding exoplanets",4,"exoplanets"],["Sonar tracking",.4,"sonar"]]),
+P("ph51","C.5","Name a term linked to the Doppler effect.","Sonic boom",[
+  ["Frequency shift",25,"change in frequency"],["Red shift",20,"redshift"],["Blue shift",15,"blueshift"],["Moving source",10,"source moving"],["Moving observer",10,"observer moving"],
+  ["Wavefronts bunching up",8,"wavefronts"],["Sonic boom",.4]]),
+P("ph52","C.5","Name something that changes when a sound or light source moves towards you.","Intensity rises",[
+  ["Frequency increases",30,"higher frequency","frequency"],["Pitch goes up",25,"higher pitch","pitch"],["Wavelength gets shorter",25,"shorter wavelength","wavelength"],["Light is blue-shifted",10,"blue shift"],
+  ["Intensity rises",.4,"louder","intensity"]]),
+P("ph53","D.1","Name a type of orbit or a term about orbits.","Hohmann transfer orbit",[
+  ["Geostationary orbit",25,"geostationary","geosynchronous"],["Low Earth orbit",15,"leo"],["Orbital period",10,"period"],["Escape velocity",10],["Satellite",10,"satellites"],["Polar orbit",10,"polar"],
+  ["Elliptical orbit",6,"ellipse"],["Hohmann transfer orbit",.4,"hohmann"]]),
+P("ph54","D.1","Name a quantity that changes with distance from a planet.","Tidal force",[
+  ["Gravitational field strength",30,"g","field strength"],["Gravitational potential",20,"potential"],["Orbital speed",15,"speed"],["Weight",12],["Orbital period",10,"period"],["Tidal force",.4,"tides"]]),
+P("ph55","D.2","Name a way to charge an object, or a term about static electricity.","Triboelectric series",[
+  ["Rubbing (friction)",30,"friction","rubbing"],["Static electricity",15,"static"],["Charging by induction",15,"induction"],["Charging by contact",15,"conduction","contact"],["Earthing",8,"grounding"],
+  ["Van de Graaff generator",6,"van de graaff"],["Triboelectric series",.4,"triboelectric"]]),
+P("ph56","D.2","Name a device that uses electric or magnetic fields.","Mass spectrometer",[
+  ["Electric motor",25,"motor"],["Loudspeaker",15,"speaker"],["Electromagnet crane",10,"scrapyard crane","electromagnet"],["MRI scanner",8,"mri"],["Maglev train",6,"maglev"],["Relay",6],
+  ["Capacitor",6],["Cathode ray tube",4,"crt"],["Mass spectrometer",.4]]),
+P("ph57","D.3","Name the path or effect of a charged particle moving in a field.","Cyclotron motion",[
+  ["Circular path in a magnetic field",30,"circle","circular"],["Parabolic path in an electric field",20,"parabola","parabolic"],["Force at right angles to velocity",12,"perpendicular force"],
+  ["Speeds up in an electric field",12,"accelerates"],["Aurora",6,"northern lights"],["Helical path",6,"helix","spiral"],["Velocity selector",4],["Cyclotron motion",.4,"cyclotron"]]),
+P("ph58","D.3","Name an equation or rule for the force on a moving charge or wire.","Lorentz force",[
+  ["F = qvB",30,"qvb","f qvb"],["F = qE",25,"qe","f qe"],["Fleming's left-hand rule",20,"left hand rule","flemings"],["F = BIL",12,"bil","f bil"],["r = mv/qB",6,"radius of path"],["Lorentz force",.4,"lorentz"]]),
+P("ph59","D.3","Name a technology that steers charged particles with fields.","Hall effect sensor",[
+  ["Particle accelerator",25,"lhc","accelerator"],["Mass spectrometer",15],["Old CRT television",12,"crt","cathode ray tube"],["Electron microscope",8],["Cyclotron",6],["Aurora (natural)",8,"aurora"],
+  ["Hall effect sensor",.4,"hall probe"]]),
+P("ph60","D.4","Name a way to increase an induced emf.","Add an iron core",[
+  ["Move faster",25,"faster","speed"],["Stronger magnet",25,"stronger field"],["More turns of wire",25,"more coils","more turns"],["Larger coil area",10,"bigger coil","area"],["Add an iron core",.4,"iron core"]], [], HL),
+P("ph61","D.4","Name a term from electromagnetic induction.","Back emf",[
+  ["Induced emf",20,"emf","induced voltage"],["Magnetic flux",20,"flux"],["Flux linkage",15],["Induced current",10],["Faraday's law",10,"faraday"],["Lenz's law",10,"lenz"],["Eddy currents",6,"eddy current"],
+  ["Back emf",.4]], [], HL),
+P("ph62","E.1","Name a result or conclusion of the gold foil experiment.","Estimate of nuclear size",[
+  ["Most alpha particles went straight through",30,"straight through","passed through"],["The atom is mostly empty space",25,"empty space"],["A small, dense nucleus",20,"nucleus","dense nucleus"],
+  ["The nucleus is positive",12,"positive nucleus"],["A few bounced back",10,"deflected","bounced back"],["Estimate of nuclear size",.4,"nuclear radius"]]),
+P("ph63","E.1","Name a feature of atomic energy levels.","Quantised angular momentum",[
+  ["Fixed energy levels",30,"energy levels","discrete levels"],["Electrons jump between levels",20,"transitions"],["Photons emitted or absorbed",15,"photons"],["Line spectra",12,"emission spectrum"],
+  ["Ground state",8],["Excited state",8],["Ionisation",4,"ionization"],["Quantised angular momentum",.4,"angular momentum"]]),
+P("ph64","E.2","Name evidence for the particle nature of light or the wave nature of matter.","Davisson–Germer experiment",[
+  ["Photoelectric effect",35,"photoelectric"],["Electron diffraction",20],["Compton scattering",15,"compton"],["de Broglie wavelength",10,"de broglie"],["Line spectra",6],
+  ["Davisson–Germer experiment",.4,"davisson germer"]], [], HL),
+P("ph65","E.2","Name a term about the photoelectric effect.","Saturation current",[
+  ["Threshold frequency",25],["Work function",25],["Photon",15,"photons"],["E = hf",12,"e hf"],["Stopping potential",10],["Planck's constant",8,"planck"],["Saturation current",.4]], [], HL),
+P("ph66","E.2","Name an idea from quantum physics.","Pauli exclusion principle",[
+  ["Wave–particle duality",25,"wave particle duality"],["Quantisation",15,"quantization","quantised"],["Uncertainty principle",15,"heisenberg"],["Photons",12,"photon"],["Superposition",8],
+  ["Quantum tunnelling",8,"tunnelling","tunneling"],["Schrödinger equation",6,"schrodinger"],["Pauli exclusion principle",.4,"pauli"]], [], HL),
+P("ph67","E.3","Name a use of radioactivity.","Food irradiation",[
+  ["Radiotherapy",25,"cancer treatment"],["Medical tracers",15,"tracers","tracer"],["Carbon dating",15,"radiocarbon dating"],["Smoke detectors",12,"smoke alarm"],["Sterilising equipment",10,"sterilisation"],
+  ["Nuclear power",8],["Thickness gauges",6,"thickness"],["Food irradiation",.4]]),
+P("ph68","E.3","Name a way to protect people from radiation.","Potassium iodide tablets",[
+  ["Lead shielding",30,"lead","shielding"],["Keeping your distance",20,"distance"],["Limiting exposure time",15,"time"],["Dosimeter badges",10,"film badge","dosimeter"],["Protective clothing",8],["Concrete walls",6,"concrete"],
+  ["Potassium iodide tablets",.4,"potassium iodide","iodine tablets"]]),
+P("ph69","E.4","Name an advantage or a disadvantage of nuclear power.","Weapons proliferation",[
+  ["No CO₂ emissions",30,"low carbon","no greenhouse gases","no co2"],["Radioactive waste",25,"waste"],["Risk of accidents",15,"accidents","meltdown"],["High energy density",10,"lots of energy"],
+  ["Expensive to build",8,"cost"],["Reliable baseload",6,"reliable"],["Decommissioning costs",4,"decommissioning"],["Weapons proliferation",.4,"proliferation"]]),
+P("ph70","E.4","Name a nuclear accident or a type of reactor.","Kyshtym disaster",[
+  ["Chernobyl",35],["Fukushima",30],["Three Mile Island",12],["Pressurised water reactor",6,"pwr"],["Breeder reactor",4,"fast breeder"],["Magnox",2],["Kyshtym disaster",.4,"kyshtym"]]),
+P("ph71","E.5","Name a requirement for, or a fact about, nuclear fusion.","Proton–proton chain",[
+  ["Very high temperature",30,"high temperature","millions of degrees"],["High pressure or density",20,"high pressure","density"],["Hydrogen fuses into helium",20,"hydrogen","helium"],["Powers the Sun",15,"sun","stars"],
+  ["Tokamak",6],["ITER",4],["Proton–proton chain",.4,"pp chain","proton proton chain"]]),
+P("ph72","E.5","Name a property used to classify stars.","Metallicity",[
+  ["Luminosity",25,"brightness"],["Temperature",20],["Colour",15,"color"],["Mass",12],["Radius",10,"size"],["Spectral class",8,"spectral type","obafgkm"],["Hertzsprung–Russell diagram",8,"hr diagram","hertzsprung russell"],
+  ["Metallicity",.4]]),
 ];
 
 /* ---------------- world (sideways) ---------------- */

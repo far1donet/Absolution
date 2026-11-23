@@ -634,6 +634,16 @@ P("b4102","B4.1.2","Name an operation on a linked list.","Detect a cycle",[
 P("b4103","B4.1.3","Name a way to traverse a binary tree.","Morris traversal",[
   ["In-order",30,"inorder","in order"],["Pre-order",25,"preorder","pre order"],["Post-order",25,"postorder","post order"],
   ["Breadth-first / level order",6,"bfs","level order","breadth first"],["Depth-first",6,"dfs","depth first"],["Morris traversal",.4,"morris"]], [], HL),
+P("a4203","A4.2.2","Name a way to split or check data before training a model.","Time-based split",[
+  ["Training / test split",30,"train test split","test set","training set"],["Validation set",15,"validation"],["Cross-validation",15,"k fold","cross validation"],["Shuffling the data",10,"shuffle"],
+  ["Stratified sampling",8,"stratified"],["Checking for bias",8,"bias check"],["Time-based split",.4,"time split","temporal split"]], [], HL),
+P("a4403","A4.4.1","Name a real case that raised concerns about AI ethics.","Microsoft Tay",[
+  ["Deepfakes",20,"deepfake"],["Biased hiring algorithm",15,"amazon hiring","hiring algorithm"],["Facial recognition misidentifying people",15,"facial recognition","face recognition"],
+  ["Self-driving car crashes",12,"self driving","tesla crash","uber crash"],["Chatbots spreading misinformation",10,"chatbot","hallucination"],["COMPAS risk scores",6,"compas"],
+  ["Cambridge Analytica",6],["Microsoft Tay",.4,"tay"]]),
+P("b2503","B2.5.1","Name a reason a program saves data to a file.","Checkpointing long jobs",[
+  ["Data persists after the program closes",35,"save data","permanent","persistence","keep data"],["Sharing data with other programs",12,"share data"],["Storing settings",12,"settings","config","configuration"],
+  ["Logging",10,"logs","log file"],["Handling large amounts of data",8,"large data"],["Backups",6,"backup"],["Checkpointing long jobs",.4,"checkpoint","checkpointing"]]),
 ];
 
 /* ---------------- world: a virus sinking into a computer ---------------- */

@@ -84,6 +84,136 @@ P("hi20","PS4","Name a law, person or event of apartheid South Africa (1948–19
   ["Sharpeville massacre",15,"sharpeville"],["Pass laws",15,"pass books","passes"],["Nelson Mandela",12,"mandela"],["Group Areas Act",10],["ANC",10,"african national congress"],
   ["Bantu Education Act",6,"bantu education"],["Rivonia Trial",5,"rivonia"],["Defiance Campaign",4],["Freedom Charter",4],["Population Registration Act",4],
   ["Prohibition of Mixed Marriages Act",.4,"mixed marriages act"]]),
+P("hi21","PS1","Name a feature of Genghis Khan's rule or campaigns.","Feigned retreats",[
+  ["Mounted archers",25,"cavalry","horse archers","horses"],["Uniting the Mongol tribes",15,"uniting the tribes","unification"],["Use of terror and massacres",10,"terror","massacres"],
+  ["Conquest of northern China",10,"jin dynasty","china"],["Destroying the Khwarazmian Empire",8,"khwarazm","khwarezm"],["The Yassa law code",8,"yassa"],["Promotion by merit",6,"meritocracy"],
+  ["The Yam relay system",6,"yam","postal system"],["Religious tolerance",4],["Feigned retreats",.4,"feigned retreat"]]),
+P("hi22","PS1","Name an event in the life or campaigns of Richard I of England.","Battle of Jaffa",[
+  ["Third Crusade",35,"crusade"],["Siege of Acre",15,"acre"],["Battle of Arsuf",12,"arsuf"],["Captured and ransomed",12,"ransom","captured","imprisoned"],["Treaty of Jaffa",6,"treaty with saladin"],
+  ["Rebellion against Henry II",6,"henry ii"],["Conquest of Cyprus",4,"cyprus"],["Death at Châlus",4,"chalus"],["Battle of Jaffa",.4,"battle of jaffa"]]),
+P("hi23","PS1","Name a reason a medieval military leader succeeded.","Exploiting enemies' divisions",[
+  ["Mobile cavalry",20,"cavalry","mobility"],["Discipline",15],["Leadership and charisma",15,"charisma","leadership"],["Siege technology",12,"siege engines"],["Use of terror",10,"terror"],
+  ["Alliances",8],["Logistics and supply",8,"logistics"],["Spies and intelligence",6,"spies","intelligence"],["Exploiting enemies' divisions",.4,"divide and conquer"]]),
+P("hi24","PS2","Name a person or event in the Spanish conquest of Mexico or Peru.","La Noche Triste",[
+  ["Hernán Cortés",25,"cortes","hernan cortes"],["Francisco Pizarro",20,"pizarro"],["Moctezuma",15,"montezuma"],["Atahualpa",12],["Smallpox",8,"disease"],["Fall of Tenochtitlan",8,"tenochtitlan"],
+  ["La Malinche",6,"malinche","dona marina"],["Battle of Cajamarca",6,"cajamarca"],["Tlaxcalan allies",4,"tlaxcala","tlaxcalans"],["La Noche Triste",.4,"noche triste"]]),
+P("hi25","PS2","Name a person or event in the final stages of Muslim rule in Spain (1482–1492).","Siege of Málaga",[
+  ["Ferdinand and Isabella",30,"ferdinand","isabella","catholic monarchs"],["Fall of Granada",25,"granada","1492"],["Boabdil (Muhammad XII)",15,"boabdil","muhammad xii"],["Treaty of Granada",10],
+  ["Spanish Inquisition",6,"inquisition"],["Alhambra Decree",5,"expulsion of jews"],["Siege of Málaga",.4,"malaga"]]),
+P("hi26","PS2","Name an impact of conquest on the conquered people.","The mita labour system",[
+  ["Deaths from disease",25,"disease","smallpox"],["Forced labour (encomienda)",15,"encomienda","forced labour","forced labor"],["Religious conversion",15,"conversion","christianity"],
+  ["Population collapse",12,"population decline"],["Loss of land",10,"land"],["Destruction of culture",8,"culture destroyed"],["Mixed mestizo society",4,"mestizo"],["The mita labour system",.4,"mita"]]),
+P("hi27","PS3","Name a response by the League or the great powers to aggression in the 1930s.","Stresa Front",[
+  ["Appeasement",25],["Lytton Report",20,"lytton"],["Sanctions on Italy",15,"sanctions"],["Japan leaving the League",10,"japan left the league"],["Hoare–Laval Pact",8,"hoare laval"],
+  ["Non-intervention in Spain",6,"non intervention"],["Stresa Front",.4,"stresa"]]),
+P("hi28","PS3","Name a cause of Japanese expansion in the 1930s and 1940s.","Kōdōha faction",[
+  ["Need for raw materials",25,"raw materials","resources","oil"],["Great Depression",15,"depression"],["Militarism",15,"army influence","military"],["US oil embargo",10,"oil embargo","embargo"],
+  ["Nationalism",10],["Population pressure",8],["Western racism and immigration bans",4,"racial equality proposal"],["Kōdōha faction",.4,"kodoha"]]),
+P("hi29","PS4","Name a form of protest used in the civil rights or anti-apartheid movements.","Stay-aways",[
+  ["Boycotts",25,"boycott"],["Marches",20,"march"],["Sit-ins",15,"sit ins"],["Civil disobedience",10],["Freedom Rides",8,"freedom riders"],["Strikes",8,"strike"],["Burning pass books",6,"pass books"],
+  ["Stay-aways",.4,"stayaway","stay at home"]]),
+P("hi30","PS5","Name a person or event in the Rwandan genocide and its context (1990–1998).","Gacaca courts",[
+  ["Habyarimana's plane shot down",20,"habyarimana","plane crash"],["Interahamwe",15],["RPF and Paul Kagame",15,"rpf","kagame"],["Roméo Dallaire and UNAMIR",12,"dallaire","unamir"],
+  ["Radio Mille Collines",10,"rtlm","radio"],["Arusha Accords",8,"arusha"],["Operation Turquoise",4],["Gacaca courts",.4,"gacaca"]]),
+P("hi31","PS5","Name a person or event in the Kosovo conflict (1989–2002).","Operation Horseshoe",[
+  ["Slobodan Milošević",25,"milosevic"],["NATO bombing (1999)",20,"nato bombing","nato"],["Kosovo Liberation Army",15,"kla"],["Račak massacre",8,"racak"],["Ibrahim Rugova",6,"rugova"],
+  ["Rambouillet talks",6,"rambouillet"],["KFOR",6],["Operation Horseshoe",.4,"horseshoe"]]),
+P("hi32","PS5","Name a reason for international intervention, or for staying out, in a conflict.","Responsibility to Protect",[
+  ["Humanitarian concern",25,"humanitarian","human rights"],["National interest",15],["Media coverage",12,"media","cnn effect"],["UN Security Council mandate",10,"un mandate","security council"],
+  ["Fear of casualties",10,"somalia","casualties"],["Regional stability",8],["Refugee flows",6,"refugees"],["Responsibility to Protect",.4,"r2p"]]),
+P("hi33","WT1","Name a feature of medieval society or economy (750–1400).","Hanseatic League",[
+  ["Feudalism",25,"feudal system"],["Manorialism",15,"manor"],["Serfdom",12,"serfs","peasants"],["Trade routes",12,"silk road"],["Guilds",10],["Black Death",10,"plague"],["Growth of towns",6,"towns"],["Crusades",4],
+  ["Hanseatic League",.4,"hanseatic","hansa"]]),
+P("hi34","WT1","Name a medieval trade route or trading city.","Novgorod",[
+  ["Silk Road",30,"silk route"],["Venice",12],["Trans-Saharan trade",10,"trans saharan","sahara"],["Constantinople",10],["Genoa",6],["Indian Ocean trade",6,"indian ocean"],["Baghdad",6],["Timbuktu",4],["Novgorod",.4]]),
+P("hi35","WT1","Name an effect of the Black Death.","Statute of Labourers",[
+  ["Huge loss of population",30,"deaths","population loss"],["Labour shortages",15,"labour shortage","labor shortage"],["Higher wages",12,"wages"],["Peasants' Revolt",10,"peasants revolt"],
+  ["Decline of serfdom",8,"end of serfdom"],["Persecution of Jews",6],["Religious doubt",6,"loss of faith"],["Statute of Labourers",.4,"statute of labourers"]]),
+P("hi36","WT2","Name a medieval war or crusade (750–1500).","Albigensian Crusade",[
+  ["Hundred Years' War",20,"hundred years war"],["First Crusade",15],["Third Crusade",15],["Wars of the Roses",12],["Reconquista",10],["Norman Conquest",10,"1066"],["Mongol invasions",8,"mongol"],
+  ["Albigensian Crusade",.4,"albigensian"]]),
+P("hi37","WT2","Name a medieval battle.","Manzikert",[
+  ["Hastings",30],["Agincourt",18],["Crécy",10,"crecy"],["Bosworth",6],["Bannockburn",6],["Hattin",6],["Tours",5,"poitiers 732"],["Ain Jalut",4],["Manzikert",.4]]),
+P("hi38","WT2","Name a cause of the Crusades.","Younger sons seeking land",[
+  ["Religious faith",25,"religion","faith"],["Pope Urban II's appeal",20,"urban ii","pope urban"],["Byzantine plea for help",12,"byzantine","alexios"],["Seljuk Turks controlling Jerusalem",12,"seljuks","jerusalem"],
+  ["Land and wealth",10,"wealth","land"],["Indulgences",8,"forgiveness of sins"],["Trade",6],["Younger sons seeking land",.4,"primogeniture"]]),
+P("hi39","WT3","Name a way medieval rulers kept power.","Travelling court",[
+  ["Religion and divine right",25,"divine right","church"],["Loyal nobles",15,"vassals","nobility"],["Armies",15,"army"],["Castles",10],["Marriage alliances",8,"marriage"],["Laws",8,"law codes"],["Taxes",6],
+  ["Travelling court",.4,"itinerant court"]]),
+P("hi40","WT3","Name a medieval Islamic or Asian dynasty or empire.","Khmer Empire",[
+  ["Abbasids",20,"abbasid"],["Umayyads",15,"umayyad"],["Song dynasty",12,"song"],["Tang dynasty",12,"tang"],["Fatimids",8,"fatimid"],["Yuan dynasty",8,"yuan"],["Ming dynasty",8,"ming"],
+  ["Ottomans",6,"ottoman"],["Delhi Sultanate",4],["Mamluks",4,"mamluk"],["Khmer Empire",.4,"khmer"]]),
+P("hi41","WT4","Name a major change in societies between 1400 and 1700.","Price revolution",[
+  ["Renaissance",25],["Reformation",20,"protestant reformation"],["Printing press",15,"printing"],["Age of exploration",15,"exploration","discovery"],["Scientific Revolution",10,"scientific"],
+  ["Rise of merchants",6,"merchants"],["Price revolution",.4]]),
+P("hi42","WT4","Name a figure of the Renaissance or the Reformation.","Zwingli",[
+  ["Martin Luther",25,"luther"],["Leonardo da Vinci",20,"da vinci","leonardo"],["Michelangelo",12],["Gutenberg",10],["John Calvin",8,"calvin"],["Henry VIII",8],["Galileo",6],["Erasmus",4],["Zwingli",.4]]),
+P("hi43","WT4","Name an explorer from the age of exploration (1400–1700).","Abel Tasman",[
+  ["Christopher Columbus",30,"columbus"],["Ferdinand Magellan",15,"magellan"],["Vasco da Gama",15,"da gama"],["Zheng He",8],["Francis Drake",6,"drake"],["Bartolomeu Dias",6,"dias"],["John Cabot",4,"cabot"],
+  ["Abel Tasman",.4,"tasman"]], [[["captain cook","james cook","cook"],"Cook's voyages came after 1700."]]),
+P("hi44","WT5","Name an early modern ruler or state (1450–1789).","Tokugawa Ieyasu",[
+  ["Louis XIV",25,"louis 14","sun king"],["Elizabeth I",15],["Peter the Great",15],["Suleiman the Magnificent",10,"suleiman","ottoman empire"],["Akbar",10,"mughal empire","mughals"],["Philip II",6],
+  ["Frederick the Great",6],["Catherine the Great",6],["Tokugawa Ieyasu",.4,"tokugawa"]]),
+P("hi45","WT5","Name a feature of absolute monarchy.","Intendants",[
+  ["Divine right of kings",25,"divine right"],["Centralised power",20,"centralized"],["Large standing army",12,"army"],["Grand palaces like Versailles",12,"versailles","palace"],["Controlling the nobles",10,"nobles"],
+  ["Bureaucracy",8],["Censorship",4],["Intendants",.4]]),
+P("hi46","WT5","Name an idea or thinker of the Enlightenment.","Cosmopolitanism",[
+  ["Separation of powers",15,"montesquieu"],["Natural rights",15,"locke","john locke"],["Social contract",15,"rousseau"],["Reason",15,"rationalism"],["Religious tolerance",10,"voltaire"],["Free speech",10,"freedom of speech"],
+  ["Cosmopolitanism",.4]]),
+P("hi47","WT6","Name an early modern war (1500–1750).","Imjin War",[
+  ["Thirty Years' War",25,"thirty years war"],["English Civil War",20],["Spanish Armada",12,"armada","anglo spanish war"],["War of the Spanish Succession",10,"spanish succession"],["Dutch Revolt",8,"eighty years war"],
+  ["Italian Wars",6],["Great Northern War",4],["Imjin War",.4,"imjin"]]),
+P("hi48","WT6","Name a cause of the Thirty Years' War.","Election of Frederick V",[
+  ["Religious conflict",30,"religion","catholics and protestants"],["Defenestration of Prague",20,"defenestration"],["Habsburg power",15,"habsburgs"],["French rivalry",10,"france"],["German princes' independence",10,"princes"],
+  ["Election of Frederick V",.4,"frederick v","winter king"]]),
+P("hi49","WT6","Name an effect of an early modern war.","Military revolution",[
+  ["Peace of Westphalia",25,"westphalia"],["Death and devastation",20,"deaths","destruction"],["Shift in the balance of power",10,"balance of power"],["Religious settlement",10],["Standing armies",10],
+  ["Debt and taxes",8,"taxation"],["Military revolution",.4]]),
+P("hi50","WT7","Name a country that industrialised in the 19th or 20th century.","Sweden",[
+  ["Britain",30,"uk","england"],["USA",15,"united states","america"],["Germany",15],["Japan",12],["Russia / USSR",8,"russia","ussr","soviet union"],["France",6],["Belgium",4],["China",4],["Sweden",.4]]),
+P("hi51","WT8","Name a method used by an independence movement.","Satyagraha",[
+  ["Non-violent protest",25,"non violence","peaceful protest"],["Armed struggle",20,"violence","armed"],["Guerrilla warfare",8,"guerrilla"],["Boycotts",10,"boycott"],["Negotiation",10],["Strikes",8],
+  ["Salt March",8],["Satyagraha",.4]]),
+P("hi52","WT9","Name a democratic state or democratic leader studied in this topic.","Konrad Adenauer",[
+  ["USA",20,"united states"],["UK",15,"britain"],["Weimar Germany",10,"weimar"],["India",10],["Franklin D. Roosevelt",10,"fdr","roosevelt"],["Churchill",6],["Nehru",6],["Nelson Mandela",6,"mandela","south africa"],
+  ["Konrad Adenauer",.4,"adenauer"]]),
+P("hi53","WT9","Name a challenge faced by a new democracy.","Emergency powers like Article 48",[
+  ["Economic crisis",25,"depression","economy"],["Extremist parties",15,"extremism"],["Weak coalition governments",15,"coalitions"],["Ethnic divisions",10],["Hyperinflation",8],["Military coups",8,"coup"],["Corruption",8],
+  ["Emergency powers like Article 48",.4,"article 48","emergency powers"]]),
+P("hi54","HL1","Name a person or event from the history of Africa and the Middle East.","Mahdist State",[
+  ["Scramble for Africa",15],["Nelson Mandela",15,"mandela"],["Nasser",12],["Suez Crisis",12,"suez"],["Atatürk",10,"ataturk"],["Kwame Nkrumah",10,"nkrumah"],["Ottoman Empire",10,"ottomans"],
+  ["Arab–Israeli wars",8,"arab israeli"],["Mahdist State",.4,"mahdi","mahdists"]], [], HL),
+P("hi55","HL1","Name a cause of, or event in, the Scramble for Africa.","Anglo-Zanzibar War",[
+  ["Berlin Conference",30,"berlin conference 1884"],["Raw materials",20,"resources"],["Prestige and nationalism",15,"prestige","nationalism"],["Missionaries",10],["Maxim gun",8,"machine guns"],["Quinine",6],
+  ["Fashoda Incident",4,"fashoda"],["Anglo-Zanzibar War",.4,"zanzibar"]], [], HL),
+P("hi56","HL1","Name an event in the modern Middle East.","Sykes–Picot Agreement",[
+  ["Creation of Israel (1948)",20,"israel 1948","creation of israel"],["Iranian Revolution",15,"iran 1979"],["Suez Crisis",15,"suez"],["Six-Day War",12,"six day war"],["Yom Kippur War",10,"yom kippur"],
+  ["Gulf War",10],["Arab Spring",10],["Sykes–Picot Agreement",.4,"sykes picot"]], [], HL),
+P("hi57","HL2","Name a person or event from the history of the Americas.","Lei Áurea",[
+  ["American Civil War",20,"civil war"],["Abraham Lincoln",15,"lincoln"],["Great Depression",10,"depression"],["New Deal",10],["Mexican Revolution",10],["Cuban Revolution",10,"castro"],["Simón Bolívar",8,"bolivar"],
+  ["Juan Perón",6,"peron"],["Lei Áurea",.4,"lei aurea","brazilian abolition"]], [], HL),
+P("hi58","HL2","Name a cause of the American Civil War.","Bleeding Kansas",[
+  ["Slavery",40],["States' rights",20,"states rights"],["Lincoln's election",15,"election of lincoln","lincoln"],["Secession",10],["Kansas–Nebraska Act",6,"kansas nebraska"],["Dred Scott decision",4,"dred scott"],
+  ["Bleeding Kansas",.4]], [], HL),
+P("hi59","HL2","Name a New Deal policy or agency.","Federal Writers' Project",[
+  ["Social Security Act",20,"social security"],["Civilian Conservation Corps",15,"ccc"],["Tennessee Valley Authority",12,"tva"],["Works Progress Administration",10,"wpa"],["Alphabet agencies",10],
+  ["Agricultural Adjustment Act",8,"aaa"],["Glass–Steagall Act",6,"glass steagall"],["Federal Writers' Project",.4,"writers project"]], [], HL),
+P("hi60","HL3","Name a person or event from the history of Asia and Oceania.","Taiping Rebellion",[
+  ["Meiji Restoration",20,"meiji"],["Mao Zedong",15,"mao"],["Chinese Revolution (1949)",15,"1949","chinese communist revolution"],["Partition of India",12,"partition"],["Korean War",10],["Opium Wars",10,"opium war"],
+  ["Federation of Australia",4,"australian federation"],["Tokugawa shogunate",4,"tokugawa"],["Taiping Rebellion",.4,"taiping"]], [], HL),
+P("hi61","HL3","Name a reform of the Meiji Restoration.","Iwakura Mission",[
+  ["Abolishing the samurai class",20,"samurai"],["Industrialisation",20,"industrialization","factories"],["Conscript army",15,"conscription","modern army"],["Meiji Constitution",12,"constitution"],
+  ["Education reform",10,"education"],["Western technology",10,"westernisation"],["Land tax reform",6,"land tax"],["Iwakura Mission",.4,"iwakura"]], [], HL),
+P("hi62","HL3","Name a policy or event under Mao Zedong.","Third Front",[
+  ["Great Leap Forward",30],["Cultural Revolution",25],["Long March",15],["Hundred Flowers Campaign",10,"hundred flowers"],["Red Guards",8],["Little Red Book",6],["Third Front",.4]], [], HL),
+P("hi63","HL4","Name a person or event from the history of Europe.","Congress of Vienna",[
+  ["French Revolution",15],["Napoleon",15,"napoleon bonaparte"],["Unification of Germany",10,"german unification"],["Bismarck",10],["Russian Revolution",10],["Hitler",10],["Unification of Italy",6,"italian unification"],
+  ["European Union",6,"eu"],["Congress of Vienna",.4,"vienna"]], [], HL),
+P("hi64","HL4","Name a figure in the unification of Italy or Germany.","Napoleon III",[
+  ["Bismarck",30,"otto von bismarck"],["Garibaldi",20],["Cavour",15],["Mazzini",10],["Wilhelm I",8,"william i"],["Victor Emmanuel II",8,"victor emmanuel"],["Napoleon III",.4]], [], HL),
+P("hi65","HL4","Name a cause of the French Revolution.","Diamond Necklace Affair",[
+  ["Debt and financial crisis",25,"debt","bankruptcy","financial crisis"],["Inequality between the estates",20,"estates","inequality","third estate"],["Enlightenment ideas",15,"enlightenment"],
+  ["Bad harvests and bread prices",15,"bread prices","bad harvests"],["Weak King Louis XVI",10,"louis xvi"],["The American Revolution",8,"american revolution"],["Diamond Necklace Affair",.4,"diamond necklace"]], [], HL),
 ];
 
 /* ---------------- world (sideways timeline) ---------------- */
