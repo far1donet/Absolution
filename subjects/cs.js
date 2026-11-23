@@ -1,4 +1,4 @@
-/* One in a Computer — prompt bank, organised by the IB Computer Science syllabus (first assessment 2027).
+/* Computer Science — world, syllabus and prompt bank, organised by the IB Computer Science syllabus (first assessment 2027).
    Each prompt: P(id, spec, question, gem, answers, traps, hl)
      answers: [label, expected popularity weight, ...aliases]   (higher weight = more people say it)
      gem: label of the one rare "One in a Computer" answer
@@ -6,7 +6,7 @@
      hl: true if the subtopic is HL only
    Keep ids stable: class stats are stored by id. */
 
-const HL = true;
+(function(){
 const CATALOG = [
   {code:"A", name:"Concepts of computer science", units:[
     {code:"A1", name:"Computer fundamentals", topics:[
@@ -28,7 +28,6 @@ const CATALOG = [
   ]},
 ];
 
-const P = (id, spec, q, gem, ans, traps = [], hl = false) => ({id, spec, q, gem, ans, traps, hl});
 
 const PROMPTS = [
 /* ---------------- A1.1 Computer hardware and operation ---------------- */
@@ -636,3 +635,102 @@ P("b4103","B4.1.3","Name a way to traverse a binary tree.","Morris traversal",[
   ["In-order",30,"inorder","in order"],["Pre-order",25,"preorder","pre order"],["Post-order",25,"postorder","post order"],
   ["Breadth-first / level order",6,"bfs","level order","breadth first"],["Depth-first",6,"dfs","depth first"],["Morris traversal",.4,"morris"]], [], HL),
 ];
+
+/* ---------------- world: a virus sinking into a computer ---------------- */
+const BANDS = [
+  {name:"Outside the case", zone:"The case",          from:0,  to:40,  hue:205, bg:["#1c252c","#141b21"]},
+  {name:"Motherboard",      zone:"The motherboard",   from:40, to:100, hue:155, bg:["#082a1e","#061c15"]},
+  {name:"RAM",              zone:"Main memory · RAM", from:100,to:170, hue:180, bg:["#06232b","#04171d"]},
+  {name:"System buses",     zone:"The system buses",  from:170,to:250, hue:45,  bg:["#17150a","#100e07"]},
+  {name:"CPU",              zone:"The processor",     from:250,to:320, hue:218, bg:["#0b1324","#090e1c"]},
+  {name:"Cache",            zone:"Cache",             from:320,to:390, hue:270, bg:["#150b26","#0f081c"]},
+  {name:"Control Unit",     zone:"The control unit",  from:390,to:460, hue:322, bg:["#1f0a1c","#160714"]},
+  {name:"ALU",              zone:"Arithmetic logic unit", from:460,to:530, hue:18, bg:["#230f08","#190a05"]},
+  {name:"MAR & MDR",        zone:"Memory registers",  from:530,to:600, hue:46,  bg:["#1e1906","#151104"]},
+  {name:"The core",         zone:"PC · IR · AC — the core", from:600,to:760, hue:350, bg:["#22070d","#0c0204"]},
+];
+const FACTS = [
+  [-38,"packets stream in from every corner of the internet"],[-20,"your virus is hiding inside a download"],
+  [24,"most malware never gets past the case"],[34,"USB 2.0 moves up to 480 Mbit/s"],
+  [55,"every component plugs into the motherboard"],[82,"copper traces carry signals between chips"],
+  [112,"RAM is volatile: it forgets everything at power-off"],[138,"programs are loaded here from secondary storage"],[160,"every instruction is fetched from RAM"],
+  [190,"address bus: one-way, CPU → memory"],[210,"data bus: two-way, data and instructions"],[232,"control bus: read, write and clock signals"],
+  [268,"single-core, multi-core, or helped by a co-processor"],[298,"3 GHz = 3 billion clock ticks every second"],
+  [338,"L1 cache answers in about one nanosecond"],[368,"cache keeps recently used data next to the cores"],
+  [408,"every instruction is decoded here"],[440,"control signals tell each part what to do next"],
+  [478,"add · subtract · compare · AND · OR · NOT"],[510,"results are written to the accumulator"],
+  [548,"MAR → address bus. MDR ↔ data bus."],[578,"the MDR holds the data fetched from memory"],
+  [622,"PC: the address of the next instruction"],[652,"IR: the instruction being decoded"],[682,"AC: the result of the last calculation"],[730,"nothing is deeper than this"],
+];
+function wallSVG(i, H, side){
+  const r = srand(97 + i*13 + (side==="r"?5:0)); const hue = BANDS[i].hue; let s="";
+  const rep = (step, fn) => { for (let y=20; y<H-20; y+=step) fn(y); };
+  switch(i){
+    case 0: s+=`<rect width="120" height="${H}" fill="#27323a"/><rect x="${side==="l"?104:12}" width="4" height="${H}" fill="#3c4952"/>`;
+      rep(170, y=>{ for(let k=0;k<7;k++) s+=`<rect x="18" y="${y+k*14}" width="76" height="6" rx="3" fill="#10161a"/>`; s+=`<circle cx="60" cy="${y+128}" r="5" fill="#5a6872"/><path d="M56 ${y+128}h8" stroke="#2a343b" stroke-width="2"/>`; }); break;
+    case 1: for(let k=0;k<6;k++){ let x=8+k*19, y=0, d=`M${x} 0`; while(y<H){ y+=50+r()*90; d+=` V${f1(y)}`; if(r()<.55){ const nx=Math.max(6,Math.min(114,x+(r()<.5?-16:16))); d+=` L${nx} ${f1(y+16)}`; x=nx; y+=16; } }
+        s+=`<path d="${d}" fill="none" stroke="hsl(${hue} 60% 32%)" stroke-width="2"/>`; }
+      rep(240, y=>{ s+=`<circle cx="${f1(30+r()*60)}" cy="${y+60}" r="13" fill="#1d2b31" stroke="#9fc2cc" stroke-width="2"/><rect x="${f1(20+r()*50)}" y="${y+130}" width="44" height="34" rx="3" fill="#0d1418" stroke="hsl(${hue} 50% 40%)"/><circle cx="${f1(10+r()*100)}" cy="${y+200}" r="3.5" fill="#c9a640"/>`; }); break;
+    case 2: s+=`<rect x="22" y="0" width="62" height="${H}" fill="hsl(${hue} 45% 17%)" stroke="hsl(${hue} 55% 38%)"/>`;
+      rep(74, y=>{ s+=`<rect x="30" y="${y}" width="46" height="54" rx="2" fill="#090e11"/>`; });
+      for(let y=4;y<H;y+=9) s+=`<rect x="86" y="${y}" width="11" height="5" fill="#c9a640"/>`; break;
+    case 3: { const cols=["#f5d042","#5ad1ff","#ff7ab8"]; for(let k=0;k<6;k++){ const x=12+k*18, c=cols[Math.floor(k/2)];
+        s+=`<line x1="${x}" x2="${x}" y1="0" y2="${H}" stroke="${c}" stroke-opacity=".2" stroke-width="2.5"/><line x1="${x}" x2="${x}" y1="0" y2="${H}" stroke="${c}" stroke-width="2.5" class="flow ${k===3?"rev":""} ${k>=4?"slow":""}" style="animation-delay:${-k*.25}s"/>`; } } break;
+    case 4: rep(130, y=>{ for(let c=0;c<2;c++) s+=`<rect x="${10+c*54}" y="${y}" width="46" height="46" rx="4" fill="hsl(${hue} 40% 15%)" stroke="hsl(${hue} 65% 52%)"/><rect x="${18+c*54}" y="${y+8}" width="30" height="30" fill="none" stroke="hsl(${hue} 65% 52% / .4)"/>`; });
+      for(let y=0;y<H;y+=40) s+=`<path d="M0 ${y}h120" stroke="hsl(${hue} 50% 40% / .18)"/>`; break;
+    case 5: for(let y=8;y<H-8;y+=12) for(let x=8;x<114;x+=12){ const on=r()<.2; s+=`<rect x="${x}" y="${y}" width="9" height="9" rx="1.5" fill="${on?`hsl(${hue} 85% 64%)`:`hsl(${hue} 30% 17%)`}" ${on&&r()<.45?`class="blink" style="animation-delay:${f1(r()*1.7)}s"`:""}/>`; } break;
+    case 6: rep(190, y=>{ s+=`<rect x="14" y="${y}" width="64" height="40" rx="5" fill="hsl(${hue} 40% 15%)" stroke="hsl(${hue} 75% 62%)" stroke-width="1.5"/><path d="M78 ${y+20} C98 ${y+20} 96 ${y+70} 112 ${y+80}M46 ${y+40} V${y+110} H112" fill="none" stroke="hsl(${hue} 75% 62%)" stroke-width="1.6" class="flow slow"/>`; });
+      { let d=`M104 0`; for(let y=0;y<H;y+=24) d+=` V${y+12} H92 V${y+24} H104`; s+=`<path d="${d}" fill="none" stroke="#5ad1ff" stroke-width="1.6" opacity=".8"/>`; } break;
+    case 7: rep(150, (y)=>{ const k=Math.floor(y/150)%2; const x=22;
+        if(k===0) s+=`<path d="M${x} ${y} h26 a24 24 0 0 1 0 48 h-26 z" fill="hsl(${hue} 50% 16%)" stroke="hsl(${hue} 85% 62%)" stroke-width="2"/>`;
+        else s+=`<path d="M${x} ${y} q34 0 52 24 q-18 24 -52 24 q14 -24 0 -48 z" fill="hsl(${hue} 50% 16%)" stroke="hsl(${hue} 85% 62%)" stroke-width="2"/>`;
+        s+=`<path d="M0 ${y+12}h${x+6}M0 ${y+36}h${x+6}M${x+50} ${y+24}h${70-x}" stroke="hsl(${hue} 85% 62% / .6)" stroke-width="1.6"/>`; }); break;
+    case 8: rep(96, y=>{ s+=`<rect x="10" y="${y}" width="98" height="44" rx="5" fill="hsl(${hue} 45% 13%)" stroke="hsl(${hue} 85% 58%)" stroke-width="1.5"/>`;
+        for(let b=0;b<8;b++) s+=`<rect x="${18+b*11}" y="${y+16}" width="8" height="12" rx="1" fill="hsl(${hue} 90% ${r()<.5?65:22}%)" ${r()<.3?`class="blink" style="animation-delay:${f1(r()*1.7)}s"`:""}/>`; }); break;
+    case 9: rep(120, y=>{ s+=`<rect x="12" y="${y}" width="96" height="70" rx="7" fill="#1a060b" stroke="hsl(${hue} 90% 60%)" stroke-width="2"/><rect x="22" y="${y+44}" width="76" height="10" rx="2" fill="hsl(${hue} 90% 60% / .5)" class="blink" style="animation-delay:${f1(r()*1.7)}s"/>`; }); break;
+  }
+  return vwall(s, H, side);
+}
+function virusGlyph(level, hue){
+  const n=8+level, rr=12+level*.6, len=8+level*.45; let s="";
+  for(let i=0;i<n;i++){ const a=i/n*Math.PI*2, c=Math.cos(a), si=Math.sin(a);
+    s+=`<line x1="${f1(c*rr)}" y1="${f1(si*rr)}" x2="${f1(c*(rr+len))}" y2="${f1(si*(rr+len))}" stroke="hsl(${hue} 85% 64%)" stroke-width="2.4" stroke-linecap="round"/><circle cx="${f1(c*(rr+len))}" cy="${f1(si*(rr+len))}" r="2.8" fill="hsl(${hue} 95% 72%)"/>`; }
+  s+=`<circle r="${rr}" fill="hsl(${hue} 55% 13%)" stroke="hsl(${hue} 90% 64%)" stroke-width="2.4"/>`;
+  const k=4+Math.floor(level/2); for(let i=0;i<k;i++){ const a=i/k*Math.PI*2+level; s+=`<circle cx="${f1(Math.cos(a)*rr*.5)}" cy="${f1(Math.sin(a)*rr*.5)}" r="2.6" fill="hsl(${hue} 95% 72%)"/>`; }
+  return avatarSVG(`<g class="vspin">${s}</g>`);
+}
+function sprite(rows, colors, px=7){ let s=""; rows.forEach((row,y)=>[...row].forEach((ch,x)=>{ if(ch===".") return; s+=`<rect x="${x*px}" y="${y*px}" width="${px}" height="${px}" fill="${colors[ch]}"/>`; }));
+  const w=rows[0].length*px, h=rows.length*px; return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges">${s}</svg>`; }
+function entity(t, c){
+  if (t==="gem") return sprite(["..#.#.#.#..","..#.#.#.#..","###########","#.........#","#....o....#","#...oo....#","#....o....#","#....o....#","#...ooo...#","#.........#","###########","..#.#.#.#..","..#.#.#.#.."],{"#":c,"o":"#fff6ff"},7);
+  if (t==="rootkit") return sprite(["..#####..",".#######.","#########","##..#..##","##..#..##","#########",".###.###.","..#####..","..#.#.#.."],{"#":c},9);
+  if (t==="trojan") return sprite(["....##........","...####.......","..##.##.......","..#..##.......",".....###......",".....#########",".....#########",".....#########",".....#.#...#.#",".....#.#...#.#","....##########",".....o..o..o.."],{"#":c,"o":"#7a4a1c"},7);
+  if (t==="adware") return `<svg width="190" height="100" viewBox="0 0 190 100">${[[0,20,"WIN!!"],[62,0,"CLICK"],[118,30,"FREE"]].map(([x,y,w],i)=>`<g class="drift" style="animation-delay:${-i*1.4}s;animation-duration:${2+i*.6}s"><rect x="${x}" y="${y}" width="70" height="52" rx="4" fill="#191505" stroke="${c}" stroke-width="2"/><rect x="${x}" y="${y}" width="70" height="12" fill="${c}"/><text x="${x+62}" y="${y+10}" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="700" fill="#191505" text-anchor="middle">×</text><text x="${x+35}" y="${y+38}" font-family="Chakra Petch,sans-serif" font-size="14" font-weight="700" fill="${c}" text-anchor="middle">${w}</text></g>`).join("")}</svg>`;
+  if (t==="spam") return `<svg width="200" height="96" viewBox="0 0 200 96">${[[10,30],[52,6],[92,40],[134,10],[160,52],[70,62]].map(([x,y],i)=>`<g class="drift" style="animation-delay:${-i*1.1}s;animation-duration:${3+i*.5}s"><rect x="${x}" y="${y}" width="34" height="24" rx="2" fill="#121a1f" stroke="${c}" stroke-width="2"/><path d="M${x} ${y} l17 13 l17 -13" fill="none" stroke="${c}" stroke-width="2"/></g>`).join("")}</svg>`;
+  return null;
+}
+function network(len){
+  const r = srand(3); let net = "";
+  const nodes = Array.from({length:22},()=>[f1(6+r()*88), f1(40+r()*(len-140))]);
+  nodes.forEach((a,i)=>{ const b=nodes[(i*7+3)%nodes.length], c=nodes[(i+1)%nodes.length];
+    net += `<line x1="${a[0]}%" y1="${a[1]}" x2="${b[0]}%" y2="${b[1]}" stroke="#2f6aa8" stroke-opacity=".35"/><line x1="${a[0]}%" y1="${a[1]}" x2="${c[0]}%" y2="${c[1]}" stroke="#2f6aa8" stroke-opacity=".2"/>`; });
+  nodes.forEach(([x,y],i)=> net += `<circle cx="${x}%" cy="${y}" r="${i%4?3:5}" fill="#6cb6ff" ${i%3?"":'class="blink"'} style="animation-delay:${i*.2}s"/>`);
+  return `<svg width="100%" height="${len}" aria-hidden="true">${net}</svg>`;
+}
+const UMs = p => Math.round(p*10).toLocaleString();
+registerSubject({
+  key:"cs", name:"Computer Science", theme:"A virus sinking into a computer", gemWord:"Computer", gemTitle:"One in a Computer", emoji:"🦠",
+  blurb:"You're a virus on the open internet. Each prompt has many correct answers. <b>Obvious answers barely sink. Valid answers other players didn't think of plunge you deeper</b>, through the case, the motherboard, RAM and the buses, into the CPU's registers.",
+  axis:"down", arrow:"▼",
+  tiers:{gem:"One in a Computer", rootkit:"Rootkit", trojan:"Trojan", adware:"Adware", spam:"Spam"}, blocked:"Access denied", fw:"FIREWALL",
+  notes:{rootkit:"Deep in the system. Very few players went this way.", trojan:"Genuinely uncommon. It slipped past the scanners.", adware:"Fairly common. It got in, but people noticed."},
+  verbs:{cta:"Descend ▼", inject:"Inject", hint:"▼ rarer answers sink deeper ▼", count:"descending"},
+  particles:["1","0"], particleColor:"#5dffb0",
+  meter:{label:"DEPTH", fmt:p=>UMs(p)+" µm", zone:p=>UMs(p)+' <span style="text-transform:none">µm</span>', tick:p=>UMs(p), gain:(a,b)=>`sink ${UMs(b-a)} µm`},
+  start:{bg:"linear-gradient(#0b1d38,#081426 70%,#0c1a2a)", label:'Start · 0 <span style="text-transform:none">µm</span>', zone:"The open internet", color:"#6cb6ff", deco:network},
+  zone0:190, endBg:"#0a0103",
+  bands:BANDS, facts:FACTS, deco:(i,len)=>wallSVG(i,len,"l")+wallSVG(i,len,"r"), avatar:virusGlyph, entity,
+  extras:({pos})=>`<div class="usb" style="top:${pos(0)-8}px"></div><div class="pins" style="top:${pos(250)+4}px"></div><div class="coreglow" style="top:${pos(700)}px"></div><div class="floor" style="top:${pos(760)}px;background:linear-gradient(#3a0610,#0a0103)"></div>`,
+  catalog:CATALOG, prompts:PROMPTS,
+});
+})();

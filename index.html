@@ -3,21 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="One in a Computer: a reverse-trivia revision game for the whole IB Computer Science syllabus. Rarer correct answers sink your virus deeper into the computer.">
-<style>body{margin:0}</style>
-</head>
-<body>
+<meta name="description" content="One in a Computer: a reverse-trivia revision game for IB Computer Science, Biology, Chemistry, Physics, Business Management and History. Rarer correct answers take you further.">
 <title>One in a Computer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: one full-screen vertical world, the inside of a computer from the open internet down to the CPU's registers.
-   The camera follows the sinking answer, then the virus. HUD on top, answer bar at the bottom, reveals in the middle.
-   Single dark look; the accent hue follows the layer the virus is in. */
+/* Layout: one full-screen world per subject (down, up or sideways). The camera follows the answer, then the player.
+   HUD on top, answer bar at the bottom, reveals in the middle. Single dark look; the accent hue follows the current layer. */
 :root{
   color-scheme:dark;
   --bg:#04070a;
-  --panel:rgba(9,15,20,.86);
+  --panel:rgba(9,15,20,.88);
   --line:#22323d;
   --fg:#e3edf2;
   --muted:#8ea6b2;
@@ -25,11 +21,8 @@
   --accent:hsl(var(--hue) 88% 62%);
   --accent-dim:hsl(var(--hue) 70% 45% / .28);
   --you:#ff4f8b;
-  --t-gem:#c98bff;
   --t-rootkit:#ff5470;
   --t-trojan:#ff9d2e;
-  --t-adware:#f5d042;
-  --t-spam:#a9bac4;
   --t-blocked:#5d6d77;
   --f-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
@@ -38,31 +31,45 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
 button{font:inherit;color:inherit}
 
 /* ---------- world ---------- */
 .viewport{position:fixed;inset:0;overflow:hidden;background:var(--bg)}
-#world{position:absolute;left:0;right:0;top:0;will-change:transform}
-.band{position:absolute;left:0;right:0;overflow:hidden}
+#world{position:absolute;left:0;top:0;will-change:transform}
+#world.ax-down,#world.ax-up{right:0}
+#world.ax-right{bottom:0}
+.band{position:absolute;overflow:hidden}
+.ax-down .band,.ax-up .band{left:0;right:0}
+.ax-right .band{top:0;bottom:0}
 .wall{position:absolute;top:0;height:100%;width:clamp(52px,13vw,150px)}
 .wall.l{left:0}.wall.r{right:0}
-.zone{position:absolute;left:0;right:0;text-align:center;font:600 11px/1.4 var(--f-mono);letter-spacing:.32em;text-transform:uppercase;padding-inline:70px}
-.zone b{display:block;font:700 clamp(18px,4.4vw,26px)/1.1 var(--f-display);letter-spacing:.14em;margin-top:6px}
-.fact{position:absolute;left:50%;transform:translateX(-50%);width:min(70%,420px);text-align:center;font:400 11.5px/1.4 var(--f-mono);color:rgb(200 220 230 / .5);letter-spacing:.04em}
-.boundary{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgb(255 255 255 / .14)}
-.usb{position:absolute;left:50%;transform:translateX(-50%);width:min(240px,52vw);height:64px;border-radius:6px;background:#06090b;border:3px solid #8b98a1;box-shadow:inset 0 0 0 6px #11181d}
-.usb::before{content:"";position:absolute;left:12%;right:12%;top:14px;height:16px;background:#3f79b0;border-radius:2px}
-.usb::after{content:"USB · ENTRY POINT";position:absolute;left:0;right:0;top:72px;text-align:center;font:600 10px var(--f-mono);letter-spacing:.2em;color:#9fb0ba}
-.pins{position:absolute;left:0;right:0;height:22px;background:radial-gradient(circle,#d8b24a 0 3px,transparent 3.5px) 0 0/16px 22px;opacity:.85}
-.coreglow{position:absolute;left:50%;width:120vw;max-width:1100px;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgb(255 50 90 / .28),transparent 62%)}
-.floor{position:absolute;left:0;right:0;height:300px;background:linear-gradient(#3a0610,#0a0103)}
-.floor::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:#ff4f6e;box-shadow:0 0 24px #ff4f6e}
-.ruler{position:absolute;right:0;top:0;width:58px;pointer-events:none}
-.ruler text{font:500 9.5px var(--f-mono);fill:rgb(210 228 236 / .55)}
-#you{position:absolute;right:0;height:0;width:70px;border-top:2px solid var(--you);transition:none}
-#you span{position:absolute;right:62px;top:-9px;font:700 10px var(--f-mono);letter-spacing:.12em;color:var(--you)}
-#virus{position:absolute;left:68%;width:74px;height:74px;margin:-37px 0 0 -37px;z-index:3;filter:drop-shadow(0 0 14px hsl(var(--hue) 95% 60% / .8))}
+.hscene{position:absolute;left:0;bottom:0}
+.zone{position:absolute;text-align:center;font:600 11px/1.4 var(--f-mono);letter-spacing:.3em;text-transform:uppercase;pointer-events:none}
+.ax-down .zone,.ax-up .zone{left:0;right:0;padding-inline:70px}
+.zone.h{width:300px;text-align:left;letter-spacing:.22em;top:58%!important}
+.zone b{display:block;font:700 clamp(18px,4.4vw,26px)/1.1 var(--f-display);letter-spacing:.14em;margin-top:6px;color:#e3edf2;text-shadow:0 2px 12px #000}
+.fact{position:absolute;text-align:center;font:400 11.5px/1.4 var(--f-mono);color:rgb(220 232 238 / .55);letter-spacing:.04em;pointer-events:none;text-shadow:0 1px 6px #000}
+.ax-down .fact,.ax-up .fact{left:50%;transform:translateX(-50%);width:min(70%,420px)}
+.fact.h{top:34%;width:230px;transform:translateX(-50%)}
+.boundary{position:absolute;border:0 dashed rgb(255 255 255 / .14)}
+.ax-down .boundary{left:0;right:0;top:0;border-top-width:1px}
+.ax-up .boundary{left:0;right:0;bottom:0;border-bottom-width:1px}
+.ax-right .boundary{top:0;bottom:0;left:0;border-left-width:1px}
+.ruler{position:absolute;pointer-events:none}
+.ruler text{font:500 9.5px var(--f-mono);fill:rgb(220 232 238 / .6)}
+.ax-down .ruler,.ax-up .ruler{right:0;top:0;width:58px}
+.ax-right .ruler{left:0;bottom:0;height:34px}
+#you{position:absolute;height:0;pointer-events:none}
+.ax-down #you,.ax-up #you{right:0;width:70px;border-top:2px solid var(--you)}
+#you span{position:absolute;font:700 10px var(--f-mono);letter-spacing:.12em;color:var(--you)}
+.ax-down #you span,.ax-up #you span{right:62px;top:-9px}
+.ax-right #you{bottom:182px;width:0}
+.ax-right #you span{left:-15px;top:-6px}
+.ax-right #you span::after{content:" ▾"}
+#virus{position:absolute;width:74px;height:74px;z-index:3;filter:drop-shadow(0 0 14px hsl(var(--hue) 95% 60% / .8))}
+.ax-down #virus,.ax-up #virus{left:68%;margin:-37px 0 0 -37px}
+.ax-right #virus{bottom:84px;margin:0 0 0 -37px}
 #virus .bob{animation:bob 2.8s ease-in-out infinite;transform-origin:37px 37px}
 #virus .vspin{animation:spin 16s linear infinite;transform-origin:0 0}
 #virus.mutate .bob{animation:mutate .9s}
@@ -79,37 +86,65 @@ button{font:inherit;color:inherit}
 @keyframes blink{50%{opacity:.2}}
 .drift{animation:drift 9s ease-in-out infinite}
 @keyframes drift{50%{transform:translate(14px,-10px)}}
+.beat{animation:beat 1s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes beat{15%{transform:scale(1.06)}30%{transform:scale(1)}}
 
-/* rank lines + sinking answer */
-.tline{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--c);opacity:0;transition:opacity .5s, filter .3s;z-index:2}
+/* rank lines + travelling answer */
+.tline{position:absolute;height:0;opacity:0;transition:opacity .5s,filter .3s;z-index:2;pointer-events:none}
+.ax-down .tline,.ax-up .tline{left:0;right:0;border-top:2px dashed var(--c)}
+.tline.v{top:0;bottom:0;height:auto;width:0;border-left:2px dashed var(--c)}
 .tline.on{opacity:.75}
 .tline.hit{opacity:1;filter:drop-shadow(0 0 8px var(--c))}
-.tline span{position:absolute;right:66px;top:-20px;font:700 10.5px var(--f-mono);letter-spacing:.14em;color:var(--c);white-space:nowrap;text-shadow:0 0 6px #000}
-.tline.fw{border-top:3px solid var(--t-rootkit)}
-#tag{position:absolute;left:46%;z-index:4;transform:translate(-50%,-50%) rotate(-3deg);pointer-events:none}
+.tline span{position:absolute;font:700 10.5px var(--f-mono);letter-spacing:.14em;color:var(--c);white-space:nowrap;text-shadow:0 0 6px #000,0 0 2px #000}
+.ax-down .tline span,.ax-up .tline span{right:66px;top:-20px}
+.tline.v span{left:8px}
+.tline.fw{border-style:solid!important;border-color:var(--t-rootkit)!important;border-width:3px 0 0}
+.tline.fw.v{border-width:0 0 0 3px}
+.tline.fw span{color:var(--t-rootkit)}
+#lines.quiet .tline span{opacity:0;transition:opacity .4s}
+#lines.quiet .tline:not(.hit){opacity:.3}
+#tag{position:absolute;z-index:4;pointer-events:none}
+.ax-down #tag,.ax-up #tag{left:46%;transform:translate(-50%,-50%) rotate(-3deg)}
+.ax-right #tag{transform:translate(-50%,50%) rotate(-3deg)}
 #tag .pill{position:relative;display:inline-flex;gap:10px;align-items:center;white-space:nowrap;max-width:76vw;overflow:hidden;text-overflow:ellipsis;
   font:700 clamp(14px,3.8vw,19px)/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--tc,#7ff3ff);
-  padding:11px 16px;border-radius:8px;background:rgb(4 8 11 / .82);border:1.5px solid color-mix(in srgb,var(--tc,#7ff3ff) 60%,transparent);
+  padding:11px 16px;border-radius:8px;background:rgb(4 8 11 / .84);border:1.5px solid color-mix(in srgb,var(--tc,#7ff3ff) 60%,transparent);
   box-shadow:0 0 22px color-mix(in srgb,var(--tc,#7ff3ff) 35%,transparent);text-shadow:0 0 10px color-mix(in srgb,var(--tc,#7ff3ff) 70%,transparent);transition:color .4s,border-color .4s,box-shadow .4s}
 #tag.denied .pill{animation:hit .5s;--tc:#7b8b95;text-decoration:line-through}
 .bits{position:absolute;left:50%;top:50%;width:0;height:0;transform:scaleY(.42)}
-.bits i{position:absolute;left:0;top:0;font:700 12px var(--f-mono);font-style:normal;color:#5dffb0;text-shadow:0 0 6px #5dffb0;animation:orbit var(--d) linear infinite;animation-delay:var(--dl)}
+.bits i{position:absolute;left:0;top:0;font:700 12px var(--f-mono);font-style:normal;color:var(--pc,#5dffb0);text-shadow:0 0 6px var(--pc,#5dffb0);animation:orbit var(--d) linear infinite;animation-delay:var(--dl)}
 @keyframes orbit{from{transform:rotate(0deg) translateX(var(--r)) rotate(0deg)}to{transform:rotate(360deg) translateX(var(--r)) rotate(-360deg)}}
+
+/* subject-specific world pieces */
+.usb{position:absolute;left:50%;transform:translateX(-50%);width:min(240px,52vw);height:64px;border-radius:6px;background:#06090b;border:3px solid #8b98a1;box-shadow:inset 0 0 0 6px #11181d}
+.usb::before{content:"";position:absolute;left:12%;right:12%;top:14px;height:16px;background:#3f79b0;border-radius:2px}
+.usb::after{content:"USB · ENTRY POINT";position:absolute;left:0;right:0;top:72px;text-align:center;font:600 10px var(--f-mono);letter-spacing:.2em;color:#9fb0ba}
+.pins{position:absolute;left:0;right:0;height:22px;background:radial-gradient(circle,#d8b24a 0 3px,transparent 3.5px) 0 0/16px 22px;opacity:.85}
+.coreglow{position:absolute;left:50%;width:120vw;max-width:1100px;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,var(--glow,rgb(255 50 90 / .28)),transparent 62%);pointer-events:none}
+.floor{position:absolute;left:0;right:0;height:420px}
+.floor::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--fc,#ff4f6e);box-shadow:0 0 24px var(--fc,#ff4f6e)}
+.bottle{position:absolute;left:50%;transform:translateX(-50%);width:min(50vw,300px);border:3px solid rgb(210 235 255 / .38);border-top:0;border-radius:0 0 46px 46px;background:rgb(210 235 255 / .045);box-shadow:inset 0 0 50px rgb(210 235 255 / .08),0 0 30px rgb(0 0 0 / .4);pointer-events:none}
+.bottle-neck{position:absolute;left:50%;transform:translateX(-50%);width:min(20vw,110px);border:3px solid rgb(210 235 255 / .38);border-bottom:0;background:rgb(210 235 255 / .045);pointer-events:none}
+.cork{position:absolute;left:50%;transform:translateX(-50%);width:min(22vw,120px);height:46px;border-radius:8px 8px 4px 4px;background:repeating-linear-gradient(90deg,#9a6a3a 0 6px,#86592e 6px 12px)}
+.fill{position:absolute;left:50%;transform:translateX(-50%);width:calc(min(50vw,300px) - 14px);top:calc(var(--av) + 18px);border-radius:4px 4px 40px 40px;
+  background:radial-gradient(circle at 35% 35%,#ffe58a 0 7px,#d9a520 8px 10px,transparent 10.5px) 0 0/28px 24px,repeating-linear-gradient(170deg,#2e8a52 0 14px,#246f42 14px 18px,#3a9a60 18px 30px);
+  box-shadow:inset 0 10px 18px rgb(255 230 140 / .35);pointer-events:none}
+.fill::before{content:"";position:absolute;left:0;right:0;top:-6px;height:12px;border-radius:50%;background:#ffd85a;box-shadow:0 0 18px #ffd85a}
 
 /* ---------- HUD ---------- */
 .hud{position:fixed;top:0;left:0;right:0;z-index:20;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;
   padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
   background:linear-gradient(rgb(3 5 7 / .85),transparent);padding-bottom:18px;pointer-events:none}
 .hud > *{pointer-events:auto}
-.box{background:rgb(6 10 13 / .8);border:1px solid var(--line);border-radius:8px;padding:5px 10px;min-width:92px}
+.box{background:rgb(6 10 13 / .82);border:1px solid var(--line);border-radius:8px;padding:5px 10px;min-width:96px}
 .box small{display:block;font:600 9px var(--f-mono);letter-spacing:.18em;color:var(--muted)}
-.box b{display:block;font:600 17px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent)}
+.box b{display:block;font:600 16px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent);white-space:nowrap}
 .box.right{text-align:right}
-.mid{display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:4px}
+.mid{display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:4px;min-width:0}
 .pips{display:flex;gap:4px}
 .pips i{width:12px;height:12px;border-radius:2px;background:#1b2730;border:1px solid #2b3b46}
 .pips i.cur{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
-.mid small{font:600 9px var(--f-mono);letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.mid small{font:600 9px var(--f-mono);letter-spacing:.18em;color:var(--muted);text-transform:uppercase;text-align:center}
 .menu-btn{margin-top:6px;width:34px;height:28px;border-radius:6px;border:1px solid var(--line);background:rgb(6 10 13 / .8);cursor:pointer;display:grid;place-items:center}
 .menu-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .menu{position:fixed;z-index:30;top:calc(env(safe-area-inset-top,0px) + 92px);left:max(12px,env(safe-area-inset-left,0px));background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:4px;backdrop-filter:blur(6px)}
@@ -139,6 +174,7 @@ button{font:inherit;color:inherit}
 .btn{appearance:none;font:700 14px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:#05080a;background:var(--accent);border:0;border-radius:8px;padding:12px 18px;cursor:pointer;white-space:nowrap}
 .btn:hover{filter:brightness(1.12)}
 .btn:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.btn:disabled{opacity:.45;cursor:default;filter:none}
 .btn.inject{background:var(--you);color:#fff}
 .btn.ghost{background:rgb(6 10 13 / .7);color:var(--fg);border:1.5px solid var(--line)}
 .btn.descend{background:rgb(4 8 11 / .85);color:var(--accent);border:2px solid var(--accent);padding:13px 26px;box-shadow:0 0 18px var(--accent-dim)}
@@ -153,11 +189,11 @@ button{font:inherit;color:inherit}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}}
 .entity{height:104px;display:grid;place-items:center}
 .entity svg{filter:drop-shadow(0 0 12px var(--c));animation:bob 2.6s ease-in-out infinite;overflow:visible}
-.rank{font:700 clamp(30px,8.5vw,50px)/1 var(--f-display);letter-spacing:.16em;color:var(--c);text-shadow:0 0 24px color-mix(in srgb,var(--c) 70%,transparent),0 0 2px #000;text-transform:uppercase;text-wrap:balance}
+.rank{font:700 clamp(28px,8vw,48px)/1.02 var(--f-display);letter-spacing:.14em;color:var(--c);text-shadow:0 0 24px color-mix(in srgb,var(--c) 70%,transparent),0 0 2px #000;text-transform:uppercase;text-wrap:balance}
 .quote{font:500 15px var(--f-mono);color:var(--fg);margin-top:4px}
 .gain{font:600 14px var(--f-mono);letter-spacing:.06em;color:var(--fg)}
 .gain b{color:var(--c)}
-.note{font:400 12.5px/1.5 var(--f-mono);color:rgb(214 230 238 / .72);max-width:44ch}
+.note{font:400 12.5px/1.5 var(--f-mono);color:rgb(214 230 238 / .75);max-width:44ch}
 .linkbtn{background:none;border:0;cursor:pointer;font:600 11px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);padding:8px;margin-top:4px}
 .linkbtn:focus-visible{outline:2px solid var(--accent);border-radius:4px}
 .spectrum{width:min(480px,100%);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:left;backdrop-filter:blur(6px)}
@@ -171,39 +207,33 @@ button{font:inherit;color:inherit}
 .spectrum .b i{display:block;height:100%;background:var(--c)}
 .spectrum .pc{font:400 11px var(--f-mono);color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
 .dock{position:fixed;z-index:16;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);display:flex;justify-content:center}
-.toast{position:fixed;z-index:14;left:0;right:0;top:46%;text-align:center;pointer-events:none;font:600 11px var(--f-mono);letter-spacing:.3em;color:var(--accent);text-transform:uppercase;animation:toast 2.4s both}
-.toast b{display:block;font:700 clamp(22px,6vw,32px)/1.1 var(--f-display);letter-spacing:.14em;margin-top:6px;color:var(--fg)}
-@keyframes toast{0%{opacity:0;transform:translateY(10px)}15%,75%{opacity:1;transform:none}100%{opacity:0}}
 
 /* ---------- title + report overlays ---------- */
 .overlay{position:fixed;inset:0;z-index:25;overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;
   padding-top:calc(env(safe-area-inset-top,0px) + 24px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 24px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.sheet{width:min(600px,100%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px;backdrop-filter:blur(8px);box-shadow:0 20px 60px rgb(0 0 0 / .55)}
+.sheet{width:min(640px,100%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px;backdrop-filter:blur(8px);box-shadow:0 20px 60px rgb(0 0 0 / .55)}
 .sheet .eyebrow{font:700 10.5px var(--f-mono);letter-spacing:.2em;color:var(--you);text-transform:uppercase}
-.sheet h1{font:700 clamp(36px,9vw,58px)/.95 var(--f-display);margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
+.sheet h1{font:700 clamp(34px,8.5vw,56px)/.95 var(--f-display);margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
 .sheet h1 em{font-style:normal;color:var(--accent);text-shadow:0 0 22px var(--accent-dim)}
-.lede{margin:0;color:var(--muted);font-size:15.5px;max-width:58ch}
+.lede{margin:0;color:var(--muted);font-size:15.5px;max-width:60ch}
 .lede b{color:var(--fg);font-weight:600}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .small{font-size:12.5px;color:var(--muted);margin:0}
+.subjects{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.subj{display:grid;grid-template-columns:38px minmax(0,1fr);gap:8px;align-items:center;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgb(255 255 255 / .03);cursor:pointer}
+.subj[aria-pressed="true"]{border-color:hsl(var(--sh) 85% 62%);background:hsl(var(--sh) 70% 45% / .2);box-shadow:0 0 0 1px hsl(var(--sh) 85% 62% / .5)}
+.subj:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.subj .ic svg{width:38px;height:38px;filter:drop-shadow(0 0 6px hsl(var(--sh) 90% 60% / .6))}
+.subj b{display:block;font:700 13.5px/1.2 var(--f-display);letter-spacing:.03em}
+.subj small{display:block;font-size:11.5px;line-height:1.3;color:var(--muted)}
 .ladder{display:flex;flex-direction:column;gap:4px}
-.ladder div{display:grid;grid-template-columns:minmax(0,170px) 44px minmax(0,1fr);gap:10px;align-items:center;font-size:13px;padding:5px 8px;border-radius:6px;background:rgb(255 255 255 / .03)}
+.ladder div{display:grid;grid-template-columns:minmax(0,190px) 44px minmax(0,1fr);gap:10px;align-items:center;font-size:13px;padding:5px 8px;border-radius:6px;background:rgb(255 255 255 / .03)}
 .ladder b{font:700 12px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
 .ladder .n{font:600 12px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
 .ladder span:last-child{color:var(--muted);font-size:12.5px}
 .status{display:inline-flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
 .status i{width:8px;height:8px;border-radius:50%;background:var(--t-blocked);flex:none}
 .status.live i{background:#3ee089;box-shadow:0 0 0 3px rgb(62 224 137 / .2)}
-.stats3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.stats3 div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:rgb(255 255 255 / .02)}
-.stats3 b{display:block;font:600 20px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent)}
-.stats3 span{font:600 9.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.recap{display:flex;flex-direction:column;gap:6px}
-.recap div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:8px 10px;border-radius:8px;background:rgb(255 255 255 / .03);border-left:3px solid var(--c)}
-.recap .p{font-size:12.5px;color:var(--muted)}
-.recap .a{font:600 13.5px var(--f-mono)}
-.recap .t{grid-row:span 2;align-self:center;text-align:right;font:700 11px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
-.recap .t small{display:block;font:600 12px var(--f-mono);color:var(--fg);letter-spacing:0}
 .picker{display:flex;flex-direction:column;gap:12px}
 .pick-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .pick-title{font:700 17px var(--f-display);letter-spacing:.06em;margin:0 0 2px}
@@ -218,7 +248,7 @@ button{font:inherit;color:inherit}
 .unit-h span{color:var(--accent);font-family:var(--f-mono);font-size:12px}
 .unit-h[aria-pressed="true"]::after{content:"all selected";font:600 9.5px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-left:auto}
 .unit-h:disabled{opacity:.5;cursor:default}
-.topic{display:grid;grid-template-columns:18px 40px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:7px;background:rgb(255 255 255 / .03);cursor:pointer;font-size:13.5px;line-height:1.3}
+.topic{display:grid;grid-template-columns:18px 46px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:7px;background:rgb(255 255 255 / .03);cursor:pointer;font-size:13.5px;line-height:1.3}
 .topic:has(input:checked){background:var(--accent-dim);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent)}
 .topic.off{opacity:.45;cursor:default}
 .topic input{accent-color:var(--accent);width:16px;height:16px;margin:0}
@@ -228,101 +258,101 @@ button{font:inherit;color:inherit}
 .hl{font:700 9px var(--f-mono);font-style:normal;letter-spacing:.1em;color:var(--t-trojan);border:1px solid currentColor;border-radius:3px;padding:0 4px;margin-left:4px;vertical-align:1px}
 details.how{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
 details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
-.btn:disabled{opacity:.45;cursor:default;filter:none}
+.stats3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stats3 div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:rgb(255 255 255 / .02);min-width:0}
+.stats3 b{display:block;font:600 19px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent);overflow-wrap:anywhere}
+.stats3 span{font:600 9.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.recap{display:flex;flex-direction:column;gap:6px}
+.recap div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:8px 10px;border-radius:8px;background:rgb(255 255 255 / .03);border-left:3px solid var(--c)}
+.recap .p{font-size:12.5px;color:var(--muted)}
+.recap .a{font:600 13.5px var(--f-mono)}
+.recap .t{grid-row:span 2;align-self:center;text-align:right;font:700 11px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.recap .t small{display:block;font:600 12px var(--f-mono);color:var(--fg);letter-spacing:0}
 .share{font:400 13px/1.5 var(--f-mono);background:rgb(0 0 0 / .35);border:1px solid var(--line);border-radius:8px;padding:10px 12px;white-space:pre-wrap;margin:0}
 
+@media (max-width:560px){
+  .subjects{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 @media (max-width:480px){
-  .box{min-width:78px;padding:4px 8px}.box b{font-size:15px}
+  .box{min-width:80px;padding:4px 8px}.box b{font-size:14px}
   .pips i{width:10px;height:10px}
-  .ladder div{grid-template-columns:minmax(0,1fr) 40px;}
+  .ladder div{grid-template-columns:minmax(0,1fr) 40px}
   .ladder span:last-child{grid-column:1 / -1}
   .tline span{right:60px}
 }
 @media (prefers-reduced-motion:reduce){
-  #virus .bob,#virus .vspin,.flow,.blink,.drift,.bits i,.entity svg,.reveal > *,.toast{animation:none!important}
+  #virus .bob,#virus .vspin,.flow,.blink,.drift,.beat,.bits i,.entity svg,.reveal > *{animation:none!important}
 }
 </style>
-
+</head>
+<body>
 <div class="viewport" id="vp"><div id="world"></div></div>
 
 <header class="hud" id="hud">
   <div>
-    <div class="box"><small>DEPTH</small><b id="hDepth">0 µm</b></div>
+    <div class="box"><small id="hMeterLabel">DEPTH</small><b id="hMeter">0</b></div>
     <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg width="16" height="12" viewBox="0 0 16 12"><path d="M0 1h16M0 6h16M0 11h16" stroke="#cfe0e8" stroke-width="2"/></svg></button>
   </div>
-  <div class="mid"><div class="pips" id="pips"></div><small id="hPrompt">Ready to infect</small></div>
+  <div class="mid"><div class="pips" id="pips"></div><small id="hPrompt">Choose a subject</small></div>
   <div class="box right"><small>SCORE</small><b id="hScore">0</b></div>
 </header>
 <div class="menu" id="menu" hidden>
   <button id="mRestart">Restart this dive</button>
-  <button id="mTitle">Back to the surface</button>
+  <button id="mTitle">Back to the start</button>
 </div>
 <div id="ui"></div>
 
-<script src="prompts.js"></script>
+<script>
+/* ================= kit: shared helpers the subject files use ================= */
+const SUBJECTS = {}, SUBJECT_ORDER = [];
+const HL = true;
+const P = (id, spec, q, gem, ans, traps = [], hl = false) => ({id, spec, q, gem, ans, traps, hl});
+function srand(seed){ let s = seed || 1; return () => { s = (s*16807) % 2147483647; return s/2147483647; }; }
+const f1 = n => Math.round(n*10)/10;
+const vwall = (inner, len, side) => `<svg class="wall ${side}" viewBox="0 0 120 ${len}" preserveAspectRatio="${side==="l"?"xMinYMin":"xMaxYMin"} slice" aria-hidden="true">${inner}</svg>`;
+const hscene = (inner, len, h = 420) => `<svg class="hscene" width="${len}" height="${h}" viewBox="0 0 ${len} ${h}" aria-hidden="true">${inner}</svg>`;
+const SUPS = {"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
+const sup = n => String(n).split("").map(c => SUPS[c] || c).join("");
+const escH = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const avatarSVG = inner => `<svg width="74" height="74" viewBox="0 0 74 74" aria-hidden="true"><g class="bob"><g transform="translate(37 37)">${inner}</g></g></svg>`;
+function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
+</script>
+<script src="subjects/cs.js"></script>
+<script src="subjects/bio.js"></script>
+<script src="subjects/chem.js"></script>
+<script src="subjects/phys.js"></script>
+<script src="subjects/biz.js"></script>
+<script src="subjects/hist.js"></script>
 <script>
 /* ================= ranks ================= */
-const TIERS = {
-  gem:     {name:"One in a Computer", pts:100, sq:"🟪", hex:"#c98bff", desc:"The hidden gem: one valid answer almost nobody thinks of", note:"The hidden gem. Almost nobody finds this one."},
-  rootkit: {name:"Rootkit",           pts:85,  sq:"🟥", hex:"#ff5470", desc:"Under 3% of answers", note:"Deep in the system. Very few players went this way."},
-  trojan:  {name:"Trojan",            pts:60,  sq:"🟧", hex:"#ff9d2e", desc:"3–8% of answers", note:"Genuinely uncommon. It slipped past the scanners."},
-  adware:  {name:"Adware",            pts:30,  sq:"🟨", hex:"#f5d042", desc:"8–18% of answers", note:"Fairly common. It got in, but people noticed."},
-  spam:    {name:"Spam",              pts:10,  sq:"⬜", hex:"#a9bac4", desc:"18% or more. The first thing everyone thinks of", note:"The answer everyone types first."},
-  blocked: {name:"Blocked",           pts:0,   sq:"⬛", hex:"#7b8b95", desc:"Not a valid answer, or out of time. You don't move", note:""},
+const TIER_BASE = {
+  gem:     {pts:100, sq:"🟪", hex:"#c98bff", desc:"The hidden gem: one valid answer almost nobody thinks of", note:"The hidden gem. Almost nobody finds this one."},
+  rootkit: {pts:85,  sq:"🟥", hex:"#ff5470", desc:"Under 3% of answers", note:"Very few players thought of this."},
+  trojan:  {pts:60,  sq:"🟧", hex:"#ff9d2e", desc:"3–8% of answers", note:"Genuinely uncommon. Nice pull."},
+  adware:  {pts:30,  sq:"🟨", hex:"#f5d042", desc:"8–18% of answers", note:"Fairly common, but not the first thing people say."},
+  spam:    {pts:10,  sq:"⬜", hex:"#a9bac4", desc:"18% or more. The first thing everyone thinks of", note:"The answer everyone types first."},
+  blocked: {pts:0,   sq:"⬛", hex:"#7b8b95", desc:"Not a valid answer, or out of time. You don't move", note:""},
 };
 const TIER_ORDER = ["gem","rootkit","trojan","adware","spam","blocked"];
 const LINE_TIERS = ["spam","adware","trojan","rootkit","gem"];
-
+const tierName = t => t==="blocked" ? M.blocked : M.tiers[t];
+const tierNote = t => (M.notes && M.notes[t]) || TIER_BASE[t].note;
 const TIME = 25, PRIOR = 20, PER_DIVE = 7, COUNTDOWN = 3;
-
-/* ================= the computer, surface → deepest (in points) ================= */
-const BANDS = [
-  {name:"Outside the case", zone:"The case",          from:0,  to:40,  hue:205, bg:["#1c252c","#141b21"]},
-  {name:"Motherboard",      zone:"The motherboard",   from:40, to:100, hue:155, bg:["#082a1e","#061c15"]},
-  {name:"RAM",              zone:"Main memory · RAM", from:100,to:170, hue:180, bg:["#06232b","#04171d"]},
-  {name:"System buses",     zone:"The system buses",  from:170,to:250, hue:45,  bg:["#17150a","#100e07"]},
-  {name:"CPU",              zone:"The processor",     from:250,to:320, hue:218, bg:["#0b1324","#090e1c"]},
-  {name:"Cache",            zone:"Cache",             from:320,to:390, hue:270, bg:["#150b26","#0f081c"]},
-  {name:"Control Unit",     zone:"The control unit",  from:390,to:460, hue:322, bg:["#1f0a1c","#160714"]},
-  {name:"ALU",              zone:"Arithmetic logic unit", from:460,to:530, hue:18, bg:["#230f08","#190a05"]},
-  {name:"MAR & MDR",        zone:"Memory registers",  from:530,to:600, hue:46,  bg:["#1e1906","#151104"]},
-  {name:"The core",         zone:"PC · IR · AC — the core", from:600,to:760, hue:350, bg:["#22070d","#0c0204"]},
-];
-const FACTS = [
-  [-38,"packets stream in from every corner of the internet"],[-20,"your virus is hiding inside a download"],
-  [24,"most malware never gets past the case"],[34,"USB 2.0 moves up to 480 Mbit/s"],
-  [55,"every component plugs into the motherboard"],[82,"copper traces carry signals between chips"],
-  [112,"RAM is volatile: it forgets everything at power-off"],[138,"programs are loaded here from secondary storage"],[160,"every instruction is fetched from RAM"],
-  [190,"address bus: one-way, CPU → memory"],[210,"data bus: two-way, data and instructions"],[232,"control bus: read, write and clock signals"],
-  [268,"single-core, multi-core, or helped by a co-processor"],[298,"3 GHz = 3 billion clock ticks every second"],
-  [338,"L1 cache answers in about one nanosecond"],[368,"cache keeps recently used data next to the cores"],
-  [408,"every instruction is decoded here"],[440,"control signals tell each part what to do next"],
-  [478,"add · subtract · compare · AND · OR · NOT"],[510,"results are written to the accumulator"],
-  [548,"MAR → address bus. MDR ↔ data bus."],[578,"the MDR holds the data fetched from memory"],
-  [622,"PC: the address of the next instruction"],[652,"IR: the instruction being decoded"],[682,"AC: the result of the last calculation"],[730,"nothing is deeper than this"],
-];
-const PX = 14, SURF = 760, WORLD_H = SURF + 760*PX + 300;
-const Y = p => SURF + p*PX;
-const START_Y = SURF - 120;
-const vY = pts => pts === 0 ? START_Y : Y(pts);
-const UM = pts => Math.round(pts*10).toLocaleString() + " µm";
-const UMz = pts => Math.round(pts*10).toLocaleString() + ' <span style="text-transform:none">µm</span>';
 
 /* ================= helpers ================= */
 const $ = s => document.querySelector(s);
 const world = $("#world"), vp = $("#vp"), ui = $("#ui");
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc = escH;
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep = ms => new Promise(r => setTimeout(r, RM ? Math.min(ms,150) : ms));
 const easeInOut = k => k<.5 ? 4*k*k*k : 1-Math.pow(-2*k+2,3)/2;
-const easeSink = k => k<.25 ? 8*k*k : 1 - Math.pow(1-k,2.4)*(1/Math.pow(.75,2.4))*.5; // quick drop, long glide
+const easeSink = k => k<.25 ? 8*k*k : 1 - Math.pow(1-k,2.4)*(1/Math.pow(.75,2.4))*.5;
 function tween(dur, fn, ease=easeInOut){ if (RM) dur = Math.min(dur,200);
   return new Promise(res=>{ const t0=performance.now(); const step=now=>{ const k=Math.min(1,(now-t0)/dur); fn(ease(k)); if(k<1) requestAnimationFrame(step); else res(); }; requestAnimationFrame(step); }); }
-function srand(seed){ let s=seed; return ()=>{ s=(s*16807)%2147483647; return s/2147483647; }; }
-const f1 = n => Math.round(n*10)/10;
+const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
 
 /* ================= answer matching ================= */
-const normSp = s => String(s).toLowerCase().replace(/²/g,"2").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ")
+const normSp = s => String(s).toLowerCase().replace(/²/g,"2").replace(/³/g,"3").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ")
   .replace(/[^a-z0-9]+/g," ").trim().replace(/^(a|an|the) /,"");
 const norm = s => normSp(s).replace(/ /g,"");
 const STOP = new Set(["and","or","not","to","in","of","a","an","the","it","is","on","at"]);
@@ -330,7 +360,7 @@ function lev(a,b){ if(Math.abs(a.length-b.length)>2) return 9; const d=Array.fro
   for(let j=1;j<=b.length;j++) d[0][j]=j;
   for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
   return d[a.length][b.length]; }
-for (const p of PROMPTS){
+for (const key of SUBJECT_ORDER) for (const p of SUBJECTS[key].prompts){
   const total = p.ans.reduce((s,a)=>s+a[1],0);
   p.list = p.ans.map(([label,w,...al]) => { const all=[label,...al];
     return {key:norm(label)||"x", label, prior:w/total, gem:label===p.gem, aliases:[...new Set(all.map(norm))], spaced:[...new Set(all.map(normSp))]}; });
@@ -356,7 +386,7 @@ function match(p, raw){
   return hit || {kind:"miss"};
 }
 
-/* ================= class stats (shared db) ================= */
+/* ================= class stats (only where the page is hosted with a shared store) ================= */
 let db=null, me=null, canWrite=false, live={}, liveTotal={}, players=0, myAns={}, statusState="loading", writeChain=Promise.resolve();
 const liveCount = (pid, k) => { const m = live[pid]; return m && Object.prototype.hasOwnProperty.call(m, k) ? m[k] : 0; };
 function share(p, a){ const lt=liveTotal[p.id]||0, lc=liveCount(p.id, a.key); return (a.prior*PRIOR + lc)/(PRIOR + lt); }
@@ -372,9 +402,8 @@ function recount(docs){
 }
 function statusHTML(){
   if (statusState==="live") return `<span class="status live"><i></i>Class stats live · ${players} other player${players===1?"":"s"}${canWrite?"":" · your answers aren't being added"}</span>`;
-  if (statusState==="loading") return `<span class="status"><i></i>Connecting to class stats…</span>`;
-  if (statusState==="slow") return `<span class="status"><i></i>Class stats can't be reached yet. Using built-in rarity estimates.</span>`;
-  return `<span class="status"><i></i>Playing offline. Rarity comes from built-in estimates.</span>`;
+  if (statusState==="loading") return `<span class="status"><i></i>Checking for class stats…</span>`;
+  return `<span class="status"><i></i>Rarity comes from built-in estimates of how often each answer is given.</span>`;
 }
 function paintStatus(){ document.querySelectorAll("[data-status]").forEach(el=>el.innerHTML=statusHTML()); }
 (async()=>{
@@ -382,12 +411,10 @@ function paintStatus(){ document.querySelectorAll("[data-status]").forEach(el=>e
     if (!window.claude || !window.claude.use){ statusState="offline"; paintStatus(); return; }
     const [d,u] = await Promise.all([claude.use("db"), claude.use("user")]);
     if (!d || !u){ statusState="offline"; paintStatus(); return; }
-    me = await u.id();
-    if (!me){ statusState="offline"; paintStatus(); return; }
-    db = d;
-    let w = null; try { w = await u.can("data.write"); } catch(e){}
+    me = await u.id(); if (!me){ statusState="offline"; paintStatus(); return; }
+    db = d; let w = null; try { w = await u.can("data.write"); } catch(e){}
     canWrite = w !== false;
-    const t = setTimeout(()=>{ if(statusState==="loading"){ statusState="slow"; paintStatus(); } }, 10000);
+    const t = setTimeout(()=>{ if(statusState==="loading"){ statusState="offline"; paintStatus(); } }, 10000);
     db.collection("subs").limit(1000).onSnapshot(snap=>{
       recount(snap.docs.map(x=>[x.id, x.data()]));
       if (!snap.metadata.fromCache){ clearTimeout(t); statusState="live"; }
@@ -399,9 +426,7 @@ function record(pid, key){
   if (!db || !me || !canWrite || myAns[pid]) return;
   myAns[pid] = key;
   const body = {a:{...myAns}, t:Date.now()};
-  writeChain = writeChain.then(()=>db.collection("subs").doc(me).set(body)).catch(e=>{
-    if (e && e.code==="invalid_argument"){ canWrite=false; paintStatus(); }
-  });
+  writeChain = writeChain.then(()=>db.collection("subs").doc(me).set(body)).catch(e=>{ if (e && e.code==="invalid_argument"){ canWrite=false; paintStatus(); } });
 }
 
 /* ================= daily set ================= */
@@ -411,182 +436,169 @@ const diveNo = Math.max(1, Math.floor((Date.UTC(now.getFullYear(),now.getMonth()
 function rng(seed){ let h=2166136261; for (const c of seed){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } h=h||1;
   return ()=>{ h^=h<<13; h^=h>>>17; h^=h<<5; return (h>>>0)/4294967296; }; }
 function pick(r, arr, n){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a.slice(0,n); }
-const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
 
-/* ================= building the world ================= */
-function wallSVG(i, H, side){
-  const r = srand(97 + i*13 + (side==="r"?5:0)); const hue = BANDS[i].hue; let s="";
-  const rep = (step, fn) => { for (let y=20; y<H-20; y+=step) fn(y); };
-  switch(i){
-    case 0: s+=`<rect width="120" height="${H}" fill="#27323a"/><rect x="${side==="l"?104:12}" width="4" height="${H}" fill="#3c4952"/>`;
-      rep(170, y=>{ for(let k=0;k<7;k++) s+=`<rect x="18" y="${y+k*14}" width="76" height="6" rx="3" fill="#10161a"/>`; s+=`<circle cx="60" cy="${y+128}" r="5" fill="#5a6872"/><path d="M56 ${y+128}h8" stroke="#2a343b" stroke-width="2"/>`; }); break;
-    case 1: for(let k=0;k<6;k++){ let x=8+k*19, y=0, d=`M${x} 0`; while(y<H){ y+=50+r()*90; d+=` V${f1(y)}`; if(r()<.55){ const nx=Math.max(6,Math.min(114,x+(r()<.5?-16:16))); d+=` L${nx} ${f1(y+16)}`; x=nx; y+=16; } }
-        s+=`<path d="${d}" fill="none" stroke="hsl(${hue} 60% 32%)" stroke-width="2"/>`; }
-      rep(240, y=>{ s+=`<circle cx="${30+r()*60}" cy="${y+60}" r="13" fill="#1d2b31" stroke="#9fc2cc" stroke-width="2"/><rect x="${20+r()*50}" y="${y+130}" width="44" height="34" rx="3" fill="#0d1418" stroke="hsl(${hue} 50% 40%)"/>`;
-        s+=`<circle cx="${10+r()*100}" cy="${y+200}" r="3.5" fill="#c9a640"/>`; }); break;
-    case 2: s+=`<rect x="22" y="0" width="62" height="${H}" fill="hsl(${hue} 45% 17%)" stroke="hsl(${hue} 55% 38%)"/>`;
-      rep(74, y=>{ s+=`<rect x="30" y="${y}" width="46" height="54" rx="2" fill="#090e11"/>`; });
-      for(let y=4;y<H;y+=9) s+=`<rect x="86" y="${y}" width="11" height="5" fill="#c9a640"/>`; break;
-    case 3: { const cols=["#f5d042","#5ad1ff","#ff7ab8"]; for(let k=0;k<6;k++){ const x=12+k*18, c=cols[Math.floor(k/2)];
-        s+=`<line x1="${x}" x2="${x}" y1="0" y2="${H}" stroke="${c}" stroke-opacity=".2" stroke-width="2.5"/><line x1="${x}" x2="${x}" y1="0" y2="${H}" stroke="${c}" stroke-width="2.5" class="flow ${k===3?"rev":""} ${k>=4?"slow":""}" style="animation-delay:${-k*.25}s"/>`; } } break;
-    case 4: rep(130, y=>{ for(let c=0;c<2;c++) s+=`<rect x="${10+c*54}" y="${y}" width="46" height="46" rx="4" fill="hsl(${hue} 40% 15%)" stroke="hsl(${hue} 65% 52%)"/><rect x="${18+c*54}" y="${y+8}" width="30" height="30" fill="none" stroke="hsl(${hue} 65% 52% / .4)"/>`; });
-      for(let y=0;y<H;y+=40) s+=`<path d="M0 ${y}h120" stroke="hsl(${hue} 50% 40% / .18)"/>`; break;
-    case 5: for(let y=8;y<H-8;y+=12) for(let x=8;x<114;x+=12){ const on=r()<.2; s+=`<rect x="${x}" y="${y}" width="9" height="9" rx="1.5" fill="${on?`hsl(${hue} 85% 64%)`:`hsl(${hue} 30% 17%)`}" ${on&&r()<.45?`class="blink" style="animation-delay:${f1(r()*1.7)}s"`:""}/>`; } break;
-    case 6: rep(190, y=>{ s+=`<rect x="14" y="${y}" width="64" height="40" rx="5" fill="hsl(${hue} 40% 15%)" stroke="hsl(${hue} 75% 62%)" stroke-width="1.5"/><path d="M78 ${y+20} C98 ${y+20} 96 ${y+70} 112 ${y+80}M46 ${y+40} V${y+110} H112" fill="none" stroke="hsl(${hue} 75% 62%)" stroke-width="1.6" class="flow slow"/>`; });
-      { let d=`M104 0`; for(let y=0;y<H;y+=24) d+=` V${y+12} H92 V${y+24} H104`; s+=`<path d="${d}" fill="none" stroke="#5ad1ff" stroke-width="1.6" opacity=".8"/>`; } break;
-    case 7: rep(150, (y)=>{ const k=Math.floor(y/150)%2; const x=22;
-        if(k===0) s+=`<path d="M${x} ${y} h26 a24 24 0 0 1 0 48 h-26 z" fill="hsl(${hue} 50% 16%)" stroke="hsl(${hue} 85% 62%)" stroke-width="2"/>`;
-        else s+=`<path d="M${x} ${y} q34 0 52 24 q-18 24 -52 24 q14 -24 0 -48 z" fill="hsl(${hue} 50% 16%)" stroke="hsl(${hue} 85% 62%)" stroke-width="2"/>`;
-        s+=`<path d="M0 ${y+12}h${x+6}M0 ${y+36}h${x+6}M${x+50} ${y+24}h${70-x}" stroke="hsl(${hue} 85% 62% / .6)" stroke-width="1.6"/>`; }); break;
-    case 8: rep(96, y=>{ s+=`<rect x="10" y="${y}" width="98" height="44" rx="5" fill="hsl(${hue} 45% 13%)" stroke="hsl(${hue} 85% 58%)" stroke-width="1.5"/>`;
-        for(let b=0;b<8;b++) s+=`<rect x="${18+b*11}" y="${y+16}" width="8" height="12" rx="1" fill="hsl(${hue} 90% ${r()<.5?65:22}%)" ${r()<.3?`class="blink" style="animation-delay:${f1(r()*1.7)}s"`:""}/>`; }); break;
-    case 9: rep(120, y=>{ s+=`<rect x="12" y="${y}" width="96" height="70" rx="7" fill="#1a060b" stroke="hsl(${hue} 90% 60%)" stroke-width="2"/><rect x="22" y="${y+44}" width="76" height="10" rx="2" fill="hsl(${hue} 90% 60% / .5)" class="blink" style="animation-delay:${f1(r()*1.7)}s"/>`; }); break;
-  }
-  return `<svg class="wall ${side}" viewBox="0 0 120 ${H}" preserveAspectRatio="${side==="l"?"xMinYMin":"xMaxYMin"} slice" aria-hidden="true">${s}</svg>`;
-}
+/* ================= world geometry ================= */
+const PX = 14, LEAD = 760, TAIL = 420, L = LEAD + 760*PX + TAIL;
+let M = null, AX = "down", DIR = 1;
+const isV = () => AX !== "right";
+const pos = p => AX==="up" ? L - LEAD - p*PX : LEAD + p*PX;
+const avPos = p => p===0 ? pos(0) - DIR*(isV()?130:150) : pos(p);
+const FR = {av:{down:.42, up:.6, right:.28}, sink:{down:.46, up:.54, right:.5}, title:{down:.7, up:.45, right:.3}, land:{down:.8, up:.8, right:.5}};
+const along = c => isV() ? `top:${c}px` : `left:${c}px`;
+function span(a,b){ const s=Math.min(a,b), n=Math.abs(b-a); return isV() ? `top:${s}px;height:${n}px` : `left:${s}px;width:${n}px`; }
+const bandFor = pts => { let i=0; M.bands.forEach((b,k)=>{ if(pts>=b.from) i=k; }); return i; };
+
 function buildWorld(){
-  world.style.height = WORLD_H + "px";
+  AX = M.axis; DIR = AX==="up" ? -1 : 1;
+  world.className = "ax-"+AX;
+  world.style.cssText = isV() ? `height:${L}px` : `width:${L}px`;
   let h = "";
-  // the open internet
-  const r = srand(3); let net = "";
-  const nodes = Array.from({length:22},()=>[f1(6+r()*88), f1(40+r()*(SURF-140))]);
-  nodes.forEach((a,i)=>{ const b=nodes[(i*7+3)%nodes.length], c=nodes[(i+1)%nodes.length];
-    net += `<line x1="${a[0]}%" y1="${a[1]}" x2="${b[0]}%" y2="${b[1]}" stroke="#2f6aa8" stroke-opacity=".35"/><line x1="${a[0]}%" y1="${a[1]}" x2="${c[0]}%" y2="${c[1]}" stroke="#2f6aa8" stroke-opacity=".2"/>`; });
-  nodes.forEach(([x,y],i)=> net += `<circle cx="${x}%" cy="${y}" r="${i%4?3:5}" fill="#6cb6ff" ${i%3?"":'class="blink"'} style="animation-delay:${i*.2}s"/>`);
-  h += `<div class="band" style="top:0;height:${SURF}px;background:linear-gradient(#0b1d38,#081426 70%,#0c1a2a)"><svg width="100%" height="${SURF}" aria-hidden="true">${net}</svg>
-    <div class="zone" style="top:${SURF-560}px;color:#6cb6ff">Start · 0 <span style="text-transform:none">µm</span><b style="color:#e3edf2">The open internet</b></div></div>`;
-  BANDS.forEach((b,i)=>{
-    const top = Y(b.from), hgt = (i===BANDS.length-1 ? WORLD_H - 300 : Y(b.to)) - top;
-    h += `<div class="band" style="top:${top}px;height:${hgt}px;background:linear-gradient(${b.bg[0]},${b.bg[1]})">
-      ${wallSVG(i,hgt,"l")}${wallSVG(i,hgt,"r")}
-      <div class="boundary" style="top:0;border-color:hsl(${b.hue} 70% 55% / .45)"></div>
-      <div class="zone" style="top:${i===0?190:46}px;color:hsl(${b.hue} 85% 66%)">${UMz(b.from)}<b style="color:#e3edf2">${esc(b.zone)}</b></div>
-      ${i===4?`<div class="pins" style="top:4px"></div>`:""}
-      ${i===9?`<div class="coreglow" style="top:${(700-600)*PX}px"></div>`:""}
-    </div>`;
+  const startSpan = AX==="up" ? span(L-LEAD, L) : span(0, LEAD);
+  h += `<div class="band" style="${startSpan};background:${M.start.bg}">${M.start.deco ? M.start.deco(LEAD) : ""}</div>`;
+  M.bands.forEach((b,i)=>{
+    const a = pos(b.from), e = pos(b.to), len = Math.abs(e-a);
+    const dirn = AX==="down" ? "180deg" : AX==="up" ? "0deg" : "90deg";
+    h += `<div class="band" style="${span(a,e)};background:linear-gradient(${dirn},${b.bg[0]},${b.bg[1]})">${M.deco(i,len)}<div class="boundary" style="border-color:hsl(${b.hue} 70% 55% / .45)"></div></div>`;
   });
-  h += `<div class="usb" style="top:${Y(0)-8}px"></div>`;
-  h += `<div class="floor" style="top:${WORLD_H-300}px"></div>`;
-  FACTS.forEach(([p,t])=> h += `<div class="fact" style="top:${Y(p)}px">${esc(t)}</div>`);
-  // depth ruler
+  const tailSpan = AX==="up" ? span(0, pos(760)) : span(pos(760), L);
+  h += `<div class="band" style="${tailSpan};background:${M.endBg||"#020304"}"></div>`;
+  // zone labels
+  const startZone = AX==="down" ? `top:${LEAD-560}px` : AX==="up" ? `top:${L-LEAD+300}px` : `left:40px;top:22%`;
+  h += `<div class="zone ${isV()?"":"h"}" style="${startZone};color:${M.start.color||"#6cb6ff"}">${M.start.label}<b>${esc(M.start.zone)}</b></div>`;
+  M.bands.forEach((b,i)=>{
+    const a = pos(b.from);
+    const st = AX==="down" ? `top:${a+(i===0?(M.zone0||46):46)}px` : AX==="up" ? `top:${a-170}px` : `left:${a+30}px;top:22%`;
+    h += `<div class="zone ${isV()?"":"h"}" style="${st};color:hsl(${b.hue} 85% 68%)">${M.meter.zone(b.from)}<b>${esc(b.zone)}</b></div>`;
+  });
+  M.facts.forEach(([p,t],k)=> h += `<div class="fact ${isV()?"":"h"}" style="${along(pos(p))}${isV()?"":`;top:${k%2?46:34}%`}">${esc(t)}</div>`);
+  // ruler
   let ru = "";
-  for (let p=0; p<=760; p+=10){ const y=Y(p), big=p%50===0;
-    ru += `<line x1="${big?36:46}" x2="58" y1="${y}" y2="${y}" stroke="rgb(210 228 236 / ${big?.55:.25})"/>`;
-    if (big && p>0) ru += `<text x="33" y="${y+3}" text-anchor="end">${(p*10).toLocaleString()}</text>`; }
-  h += `<svg class="ruler" width="58" height="${WORLD_H}" aria-hidden="true">${ru}</svg>`;
+  for (let p=0; p<=760; p+=10){ const c = pos(p), big = p%50===0;
+    if (isV()){ ru += `<line x1="${big?36:46}" x2="58" y1="${c}" y2="${c}" stroke="rgb(220 232 238 / ${big?.6:.28})"/>`; if (big && p>0) ru += `<text x="33" y="${c+3}" text-anchor="end">${esc(M.meter.tick(p))}</text>`; }
+    else { ru += `<line y1="${big?12:22}" y2="34" x1="${c}" x2="${c}" stroke="rgb(220 232 238 / ${big?.6:.28})"/>`; if (big && p>0) ru += `<text x="${c+4}" y="10">${esc(M.meter.tick(p))}</text>`; }
+  }
+  h += isV() ? `<svg class="ruler" width="58" height="${L}" aria-hidden="true">${ru}</svg>` : `<svg class="ruler" width="${L}" height="34" aria-hidden="true">${ru}</svg>`;
+  if (M.extras) h += M.extras({pos, L, LEAD, PX});
   h += `<div id="lines"></div><div id="you"><span>YOU</span></div><div id="virus"></div>`;
   world.innerHTML = h;
-}
-function virusGlyph(level, hue){
-  const n=8+level, rr=12+level*.6, len=8+level*.45; let s="";
-  for(let i=0;i<n;i++){ const a=i/n*Math.PI*2, c=Math.cos(a), si=Math.sin(a);
-    s+=`<line x1="${f1(c*rr)}" y1="${f1(si*rr)}" x2="${f1(c*(rr+len))}" y2="${f1(si*(rr+len))}" stroke="hsl(${hue} 85% 64%)" stroke-width="2.4" stroke-linecap="round"/><circle cx="${f1(c*(rr+len))}" cy="${f1(si*(rr+len))}" r="2.8" fill="hsl(${hue} 95% 72%)"/>`; }
-  s+=`<circle r="${rr}" fill="hsl(${hue} 55% 13%)" stroke="hsl(${hue} 90% 64%)" stroke-width="2.4"/>`;
-  const k=4+Math.floor(level/2); for(let i=0;i<k;i++){ const a=i/k*Math.PI*2+level; s+=`<circle cx="${f1(Math.cos(a)*rr*.5)}" cy="${f1(Math.sin(a)*rr*.5)}" r="2.6" fill="hsl(${hue} 95% 72%)"/>`; }
-  return `<svg width="74" height="74" viewBox="0 0 74 74" aria-hidden="true"><g class="bob"><g transform="translate(37 37)"><g class="vspin">${s}</g></g></g></svg>`;
+  document.title = M.gemTitle;
 }
 
 /* ================= camera + actors ================= */
-let cam = 0, focusY = START_Y, focusFrac = .6, curBand = -1;
-const vh = () => vp.clientHeight;
-function setCam(v){ cam = Math.max(0, Math.min(WORLD_H - vh(), v)); world.style.transform = `translate3d(0,${-cam}px,0)`; }
-function look(y, frac){ focusY = y; if (frac!=null) focusFrac = frac; setCam(y - vh()*focusFrac); }
-addEventListener("resize", () => setCam(focusY - vh()*focusFrac));
-function setVirus(y){ const v=$("#virus"), you=$("#you"); v.style.top = y+"px"; you.style.top = y+"px"; }
+let cam = 0, focusC = 0, focusFrac = .5, curBand = -1, avC = 0;
+const vsz = () => isV() ? vp.clientHeight : vp.clientWidth;
+function setCam(v){ cam = Math.max(0, Math.min(L - vsz(), v)); world.style.transform = isV() ? `translate3d(0,${-cam}px,0)` : `translate3d(${-cam}px,0,0)`; }
+function look(c, frac){ focusC = c; if (frac!=null) focusFrac = frac; setCam(c - vsz()*focusFrac); }
+addEventListener("resize", () => setCam(focusC - vsz()*focusFrac));
+function setAvatar(c){ const v=$("#virus"), you=$("#you"); avC = c;
+  if (isV()){ v.style.top=c+"px"; v.style.left=M.avX||""; you.style.top=c+"px"; } else { v.style.left=c+"px"; you.style.left=c+"px"; }
+  world.style.setProperty("--av", c+"px"); }
 function setHue(h){ document.documentElement.style.setProperty("--hue", h); }
-const bandFor = pts => { let i=0; BANDS.forEach((b,k)=>{ if(pts>=b.from) i=k; }); return i; };
 function setBand(pts, animate){
   const b = pts===0 ? 0 : bandFor(pts);
   if (b === curBand) return false;
   curBand = b; const v=$("#virus");
-  v.innerHTML = virusGlyph(b, BANDS[b].hue); setHue(BANDS[b].hue);
+  v.innerHTML = M.avatar(b, M.bands[b].hue); setHue(M.bands[b].hue);
   if (animate){ v.classList.remove("mutate"); void v.offsetWidth; v.classList.add("mutate"); }
   return true;
 }
-function toast(eyebrow, title){ const t=document.createElement("div"); t.className="toast"; t.innerHTML=`${esc(eyebrow)}<b>${esc(title)}</b>`; document.body.appendChild(t); setTimeout(()=>t.remove(), 2500); }
 
 /* ================= HUD ================= */
-function hud(depthPts, score){ $("#hDepth").textContent = UM(depthPts); $("#hScore").textContent = Math.round(score); }
+function hud(at, score){ $("#hMeterLabel").textContent = M.meter.label; $("#hMeter").textContent = M.meter.fmt(at); $("#hScore").textContent = Math.round(score); }
 function pips(){ const n = S ? S.set.length : PER_DIVE;
-  $("#pips").innerHTML = Array.from({length:n},(_,i)=>{ const r=S&&S.results[i]; return `<i class="${S&&i===S.i&&!r?"cur":""}" style="${r?`background:${TIERS[r.tier].hex};border-color:${TIERS[r.tier].hex}`:""}"></i>`; }).join(""); }
+  $("#pips").innerHTML = Array.from({length:n},(_,i)=>{ const r=S&&S.results[i]; return `<i class="${S&&i===S.i&&!r?"cur":""}" style="${r?`background:${TIER_BASE[r.tier].hex};border-color:${TIER_BASE[r.tier].hex}`:""}"></i>`; }).join(""); }
 
-/* ================= sprites for the reveal ================= */
-function sprite(rows, colors, px=7){ let s=""; rows.forEach((row,y)=>[...row].forEach((ch,x)=>{ if(ch===".") return; s+=`<rect x="${x*px}" y="${y*px}" width="${px}" height="${px}" fill="${colors[ch]}"/>`; }));
+/* ================= reveal art ================= */
+function pixel(rows, colors, px=7){ let s=""; rows.forEach((row,y)=>[...row].forEach((ch,x)=>{ if(ch===".") return; s+=`<rect x="${x*px}" y="${y*px}" width="${px}" height="${px}" fill="${colors[ch]}"/>`; }));
   const w=rows[0].length*px, h=rows.length*px; return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges">${s}</svg>`; }
-function entity(t){
-  const c = TIERS[t].hex;
-  if (t==="gem") return sprite(["..#.#.#.#..","..#.#.#.#..","###########","#.........#","#....o....#","#...oo....#","#....o....#","#....o....#","#...ooo...#","#.........#","###########","..#.#.#.#..","..#.#.#.#.."],{"#":c,"o":"#fff6ff"},7);
-  if (t==="rootkit") return sprite(["..#####..",".#######.","#########","##..#..##","##..#..##","#########",".###.###.","..#####..","..#.#.#.."],{"#":c},9);
-  if (t==="trojan") return sprite(["....##........","...####.......","..##.##.......","..#..##.......",".....###......",".....#########",".....#########",".....#########",".....#.#...#.#",".....#.#...#.#","....##########",".....o..o..o.."],{"#":c,"o":"#7a4a1c"},7);
-  if (t==="adware") return `<svg width="190" height="100" viewBox="0 0 190 100">${[[0,20,"WIN!!"],[62,0,"CLICK"],[118,30,"FREE"]].map(([x,y,w],i)=>`<g class="drift" style="animation-delay:${-i*1.4}s;animation-duration:${2+i*.6}s"><rect x="${x}" y="${y}" width="70" height="52" rx="4" fill="#191505" stroke="${c}" stroke-width="2"/><rect x="${x}" y="${y}" width="70" height="12" fill="${c}"/><text x="${x+62}" y="${y+10}" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="700" fill="#191505" text-anchor="middle">×</text><text x="${x+35}" y="${y+38}" font-family="Chakra Petch,sans-serif" font-size="14" font-weight="700" fill="${c}" text-anchor="middle">${w}</text></g>`).join("")}</svg>`;
-  if (t==="spam") return `<svg width="200" height="96" viewBox="0 0 200 96">${[[10,30],[52,6],[92,40],[134,10],[160,52],[70,62]].map(([x,y],i)=>`<g class="drift" style="animation-delay:${-i*1.1}s;animation-duration:${3+i*.5}s"><rect x="${x}" y="${y}" width="34" height="24" rx="2" fill="#121a1f" stroke="${c}" stroke-width="2"/><path d="M${x} ${y} l17 13 l17 -13" fill="none" stroke="${c}" stroke-width="2"/></g>`).join("")}</svg>`;
-  return sprite(["#########","#.......#","#.x...x.#","#..x.x..#","#...x...#","#..x.x..#",".#x...x#.","..#...#..","...###..."],{"#":c,"x":"#ff5470"},9);
+function defaultEntity(t){
+  const c = TIER_BASE[t].hex;
+  if (t==="blocked") return pixel(["#########","#.......#","#.x...x.#","#..x.x..#","#...x...#","#..x.x..#",".#x...x#.","..#...#..","...###..."],{"#":c,"x":"#ff5470"},9);
+  const n = {gem:5, rootkit:4, trojan:3, adware:2, spam:1}[t];
+  const star = (cx,cy,r,f) => { let d=""; for(let k=0;k<10;k++){ const a=-Math.PI/2+k*Math.PI/5, rr=k%2?r*.45:r; d+=(k?"L":"M")+f1(cx+Math.cos(a)*rr)+" "+f1(cy+Math.sin(a)*rr); } return `<path d="${d}Z" fill="${f?c:"none"}" stroke="${c}" stroke-width="2"/>`; };
+  let s=""; for (let k=0;k<5;k++) s += star(22+k*40, 30, 17, k<n);
+  return `<svg width="206" height="64" viewBox="0 0 206 64">${s}</svg>`;
 }
 
 /* ================= game flow ================= */
 let S = null, raf = null, flowId = 0;
-function clearUI(){ ui.innerHTML = ""; $("#lines").innerHTML = ""; const tg=$("#tag"); if (tg) tg.remove(); stopTimer(); }
+function clearUI(){ ui.innerHTML = ""; const ln=$("#lines"); if (ln) ln.innerHTML = ""; const tg=$("#tag"); if (tg) tg.remove(); stopTimer(); }
 
-/* ---------- syllabus picker ---------- */
-const TOPIC_NAME = {};
-CATALOG.forEach(th=>th.units.forEach(u=>u.topics.forEach(([c,n])=>{ TOPIC_NAME[c]=n; })));
+/* ---------- subjects + syllabus picker ---------- */
+function setMode(key){
+  if (!SUBJECTS[key]) key = SUBJECT_ORDER[0];
+  M = SUBJECTS[key]; store.set("oiac-mode", key);
+  if (!M.topicName){ const o={}; M.catalog.forEach(th=>th.units.forEach(u=>u.topics.forEach(([c,n])=>{ o[c]=n; }))); M.topicName=o; }
+  buildWorld(); curBand = -1;
+}
 const topicOf = p => p.spec.split(".").slice(0,2).join(".");
-let pickState = {level:"HL", sel:["A1.1"]};
-try { const saved = store.get("oiac-pick"); if (saved && Array.isArray(saved.sel) && (saved.level==="SL"||saved.level==="HL")) pickState = saved; } catch(e){}
-const savePick = () => store.set("oiac-pick", pickState);
+function getPick(){
+  let st = store.get("oiac-pick-"+M.key) || (M.key==="cs" ? store.get("oiac-pick") : null);
+  if (!st || !Array.isArray(st.sel) || (st.level!=="SL" && st.level!=="HL")){
+    const first = M.catalog.flatMap(t=>t.units).flatMap(u=>u.topics).map(t=>t[0]).find(c=>M.prompts.some(p=>topicOf(p)===c));
+    st = {level:"HL", sel:first?[first]:[]};
+  }
+  return st;
+}
+let pickState = null;
+const savePick = () => store.set("oiac-pick-"+M.key, pickState);
 const inLevel = p => pickState.level==="HL" || !p.hl;
-const countFor = code => PROMPTS.filter(p=>topicOf(p)===code && inLevel(p)).length;
-function pool(){ const sel=new Set(pickState.sel); return PROMPTS.filter(p=>sel.has(topicOf(p)) && inLevel(p)); }
+const countFor = code => M.prompts.filter(p=>topicOf(p)===code && inLevel(p)).length;
+const anyFor = code => M.prompts.some(p=>topicOf(p)===code);
+function pool(){ const sel=new Set(pickState.sel); return M.prompts.filter(p=>sel.has(topicOf(p)) && inLevel(p)); }
 function activeTopics(){ return pickState.sel.filter(c=>countFor(c)>0).sort(); }
-const scopeKey = () => pickState.level+":"+activeTopics().join(",");
+const scopeKey = () => M.key+":"+pickState.level+":"+activeTopics().join(",");
 function scopeLabel(){ const t=activeTopics(); return t.length<=3 ? t.join(" + ") : `${t.length} topics`; }
 
 function titleScreen(){
-  flowId++; S = null; clearUI(); curBand=-1; setBand(0,false); setVirus(START_Y); look(START_Y, .7); hud(0,0); pips();
-  $("#hPrompt").textContent = "Ready to infect";
+  flowId++; S = null; clearUI(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.title[AX]); hud(0,0); pips();
+  pickState = getPick();
+  $("#hPrompt").textContent = "Choose a subject";
   ui.innerHTML = `<div class="overlay" id="ov"><section class="sheet" aria-labelledby="tt">
-    <div><div class="eyebrow">IB Computer Science · Revision dive #${diveNo}</div><h1 id="tt">One in a <em>Computer</em></h1></div>
-    <p class="lede">You're a virus on the open internet. Each prompt has many correct answers. <b>Obvious answers barely sink. Valid answers other players didn't think of plunge you deeper</b>, through the case, the motherboard, RAM and the buses, into the CPU's registers.</p>
+    <div><div class="eyebrow">IB revision dive #${diveNo}</div><h1 id="tt">One in a <em>${esc(M.gemWord)}</em></h1></div>
+    <div class="subjects" role="group" aria-label="Subject">${SUBJECT_ORDER.map(k=>{ const s=SUBJECTS[k]; return `<button class="subj" data-subj="${k}" aria-pressed="${k===M.key}" style="--sh:${s.bands[2].hue}"><span class="ic">${s.avatar(3, s.bands[2].hue)}</span><span><b>${esc(s.name)}</b><small>${esc(s.theme)}</small></span></button>`; }).join("")}</div>
+    <p class="lede">${M.blurb}</p>
     <div class="picker" id="picker"></div>
     <details class="how"><summary>How scoring works</summary>
-      <div class="ladder">${TIER_ORDER.map(t=>`<div style="--c:${TIERS[t].hex}"><b>${TIERS[t].name}</b><span class="n">+${TIERS[t].pts}</span><span>${TIERS[t].desc}</span></div>`).join("")}</div>
+      <div class="ladder">${TIER_ORDER.map(t=>`<div style="--c:${TIER_BASE[t].hex}"><b>${esc(tierName(t))}</b><span class="n">+${TIER_BASE[t].pts}</span><span>${TIER_BASE[t].desc}</span></div>`).join("")}</div>
       <p class="small">${TIME} seconds per prompt, one answer each. Rarity comes from built-in estimates of how often each answer is given, blended with live answers where class stats are available. Small typos and short phrases are accepted.</p>
     </details>
   </section></div>`;
+  document.querySelectorAll("[data-subj]").forEach(b=> b.onclick = () => { const k=b.dataset.subj; if (k===M.key) return; setMode(k); titleScreen(); const f=document.querySelector(`[data-subj="${k}"]`); if (f) f.focus({preventScroll:true}); });
   renderPicker();
 }
 
 function renderPicker(focusSel){
   const el = $("#picker"); if (!el) return;
   const sel = new Set(pickState.sel), n = pool().length, per = Math.min(PER_DIVE, n);
-  const done = n ? store.get("oiac4-day-"+dayStr+"-"+scopeKey()) : null;
+  const done = n ? store.get("oiac5-day-"+dayStr+"-"+scopeKey()) : null;
   el.innerHTML = `
     <div class="pick-top">
       <div><h2 class="pick-title">Choose what to revise</h2>
-        <p class="small" aria-live="polite">${n ? `<b>${esc(scopeLabel())}</b> · ${n} prompt${n===1?"":"s"} · each dive uses ${per}` : "Tick at least one topic below."}</p></div>
+        <p class="small" aria-live="polite">${n ? `<b>${esc(M.name)} · ${esc(scopeLabel())}</b> · ${n} prompt${n===1?"":"s"} · each dive uses ${per}` : "Tick at least one topic below."}</p></div>
       <div class="seg" role="group" aria-label="Course level">
         <button data-lv="SL" aria-pressed="${pickState.level==="SL"}">SL</button><button data-lv="HL" aria-pressed="${pickState.level==="HL"}">HL</button></div>
     </div>
     <div class="row">
-      <button class="btn" id="daily" ${n?"":"disabled"}>${done?"Replay today's dive":"Today's dive"} ▼</button>
+      <button class="btn" id="daily" ${n?"":"disabled"}>${done?"Replay today's dive":"Today's dive"} ${M.arrow}</button>
       <button class="btn ghost" id="practice" ${n?"":"disabled"}>Practice dive</button>
     </div>
-    <p class="small">${done?`Today's best on these topics: <b>${done.score}</b> pts, reached ${esc(done.layer)}. `:""}Everyone who picks the same topics and level gets the same prompts in today's dive. Practice dives are random.</p>
+    <p class="small">${done?`Today's best on these topics: <b>${done.score}</b> pts, reached ${esc(done.layer)}. `:""}Everyone who picks the same subject, topics and level gets the same prompts in today's dive. Practice dives are random.</p>
     <span data-status>${statusHTML()}</span>
     <div class="row"><button class="mini" id="pAll">Select all</button><button class="mini" id="pNone">Clear</button></div>
-    ${CATALOG.map(th=>`<div class="theme"><h3>Theme ${th.code} · ${esc(th.name)}</h3>${th.units.map(u=>{
+    ${M.catalog.map(th=>`<div class="theme"><h3>${esc(th.label || `Theme ${th.code} · ${th.name}`)}</h3>${th.units.map(u=>{
       const codes = u.topics.map(t=>t[0]).filter(c=>countFor(c)>0);
       const all = codes.length>0 && codes.every(c=>sel.has(c));
-      return `<div class="unit"><button class="unit-h" data-unit="${u.code}" aria-pressed="${all}" ${codes.length?"":"disabled"}><span>${u.code}</span>${esc(u.name)}</button>
-        ${u.topics.map(([c,nm,hl])=>{ const k=countFor(c); return `<label class="topic${k?"":" off"}"><input type="checkbox" data-topic="${c}" ${sel.has(c)&&k?"checked":""} ${k?"":"disabled"}><span class="code">${c}</span><span class="nm">${esc(nm)}${hl?' <i class="hl">HL</i>':""}</span><span class="cnt">${k?k+" prompts":"HL only"}</span></label>`; }).join("")}</div>`; }).join("")}</div>`).join("")}`;
+      return `<div class="unit"><button class="unit-h" data-unit="${esc(u.code)}" aria-pressed="${all}" ${codes.length?"":"disabled"}><span>${esc(u.code)}</span>${esc(u.name)}</button>
+        ${u.topics.map(([c,nm,hl])=>{ const k=countFor(c); return `<label class="topic${k?"":" off"}"><input type="checkbox" data-topic="${esc(c)}" ${sel.has(c)&&k?"checked":""} ${k?"":"disabled"}><span class="code">${esc(c)}</span><span class="nm">${esc(nm)}${hl?' <i class="hl">HL</i>':""}</span><span class="cnt">${k?k+" prompts":anyFor(c)?"HL only":"coming soon"}</span></label>`; }).join("")}</div>`; }).join("")}</div>`).join("")}`;
   const set = (codes, on) => { const s2=new Set(pickState.sel); codes.forEach(c=> on ? s2.add(c) : s2.delete(c)); pickState.sel=[...s2]; savePick(); };
   $("#daily").onclick = () => newGame(true);
   $("#practice").onclick = () => newGame(false);
   el.querySelectorAll("[data-lv]").forEach(b=> b.onclick = () => { pickState.level=b.dataset.lv; savePick(); renderPicker(`[data-lv="${b.dataset.lv}"]`); });
-  $("#pAll").onclick = () => { set(Object.keys(TOPIC_NAME).filter(c=>countFor(c)>0), true); renderPicker("#pAll"); };
+  $("#pAll").onclick = () => { set(Object.keys(M.topicName).filter(c=>countFor(c)>0), true); renderPicker("#pAll"); };
   $("#pNone").onclick = () => { pickState.sel=[]; savePick(); renderPicker("#pNone"); };
   el.querySelectorAll("[data-unit]").forEach(b=> b.onclick = () => {
-    const u = CATALOG.flatMap(t=>t.units).find(x=>x.code===b.dataset.unit);
+    const u = M.catalog.flatMap(t=>t.units).find(x=>x.code===b.dataset.unit);
     const codes = u.topics.map(t=>t[0]).filter(c=>countFor(c)>0);
     set(codes, b.getAttribute("aria-pressed")!=="true"); renderPicker(`[data-unit="${u.code}"]`); });
   el.querySelectorAll("[data-topic]").forEach(cb=> cb.onchange = () => { set([cb.dataset.topic], cb.checked); renderPicker(`[data-topic="${cb.dataset.topic}"]`); });
@@ -594,29 +606,29 @@ function renderPicker(focusSel){
 }
 
 function newGame(daily){
-  const P = pool(); if (!P.length){ titleScreen(); return; }
+  const Pl = pool(); if (!Pl.length){ titleScreen(); return; }
   flowId++;
-  const n = Math.min(PER_DIVE, P.length);
-  const set = daily ? pick(rng("oiac4"+dayStr+scopeKey()), P, n) : pick(rng(String(Math.random())), P, n);
+  const n = Math.min(PER_DIVE, Pl.length);
+  const set = daily ? pick(rng("oiac5"+dayStr+scopeKey()), Pl, n) : pick(rng(String(Math.random())), Pl, n);
   S = {daily, set, i:0, score:0, results:[], id:flowId, scope:scopeKey(), label:scopeLabel()};
-  clearUI(); curBand=-1; setBand(0,false); setVirus(START_Y); look(START_Y, .42); hud(0,0); pips();
+  clearUI(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.av[AX]); hud(0,0); pips();
   showPrompt();
 }
 
 async function showPrompt(){
   const id = flowId, p = S.set[S.i];
-  pips(); $("#hPrompt").textContent = `Prompt ${S.i+1} of ${S.set.length}`;
+  pips(); $("#hPrompt").textContent = `${M.name} · Prompt ${S.i+1} of ${S.set.length}`;
   ui.innerHTML = `
     <section class="card" id="card" aria-live="polite">
-      <div class="eyebrow">Prompt ${S.i+1} of ${S.set.length}<span class="spec">${p.spec}${p.hl?" · HL":""}</span><span style="color:var(--muted);letter-spacing:.1em">${esc(TOPIC_NAME[topicOf(p)]||"")}</span></div>
+      <div class="eyebrow">Prompt ${S.i+1} of ${S.set.length}<span class="spec">${esc(p.spec)}${p.hl?" · HL":""}</span><span style="color:var(--muted);letter-spacing:.1em">${esc(M.topicName[topicOf(p)]||"")}</span></div>
       <p class="q">${esc(p.q)}</p>
-      <p class="hint">▼ rarer answers sink deeper ▼</p>
+      <p class="hint">${esc(M.verbs.hint)}</p>
     </section>
-    <div class="countdown" id="cd">descending · the clock starts in <b id="cdn">${COUNTDOWN}</b></div>
+    <div class="countdown" id="cd">${esc(M.verbs.count)} · the clock starts in <b id="cdn">${COUNTDOWN}</b></div>
     <div class="bar out" id="bar"><form id="f" autocomplete="off">
       <div class="ring" id="ring"><svg width="46" height="46"><circle cx="23" cy="23" r="20" fill="rgb(6 10 13 / .9)" stroke="#22323d" stroke-width="3"/><circle id="rc" cx="23" cy="23" r="20" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="125.7" stroke-dashoffset="0" stroke-linecap="round"/></svg><b id="rn">${TIME}</b></div>
       <input id="ans" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type your answer" aria-label="Your answer" maxlength="80">
-      <button class="btn inject" type="submit">Inject</button>
+      <button class="btn inject" type="submit">${esc(M.verbs.inject)}</button>
     </form></div>`;
   for (let n=COUNTDOWN; n>0; n--){ if (id!==flowId) return; const el=$("#cdn"); if (el) el.textContent=n; await sleep(1000); }
   if (id!==flowId) return;
@@ -635,6 +647,10 @@ function startTimer(){
 function stopTimer(){ if (raf) cancelAnimationFrame(raf); raf=null; }
 const pct = s => s>=.1 ? Math.round(s*100)+"%" : s>=.01 ? (s*100).toFixed(1)+"%" : "<1%";
 
+function placeTag(tag, c, k, arc){
+  if (isV()) tag.style.top = c+"px";
+  else { tag.style.left = c+"px"; tag.style.bottom = (150 + arc*4*k*(1-k))+"px"; }
+}
 async function submit(timeout){
   if (!S || S.locked) return;
   const id = flowId, p = S.set[S.i]; const raw = $("#ans").value.trim();
@@ -645,71 +661,75 @@ async function submit(timeout){
   if (m.kind==="ok"){
     ans = m.ans; tier = tierOf(p, ans); const sh = share(p, ans);
     const lc = liveCount(p.id, ans.key), lt = liveTotal[p.id]||0;
-    msg = TIERS[tier].note + (lt ? ` ${lc} of ${lt} classmate${lt===1?"":"s"} said this.` : ans.gem ? "" : ` About ${pct(sh)} of answers.`);
+    msg = tierNote(tier) + (lt ? ` ${lc} of ${lt} classmate${lt===1?"":"s"} said this.` : ans.gem ? "" : ` About ${pct(sh)} of answers.`);
     if (m.fuzzy) msg = `Accepted as “${ans.label}”. ` + msg;
     record(p.id, ans.key);
   } else if (m.kind==="trap") msg = m.msg;
-  else if (m.kind==="empty") msg = "Out of time. The antivirus caught you, so you didn't move.";
-  else msg = "That isn't one of the accepted answers, so the firewall stopped it.";
-  const pts = TIERS[tier].pts;
+  else if (m.kind==="empty") msg = "Out of time, so you didn't move.";
+  else msg = "That isn't one of the accepted answers, so you didn't move.";
+  const pts = TIER_BASE[tier].pts;
   S.results[S.i] = {p, raw, tier, pts, msg, ans, label: ans ? ans.label : (raw || "—")};
   $("#card").classList.add("out"); $("#bar").classList.add("out");
   await sleep(350); if (id!==flowId) return;
 
-  // rank lines below the virus
-  const startY = vY(S.score), base = S.score;
-  const lines = $("#lines");
-  lines.innerHTML = LINE_TIERS.map(t=>`<div class="tline" data-t="${t}" style="--c:${TIERS[t].hex};top:${Y(base+TIERS[t].pts)}px"><span>${TIERS[t].name.toUpperCase()} · ${TIERS[t].pts}</span></div>`).join("")
-    + `<div class="tline fw" data-t="fw" style="--c:var(--t-rootkit);top:${startY+70}px"><span>FIREWALL</span></div>`;
+  const base = S.score, startC = avC;
+  const lines = $("#lines"); lines.classList.remove("quiet");
+  lines.innerHTML = LINE_TIERS.map((t,k)=>`<div class="tline ${isV()?"":"v"}" data-t="${t}" style="--c:${TIER_BASE[t].hex};${along(pos(base+TIER_BASE[t].pts))}"><span style="${isV()?"":`top:${120+k*22}px`}">${esc(tierName(t).toUpperCase())} · ${TIER_BASE[t].pts}</span></div>`).join("")
+    + `<div class="tline fw ${isV()?"":"v"}" data-t="fw" style="${along(startC + DIR*70)}"><span style="${isV()?"":"top:236px"}">${esc(M.fw)}</span></div>`;
   requestAnimationFrame(()=>lines.querySelectorAll(".tline").forEach(l=>l.classList.add("on")));
 
-  if (m.kind==="empty"){ $("#virus").classList.remove("hit"); void $("#virus").offsetWidth; $("#virus").classList.add("hit"); await sleep(600); }
+  if (m.kind==="empty"){ const v=$("#virus"); v.classList.remove("hit"); void v.offsetWidth; v.classList.add("hit"); await sleep(600); }
   else {
-    // the sinking answer
     const tag = document.createElement("div"); tag.id = "tag";
-    const bits = Array.from({length:12},(_,k)=>`<i style="--r:${70+(k%4)*18}px;--d:${2.2+(k%5)*.5}s;--dl:${-k*.37}s">${k%3?1:0}</i>`).join("");
-    tag.innerHTML = `<div class="bits">${bits}</div><span class="pill">“${esc(raw)}” ▼</span>`;
-    tag.style.top = startY + "px"; world.appendChild(tag);
+    const bits = Array.from({length:12},(_,k)=>`<i style="--r:${70+(k%4)*18}px;--d:${2.2+(k%5)*.5}s;--dl:${-k*.37}s">${esc(M.particles[k % M.particles.length])}</i>`).join("");
+    tag.innerHTML = `<div class="bits" style="--pc:${M.particleColor||"#5dffb0"}">${bits}</div><span class="pill">“${esc(raw)}” ${M.arrow}</span>`;
+    placeTag(tag, startC, 0, 0); world.appendChild(tag);
     await sleep(300); if (id!==flowId) return;
-    const endY = pts>0 ? Y(base+pts) - 24 : startY + 70 - 24;
+    const off = isV() ? DIR*24 : 0;
+    const endC = pts>0 ? pos(base+pts) - off : startC + DIR*70 - (isV()? off : 34);
+    const arc = isV() ? 0 : (M.arc ? Math.min(320, 70 + Math.abs(endC-startC)*.16) : 40);
     const lineEls = [...lines.querySelectorAll(".tline")];
     const dur = pts>0 ? 1300 + pts*30 : 700;
     await tween(dur, k=>{
-      if (id!==flowId) return; const y = startY + (endY-startY)*k; tag.style.top = y + "px"; look(y, .46);
-      lineEls.forEach(l=>{ const ly=parseFloat(l.style.top); if (y+24>=ly-2 && !l.classList.contains("hit") && (l.dataset.t!=="fw" || pts===0)) { l.classList.add("hit"); setTimeout(()=>l.classList.remove("hit"), 500); } });
+      if (id!==flowId) return;
+      const c = startC + (endC-startC)*k; placeTag(tag, c, k, arc); look(c, FR.sink[AX]);
+      const lead = c + off;
+      lineEls.forEach(l=>{ const lc = parseFloat(isV() ? l.style.top : l.style.left);
+        if ((DIR>0 ? lead>=lc-2 : lead<=lc+2) && !l.classList.contains("hit") && (l.dataset.t!=="fw" || pts===0)){ l.classList.add("hit"); setTimeout(()=>l.classList.remove("hit"), 500); } });
     }, pts>0 ? easeSink : easeInOut);
     if (id!==flowId) return;
-    if (pts===0){ tag.classList.add("denied"); }
-    else { tag.style.setProperty("--tc", TIERS[tier].hex); const ln = lineEls.find(l=>l.dataset.t===tier); if (ln) ln.classList.add("hit"); }
+    if (pts===0) tag.classList.add("denied");
+    else { tag.style.setProperty("--tc", TIER_BASE[tier].hex); const ln = lineEls.find(l=>l.dataset.t===tier); if (ln) ln.classList.add("hit"); }
     await sleep(500);
-    const ty = parseFloat(tag.style.top), f0 = focusFrac;
-    await tween(600, k=>{ if (id===flowId) look(ty, f0 + (.8-f0)*k); });
+    const tc = parseFloat(isV() ? tag.style.top : tag.style.left), f0 = focusFrac;
+    await tween(600, k=>{ if (id===flowId) look(tc, f0 + (FR.land[AX]-f0)*k); });
   }
   if (id!==flowId) return;
   showReveal();
 }
 
 function showReveal(){
-  const r = S.results[S.i], p = r.p, t = r.tier, c = TIERS[t].hex;
-  S.score += r.pts; hud(S.score - r.pts, S.score); pips();
+  $("#lines").classList.add("quiet");
+  const r = S.results[S.i], p = r.p, t = r.tier, c = TIER_BASE[t].hex;
+  const from = S.score; S.score += r.pts; hud(from, S.score); pips();
   const rows = p.list.map(a=>({a, s:share(p,a), t:tierOf(p,a)})).sort((x,y)=>(x.a.gem-y.a.gem) || (y.s-x.s));
   const max = Math.max(...rows.map(x=>x.s));
   const last = S.i === S.set.length-1;
+  const art = (M.entity && M.entity(t, c)) || defaultEntity(t);
   ui.innerHTML = `
     <section class="reveal" style="--c:${c}" aria-live="polite">
-      <div class="entity" style="--c:${c}">${entity(t)}</div>
-      <div class="rank">${t==="blocked" ? (r.raw?"Access denied":"Timed out") : TIERS[t].name}</div>
+      <div class="entity" style="--c:${c}">${art}</div>
+      <div class="rank">${t==="blocked" ? esc(r.raw ? M.blocked : "Timed out") : esc(tierName(t))}</div>
       <div class="quote">${r.raw ? `“${esc(r.ans ? r.ans.label : r.raw)}”` : "no answer"}</div>
-      <div class="gain"><b>+${r.pts} PTS</b> · ${r.pts ? `sink ${UM(r.pts)}` : "no movement"}</div>
+      <div class="gain"><b>+${r.pts} PTS</b> · ${r.pts ? esc(M.meter.gain(from, S.score)) : "no movement"}</div>
       <div class="note">${esc(r.msg)}</div>
       <button class="linkbtn" id="specBtn" aria-expanded="false">All accepted answers ▾</button>
-      <div class="spectrum" id="spec" hidden><ul>${rows.map(x=>`<li class="${r.ans && x.a.key===r.ans.key?"mine":""}" style="--c:${TIERS[x.t].hex}"><span class="lab"><i class="sw"></i><span>${esc(x.a.label)}${x.a.gem?" · <b>gem</b>":""}</span></span><span class="b"><i style="width:${x.a.gem?3:Math.max(3,x.s/max*100)}%"></i></span><span class="pc">${x.a.gem?"gem":pct(x.s)}</span></li>`).join("")}</ul></div>
+      <div class="spectrum" id="spec" hidden><ul>${rows.map(x=>`<li class="${r.ans && x.a.key===r.ans.key?"mine":""}" style="--c:${TIER_BASE[x.t].hex}"><span class="lab"><i class="sw"></i><span>${esc(x.a.label)}${x.a.gem?" · <b>gem</b>":""}</span></span><span class="b"><i style="width:${x.a.gem?3:Math.max(3,x.s/max*100)}%"></i></span><span class="pc">${x.a.gem?"gem":pct(x.s)}</span></li>`).join("")}</ul></div>
     </section>
-    <div class="dock"><button class="btn descend" id="go">${r.pts ? "Descend ▼" : (last ? "Infection report ▼" : "Next prompt ▼")}</button></div>`;
+    <div class="dock"><button class="btn descend" id="go">${r.pts ? esc(M.verbs.cta) : (last ? "Results" : "Next prompt")}</button></div>`;
   $("#specBtn").onclick = e => { const sp=$("#spec"); sp.hidden=!sp.hidden; e.currentTarget.setAttribute("aria-expanded", String(!sp.hidden)); e.currentTarget.textContent = sp.hidden ? "All accepted answers ▾" : "Hide answers ▴"; };
   $("#go").onclick = descend; $("#go").focus({preventScroll:true});
 }
-const curPts = () => S ? S.results.reduce((s,r)=>s+(r?r.pts:0),0) : 0;
 
 async function descend(){
   const id = flowId, r = S.results[S.i];
@@ -718,29 +738,28 @@ async function descend(){
   $("#lines").querySelectorAll(".tline").forEach(l=>l.classList.remove("on"));
   const from = S.score - r.pts, to = S.score;
   if (r.pts > 0){
-    const y0 = vY(from), y1 = vY(to);
-    await tween(900 + r.pts*16, k=>{ if (id!==flowId) return; const y = y0+(y1-y0)*k, pnow = from + (to-from)*k; setVirus(y); look(y, .42); hud(pnow, S.score);
-      setBand(pnow, true); });
+    const c0 = avPos(from), c1 = avPos(to);
+    await tween(900 + r.pts*16, k=>{ if (id!==flowId) return; const c = c0+(c1-c0)*k, pnow = from + (to-from)*k; setAvatar(c); look(c, FR.av[AX]); hud(pnow, S.score); setBand(pnow, true); });
     if (id!==flowId) return;
-  } else look(vY(to), .42);
+  } else look(avC, FR.av[AX]);
   $("#lines").innerHTML = "";
   S.i++;
   if (S.i >= S.set.length) report(); else showPrompt();
 }
 
 function report(){
-  const b = bandFor(S.score), where = S.score===0 ? "the open internet" : BANDS[b].name;
+  const b = bandFor(S.score), where = S.score===0 ? M.start.zone : M.bands[b].name;
   const counts = {}; S.results.forEach(r=>counts[r.tier]=(counts[r.tier]||0)+1);
-  const shareText = `One in a Computer · ${S.label} · ${S.daily?"Dive #"+diveNo:"Practice"}\n🦠 ${S.score} pts · ${UM(S.score)} · reached ${where}\n${S.results.map(r=>TIERS[r.tier].sq).join("")}`;
-  if (S.daily){ const dk = "oiac4-day-"+dayStr+"-"+S.scope; const prev = store.get(dk); if (!prev || S.score>prev.score) store.set(dk, {score:S.score, layer:where}); }
+  const shareText = `One in a ${M.gemWord} · ${M.name} ${S.label} · ${S.daily?"Dive #"+diveNo:"Practice"}\n${M.emoji} ${S.score} pts · ${M.meter.fmt(S.score)} · reached ${where}\n${S.results.map(r=>TIER_BASE[r.tier].sq).join("")}`;
+  if (S.daily){ const dk = "oiac5-day-"+dayStr+"-"+S.scope; const prev = store.get(dk); if (!prev || S.score>prev.score) store.set(dk, {score:S.score, layer:where}); }
   $("#hPrompt").textContent = "Dive complete";
   ui.innerHTML = `<div class="overlay"><section class="sheet" aria-labelledby="rt">
-    <div><div class="eyebrow">Infection report · ${esc(S.label)} · ${S.daily?"Dive #"+diveNo:"Practice"}</div><h1 id="rt">Reached <em>${esc(where)}</em></h1></div>
-    <div class="stats3"><div><b>${S.score}</b><span>Points</span></div><div><b>${UM(S.score)}</b><span>Depth</span></div><div><b>${(counts.gem||0)+(counts.rootkit||0)}</b><span>Rootkit or better</span></div></div>
-    <div class="recap">${S.results.map(r=>`<div style="--c:${TIERS[r.tier].hex}"><span class="p"><span class="spec">${r.p.spec}</span> ${esc(r.p.q)}</span><span class="t">${TIERS[r.tier].name}<small>+${r.pts}</small></span><span class="a">${esc(r.label)}</span></div>`).join("")}</div>
+    <div><div class="eyebrow">${esc(M.name)} report · ${esc(S.label)} · ${S.daily?"Dive #"+diveNo:"Practice"}</div><h1 id="rt">Reached <em>${esc(where)}</em></h1></div>
+    <div class="stats3"><div><b>${S.score}</b><span>Points</span></div><div><b>${esc(M.meter.fmt(S.score))}</b><span>${esc(M.meter.label.toLowerCase())}</span></div><div><b>${(counts.gem||0)+(counts.rootkit||0)}</b><span>${esc(tierName("rootkit"))} or better</span></div></div>
+    <div class="recap">${S.results.map(r=>`<div style="--c:${TIER_BASE[r.tier].hex}"><span class="p"><span class="spec">${esc(r.p.spec)}</span> ${esc(r.p.q)}</span><span class="t">${esc(tierName(r.tier))}<small>+${r.pts}</small></span><span class="a">${esc(r.label)}</span></div>`).join("")}</div>
     <pre class="share" id="sharetext">${esc(shareText)}</pre>
     <div class="row"><button class="btn" id="copy">Copy result</button><span class="small" id="copied" aria-live="polite"></span></div>
-    <div class="row"><button class="btn ghost" id="again">Practice dive</button><button class="btn ghost" id="surface">Back to the surface ▲</button></div>
+    <div class="row"><button class="btn ghost" id="again">Practice dive</button><button class="btn ghost" id="surface">Back to the start</button></div>
   </section></div>`;
   $("#copy").onclick = () => {
     const ok = () => $("#copied").textContent = "Copied. Paste it in your class chat.";
@@ -748,7 +767,7 @@ function report(){
     try { navigator.clipboard.writeText(shareText).then(ok, fallback); } catch(e){ fallback(); }
   };
   $("#again").onclick = () => newGame(false);
-  $("#surface").onclick = async () => { ui.innerHTML=""; const y0=focusY; await tween(1600, k=>look(y0+(START_Y-y0)*k, .42+(.7-.42)*k)); titleScreen(); };
+  $("#surface").onclick = async () => { ui.innerHTML=""; const c0=focusC, f0=focusFrac, c1=avPos(0); await tween(1600, k=>look(c0+(c1-c0)*k, f0+(FR.title[AX]-f0)*k)); titleScreen(); };
 }
 
 /* ================= menu ================= */
@@ -756,9 +775,8 @@ $("#menuBtn").onclick = () => { const m=$("#menu"); m.hidden=!m.hidden; $("#menu
 $("#mTitle").onclick = () => { $("#menu").hidden=true; titleScreen(); };
 $("#mRestart").onclick = () => { $("#menu").hidden=true; if (S) newGame(S.daily); else newGame(false); };
 
-buildWorld();
+setMode(store.get("oiac-mode") || "cs");
 titleScreen();
 </script>
-
 </body>
 </html>
