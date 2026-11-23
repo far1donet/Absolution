@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="One in a Computer: a reverse-trivia game for IB Computer Science A1.1.1 and A1.1.5. Rarer correct answers sink your virus deeper into the computer.">
+<style>body{margin:0}</style>
+</head>
+<body>
+<title>One in a Computer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one full-screen vertical world, the inside of a computer from the open internet down to the CPU's registers.
+   The camera follows the sinking answer, then the virus. HUD on top, answer bar at the bottom, reveals in the middle.
+   Single dark look; the accent hue follows the layer the virus is in. */
+:root{
+  color-scheme:dark;
+  --bg:#04070a;
+  --panel:rgba(9,15,20,.86);
+  --line:#22323d;
+  --fg:#e3edf2;
+  --muted:#8ea6b2;
+  --hue:205;
+  --accent:hsl(var(--hue) 88% 62%);
+  --accent-dim:hsl(var(--hue) 70% 45% / .28);
+  --you:#ff4f8b;
+  --t-gem:#c98bff;
+  --t-rootkit:#ff5470;
+  --t-trojan:#ff9d2e;
+  --t-adware:#f5d042;
+  --t-spam:#a9bac4;
+  --t-blocked:#5d6d77;
+  --f-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+button{font:inherit;color:inherit}
+
+/* ---------- world ---------- */
+.viewport{position:fixed;inset:0;overflow:hidden;background:var(--bg)}
+#world{position:absolute;left:0;right:0;top:0;will-change:transform}
+.band{position:absolute;left:0;right:0;overflow:hidden}
+.wall{position:absolute;top:0;height:100%;width:clamp(52px,13vw,150px)}
+.wall.l{left:0}.wall.r{right:0}
+.zone{position:absolute;left:0;right:0;text-align:center;font:600 11px/1.4 var(--f-mono);letter-spacing:.32em;text-transform:uppercase;padding-inline:70px}
+.zone b{display:block;font:700 clamp(18px,4.4vw,26px)/1.1 var(--f-display);letter-spacing:.14em;margin-top:6px}
+.fact{position:absolute;left:50%;transform:translateX(-50%);width:min(70%,420px);text-align:center;font:400 11.5px/1.4 var(--f-mono);color:rgb(200 220 230 / .5);letter-spacing:.04em}
+.boundary{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgb(255 255 255 / .14)}
+.usb{position:absolute;left:50%;transform:translateX(-50%);width:min(240px,52vw);height:64px;border-radius:6px;background:#06090b;border:3px solid #8b98a1;box-shadow:inset 0 0 0 6px #11181d}
+.usb::before{content:"";position:absolute;left:12%;right:12%;top:14px;height:16px;background:#3f79b0;border-radius:2px}
+.usb::after{content:"USB · ENTRY POINT";position:absolute;left:0;right:0;top:72px;text-align:center;font:600 10px var(--f-mono);letter-spacing:.2em;color:#9fb0ba}
+.pins{position:absolute;left:0;right:0;height:22px;background:radial-gradient(circle,#d8b24a 0 3px,transparent 3.5px) 0 0/16px 22px;opacity:.85}
+.coreglow{position:absolute;left:50%;width:120vw;max-width:1100px;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgb(255 50 90 / .28),transparent 62%)}
+.floor{position:absolute;left:0;right:0;height:300px;background:linear-gradient(#3a0610,#0a0103)}
+.floor::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:#ff4f6e;box-shadow:0 0 24px #ff4f6e}
+.ruler{position:absolute;right:0;top:0;width:58px;pointer-events:none}
+.ruler text{font:500 9.5px var(--f-mono);fill:rgb(210 228 236 / .55)}
+#you{position:absolute;right:0;height:0;width:70px;border-top:2px solid var(--you);transition:none}
+#you span{position:absolute;right:62px;top:-9px;font:700 10px var(--f-mono);letter-spacing:.12em;color:var(--you)}
+#virus{position:absolute;left:68%;width:74px;height:74px;margin:-37px 0 0 -37px;z-index:3;filter:drop-shadow(0 0 14px hsl(var(--hue) 95% 60% / .8))}
+#virus .bob{animation:bob 2.8s ease-in-out infinite;transform-origin:37px 37px}
+#virus .vspin{animation:spin 16s linear infinite;transform-origin:0 0}
+#virus.mutate .bob{animation:mutate .9s}
+#virus.hit .bob{animation:hit .5s}
+@keyframes bob{50%{transform:translateY(-6px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes mutate{0%{transform:scale(1)}35%{transform:scale(.45) rotate(-30deg)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes hit{20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.flow{stroke-dasharray:7 11;animation:flow 1.1s linear infinite}
+.flow.rev{animation-direction:reverse}
+.flow.slow{animation-duration:2.2s}
+@keyframes flow{to{stroke-dashoffset:-36}}
+.blink{animation:blink 1.7s ease-in-out infinite}
+@keyframes blink{50%{opacity:.2}}
+.drift{animation:drift 9s ease-in-out infinite}
+@keyframes drift{50%{transform:translate(14px,-10px)}}
+
+/* rank lines + sinking answer */
+.tline{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--c);opacity:0;transition:opacity .5s, filter .3s;z-index:2}
+.tline.on{opacity:.75}
+.tline.hit{opacity:1;filter:drop-shadow(0 0 8px var(--c))}
+.tline span{position:absolute;right:66px;top:-20px;font:700 10.5px var(--f-mono);letter-spacing:.14em;color:var(--c);white-space:nowrap;text-shadow:0 0 6px #000}
+.tline.fw{border-top:3px solid var(--t-rootkit)}
+#tag{position:absolute;left:46%;z-index:4;transform:translate(-50%,-50%) rotate(-3deg);pointer-events:none}
+#tag .pill{position:relative;display:inline-flex;gap:10px;align-items:center;white-space:nowrap;max-width:76vw;overflow:hidden;text-overflow:ellipsis;
+  font:700 clamp(14px,3.8vw,19px)/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--tc,#7ff3ff);
+  padding:11px 16px;border-radius:8px;background:rgb(4 8 11 / .82);border:1.5px solid color-mix(in srgb,var(--tc,#7ff3ff) 60%,transparent);
+  box-shadow:0 0 22px color-mix(in srgb,var(--tc,#7ff3ff) 35%,transparent);text-shadow:0 0 10px color-mix(in srgb,var(--tc,#7ff3ff) 70%,transparent);transition:color .4s,border-color .4s,box-shadow .4s}
+#tag.denied .pill{animation:hit .5s;--tc:#7b8b95;text-decoration:line-through}
+.bits{position:absolute;left:50%;top:50%;width:0;height:0;transform:scaleY(.42)}
+.bits i{position:absolute;left:0;top:0;font:700 12px var(--f-mono);font-style:normal;color:#5dffb0;text-shadow:0 0 6px #5dffb0;animation:orbit var(--d) linear infinite;animation-delay:var(--dl)}
+@keyframes orbit{from{transform:rotate(0deg) translateX(var(--r)) rotate(0deg)}to{transform:rotate(360deg) translateX(var(--r)) rotate(-360deg)}}
+
+/* ---------- HUD ---------- */
+.hud{position:fixed;top:0;left:0;right:0;z-index:20;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;
+  padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  background:linear-gradient(rgb(3 5 7 / .85),transparent);padding-bottom:18px;pointer-events:none}
+.hud > *{pointer-events:auto}
+.box{background:rgb(6 10 13 / .8);border:1px solid var(--line);border-radius:8px;padding:5px 10px;min-width:92px}
+.box small{display:block;font:600 9px var(--f-mono);letter-spacing:.18em;color:var(--muted)}
+.box b{display:block;font:600 17px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent)}
+.box.right{text-align:right}
+.mid{display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:4px}
+.pips{display:flex;gap:4px}
+.pips i{width:12px;height:12px;border-radius:2px;background:#1b2730;border:1px solid #2b3b46}
+.pips i.cur{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.mid small{font:600 9px var(--f-mono);letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.menu-btn{margin-top:6px;width:34px;height:28px;border-radius:6px;border:1px solid var(--line);background:rgb(6 10 13 / .8);cursor:pointer;display:grid;place-items:center}
+.menu-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.menu{position:fixed;z-index:30;top:calc(env(safe-area-inset-top,0px) + 92px);left:max(12px,env(safe-area-inset-left,0px));background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:4px;backdrop-filter:blur(6px)}
+.menu button{background:none;border:0;text-align:left;padding:8px 12px;border-radius:6px;cursor:pointer;font:600 13px var(--f-mono);letter-spacing:.06em}
+.menu button:hover,.menu button:focus-visible{background:var(--accent-dim);outline:none}
+
+/* ---------- prompt card + answer bar ---------- */
+.card{position:fixed;z-index:15;top:calc(env(safe-area-inset-top,0px) + 92px);left:50%;transform:translateX(-50%);width:min(540px,calc(100% - 32px));
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px 14px;backdrop-filter:blur(6px);
+  box-shadow:0 10px 40px rgb(0 0 0 / .5);transition:opacity .35s,transform .35s}
+.card.out{opacity:0;transform:translate(-50%,-12px);pointer-events:none}
+.card .eyebrow{font:700 10px var(--f-mono);letter-spacing:.2em;color:var(--you);text-transform:uppercase;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spec{font:600 10px var(--f-mono);letter-spacing:.08em;color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.card .q{font:600 clamp(19px,4.6vw,25px)/1.25 var(--f-display);margin:8px 0 6px;text-wrap:balance;letter-spacing:.01em}
+.card .hint{font:500 10.5px var(--f-mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:0}
+.bar{position:fixed;z-index:16;left:0;right:0;bottom:0;display:flex;gap:10px;align-items:center;justify-content:center;
+  padding-top:14px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:linear-gradient(transparent,rgb(3 5 7 / .92) 40%);transition:opacity .3s,transform .3s}
+.bar.out{opacity:0;transform:translateY(20px);pointer-events:none}
+.bar form{display:flex;gap:10px;align-items:center;width:min(560px,100%)}
+.ring{position:relative;width:46px;height:46px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:700 15px var(--f-mono);font-variant-numeric:tabular-nums}
+.ring.low b{color:var(--t-rootkit)}
+.bar input{flex:1;min-width:0;font:500 16px var(--f-mono);color:var(--fg);background:rgb(6 10 13 / .9);border:1.5px solid var(--accent);border-radius:9px;padding:12px 14px}
+.bar input:focus{outline:none;box-shadow:0 0 0 3px var(--accent-dim)}
+.btn{appearance:none;font:700 14px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:#05080a;background:var(--accent);border:0;border-radius:8px;padding:12px 18px;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(1.12)}
+.btn:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.btn.inject{background:var(--you);color:#fff}
+.btn.ghost{background:rgb(6 10 13 / .7);color:var(--fg);border:1.5px solid var(--line)}
+.btn.descend{background:rgb(4 8 11 / .85);color:var(--accent);border:2px solid var(--accent);padding:13px 26px;box-shadow:0 0 18px var(--accent-dim)}
+.countdown{position:fixed;z-index:16;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);text-align:center;font:600 11px var(--f-mono);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.countdown b{color:var(--accent)}
+
+/* ---------- reveal ---------- */
+.reveal{background:radial-gradient(ellipse 70% 55% at 50% 32%,rgb(3 5 7 / .8),transparent 75%);position:fixed;z-index:15;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 96px);bottom:96px;overflow-y:auto;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px 12px}
+.reveal > *{animation:rise .5s both}
+.reveal > *:nth-child(2){animation-delay:.08s}.reveal > *:nth-child(3){animation-delay:.16s}.reveal > *:nth-child(4){animation-delay:.24s}.reveal > *:nth-child(5){animation-delay:.32s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.entity{height:104px;display:grid;place-items:center}
+.entity svg{filter:drop-shadow(0 0 12px var(--c));animation:bob 2.6s ease-in-out infinite;overflow:visible}
+.rank{font:700 clamp(30px,8.5vw,50px)/1 var(--f-display);letter-spacing:.16em;color:var(--c);text-shadow:0 0 24px color-mix(in srgb,var(--c) 70%,transparent),0 0 2px #000;text-transform:uppercase;text-wrap:balance}
+.quote{font:500 15px var(--f-mono);color:var(--fg);margin-top:4px}
+.gain{font:600 14px var(--f-mono);letter-spacing:.06em;color:var(--fg)}
+.gain b{color:var(--c)}
+.note{font:400 12.5px/1.5 var(--f-mono);color:rgb(214 230 238 / .72);max-width:44ch}
+.linkbtn{background:none;border:0;cursor:pointer;font:600 11px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);padding:8px;margin-top:4px}
+.linkbtn:focus-visible{outline:2px solid var(--accent);border-radius:4px}
+.spectrum{width:min(480px,100%);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:left;backdrop-filter:blur(6px)}
+.spectrum ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.spectrum li{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 40px;gap:8px;align-items:center;font-size:13px;padding:2px 6px;border-radius:5px}
+.spectrum li.mine{outline:1.5px solid var(--accent);background:var(--accent-dim)}
+.spectrum .lab{display:flex;gap:7px;align-items:center;min-width:0}
+.spectrum .lab span{overflow-wrap:anywhere}
+.spectrum .sw{width:9px;height:9px;border-radius:2px;flex:none;background:var(--c)}
+.spectrum .b{height:6px;background:#1b2730;border-radius:3px;overflow:hidden}
+.spectrum .b i{display:block;height:100%;background:var(--c)}
+.spectrum .pc{font:400 11px var(--f-mono);color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.dock{position:fixed;z-index:16;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);display:flex;justify-content:center}
+.toast{position:fixed;z-index:14;left:0;right:0;top:46%;text-align:center;pointer-events:none;font:600 11px var(--f-mono);letter-spacing:.3em;color:var(--accent);text-transform:uppercase;animation:toast 2.4s both}
+.toast b{display:block;font:700 clamp(22px,6vw,32px)/1.1 var(--f-display);letter-spacing:.14em;margin-top:6px;color:var(--fg)}
+@keyframes toast{0%{opacity:0;transform:translateY(10px)}15%,75%{opacity:1;transform:none}100%{opacity:0}}
+
+/* ---------- title + report overlays ---------- */
+.overlay{position:fixed;inset:0;z-index:25;overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;
+  padding-top:calc(env(safe-area-inset-top,0px) + 24px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 24px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheet{width:min(600px,100%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px;backdrop-filter:blur(8px);box-shadow:0 20px 60px rgb(0 0 0 / .55)}
+.sheet .eyebrow{font:700 10.5px var(--f-mono);letter-spacing:.2em;color:var(--you);text-transform:uppercase}
+.sheet h1{font:700 clamp(36px,9vw,58px)/.95 var(--f-display);margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
+.sheet h1 em{font-style:normal;color:var(--accent);text-shadow:0 0 22px var(--accent-dim)}
+.lede{margin:0;color:var(--muted);font-size:15.5px;max-width:58ch}
+.lede b{color:var(--fg);font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.small{font-size:12.5px;color:var(--muted);margin:0}
+.ladder{display:flex;flex-direction:column;gap:4px}
+.ladder div{display:grid;grid-template-columns:minmax(0,170px) 44px minmax(0,1fr);gap:10px;align-items:center;font-size:13px;padding:5px 8px;border-radius:6px;background:rgb(255 255 255 / .03)}
+.ladder b{font:700 12px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.ladder .n{font:600 12px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.ladder span:last-child{color:var(--muted);font-size:12.5px}
+.status{display:inline-flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--t-blocked);flex:none}
+.status.live i{background:#3ee089;box-shadow:0 0 0 3px rgb(62 224 137 / .2)}
+.stats3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stats3 div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:rgb(255 255 255 / .02)}
+.stats3 b{display:block;font:600 20px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent)}
+.stats3 span{font:600 9.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.recap{display:flex;flex-direction:column;gap:6px}
+.recap div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:8px 10px;border-radius:8px;background:rgb(255 255 255 / .03);border-left:3px solid var(--c)}
+.recap .p{font-size:12.5px;color:var(--muted)}
+.recap .a{font:600 13.5px var(--f-mono)}
+.recap .t{grid-row:span 2;align-self:center;text-align:right;font:700 11px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.recap .t small{display:block;font:600 12px var(--f-mono);color:var(--fg);letter-spacing:0}
+.share{font:400 13px/1.5 var(--f-mono);background:rgb(0 0 0 / .35);border:1px solid var(--line);border-radius:8px;padding:10px 12px;white-space:pre-wrap;margin:0}
+
+@media (max-width:480px){
+  .box{min-width:78px;padding:4px 8px}.box b{font-size:15px}
+  .pips i{width:10px;height:10px}
+  .ladder div{grid-template-columns:minmax(0,1fr) 40px;}
+  .ladder span:last-child{grid-column:1 / -1}
+  .tline span{right:60px}
+}
+@media (prefers-reduced-motion:reduce){
+  #virus .bob,#virus .vspin,.flow,.blink,.drift,.bits i,.entity svg,.reveal > *,.toast{animation:none!important}
+}
+</style>
+
+<div class="viewport" id="vp"><div id="world"></div></div>
+
+<header class="hud" id="hud">
+  <div>
+    <div class="box"><small>DEPTH</small><b id="hDepth">0 µm</b></div>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg width="16" height="12" viewBox="0 0 16 12"><path d="M0 1h16M0 6h16M0 11h16" stroke="#cfe0e8" stroke-width="2"/></svg></button>
+  </div>
+  <div class="mid"><div class="pips" id="pips"></div><small id="hPrompt">Ready to infect</small></div>
+  <div class="box right"><small>SCORE</small><b id="hScore">0</b></div>
+</header>
+<div class="menu" id="menu" hidden>
+  <button id="mRestart">Restart this dive</button>
+  <button id="mTitle">Back to the surface</button>
+</div>
+<div id="ui"></div>
+
+<script>
+/* ================= ranks ================= */
+const TIERS = {
+  gem:     {name:"One in a Computer", pts:100, sq:"🟪", hex:"#c98bff", desc:"The hidden gem: one valid answer almost nobody thinks of", note:"The hidden gem. Almost nobody finds this one."},
+  rootkit: {name:"Rootkit",           pts:85,  sq:"🟥", hex:"#ff5470", desc:"Under 3% of answers", note:"Deep in the system. Very few players went this way."},
+  trojan:  {name:"Trojan",            pts:60,  sq:"🟧", hex:"#ff9d2e", desc:"3–8% of answers", note:"Genuinely uncommon. It slipped past the scanners."},
+  adware:  {name:"Adware",            pts:30,  sq:"🟨", hex:"#f5d042", desc:"8–18% of answers", note:"Fairly common. It got in, but people noticed."},
+  spam:    {name:"Spam",              pts:10,  sq:"⬜", hex:"#a9bac4", desc:"18% or more. The first thing everyone thinks of", note:"The answer everyone types first."},
+  blocked: {name:"Blocked",           pts:0,   sq:"⬛", hex:"#7b8b95", desc:"Not a valid answer, or out of time. You don't move", note:""},
+};
+const TIER_ORDER = ["gem","rootkit","trojan","adware","spam","blocked"];
+const LINE_TIERS = ["spam","adware","trojan","rootkit","gem"];
+
+/* ================= prompts: A1.1.1 and A1.1.5 =================
+   Each answer: [label, expected popularity weight, ...aliases]. gem = label of the hidden gem. */
+const PROMPTS = [
+ {id:"c01",spec:"A1.1.1",cat:"CPU components",q:"Name a component or register inside the CPU.",gem:"Instruction register",ans:[
+  ["ALU",30,"arithmetic logic unit","arithmetic and logic unit"],["Control unit",26,"cu"],["Registers",10,"register"],
+  ["Cache",9,"cache memory","l1","l2","l3","l1 cache","l2 cache","l3 cache"],["Program counter",7,"pc"],["Accumulator",5,"acc","ac"],
+  ["MAR",5,"memory address register"],["MDR",4,"memory data register","mbr","memory buffer register"],["Core",2,"cores","processor core"],
+  ["Internal buses",1.5,"bus","buses","internal bus"],["Clock",1.5,"system clock"],["Instruction register",.4,"ir","cir","current instruction register"]],
+  traps:[[["ram","rom","hdd","ssd","hard drive","gpu","motherboard","power supply","psu","main memory"],"That's outside the CPU, on the motherboard or in a separate device."]]},
+ {id:"c02",spec:"A1.1.1",cat:"The ALU",q:"Name something the ALU does.",gem:"Sets status flags",ans:[
+  ["Arithmetic / calculations",30,"arithmetic","calculations","calculation","calculates","maths","math","arithmetic operations","does calculations","performs calculations"],
+  ["Addition",12,"add","adding","adds","adds numbers"],["Subtraction",8,"subtract","subtracting","subtracts"],
+  ["Logic operations",12,"logic","logical operations","logical","boolean logic","boolean","and or not","logic gates"],
+  ["Comparisons",10,"compare","comparing","compares","compares values","comparison","greater than","less than"],
+  ["Multiplication / division",4,"multiply","multiplication","divide","division"],
+  ["Stores results in the accumulator",4,"accumulator","result to accumulator","stores result","saves result"],
+  ["Bit shifts",1.5,"shift","shifting","bit shift","binary shift","shift left","shift right"],["Increment / decrement",1,"increment","decrement","add one"],
+  ["Sets status flags",.4,"flags","status flags","sets flags","overflow flag","zero flag","carry flag","overflow","sets the flags"]],
+  traps:[[["fetch","fetches","fetches instructions","decode","decodes","decoding","decodes instructions","control signals","sends control signals","controls the cpu"],"That's the Control Unit's job, not the ALU's."]]},
+ {id:"c03",spec:"A1.1.1",cat:"The Control Unit",q:"Name a job the Control Unit does.",gem:"Handles interrupts",ans:[
+  ["Decodes instructions",28,"decode","decoding","decodes","decode instructions"],["Sends control signals",18,"control signals","control signal","sends signals","signals"],
+  ["Controls / coordinates the CPU",16,"controls","coordinates","controls the cpu","coordinates components","manages","directs","controls components","control","controls everything"],
+  ["Fetches instructions",12,"fetch","fetching","fetches","fetch instructions"],
+  ["Runs the fetch-decode-execute cycle",6,"fde","fde cycle","fetch decode execute","fetch decode execute cycle","machine cycle","instruction cycle"],
+  ["Directs the flow of data",5,"data flow","moves data","directs data","controls data flow","flow of data"],
+  ["Tells the ALU what to do",4,"controls the alu","tells the alu","tells the alu what to do","alu"],
+  ["Syncs with the clock",3,"clock","timing","synchronises","synchronizes","clock signal","uses the clock"],
+  ["Tells memory to read or write",2,"read","write","read write","read signal","write signal","memory read"],
+  ["Updates the program counter",1.5,"program counter","pc","increment pc","increments pc","updates pc"],["Handles interrupts",.4,"interrupts","interrupt","interrupt handling"]],
+  traps:[[["calculations","calculation","arithmetic","maths","math","adds numbers","does calculations","performs calculations","logic operations"],"That's the ALU's job. The Control Unit decides what happens; the ALU does the maths."]]},
+ {id:"c04",spec:"A1.1.1",cat:"Registers",q:"Name a register in the CPU.",gem:"Status register",ans:[
+  ["Program counter",28,"pc"],["MAR",18,"memory address register"],["MDR",16,"memory data register","mbr","memory buffer register"],
+  ["Accumulator",14,"acc","ac"],["Instruction register",10,"ir","cir","current instruction register"],
+  ["General-purpose register",3,"general purpose register","general purpose","gpr","r0","r1","eax"],["Stack pointer",1,"sp"],["Index register",.6,"index"],
+  ["Status register",.4,"flags register","flag register","flags","sr","psw","status","status flags"]],
+  traps:[[["alu","cu","control unit","cache","ram","rom","bus"],"That's a CPU part or memory, not a register."]]},
+ {id:"c05",spec:"A1.1.1",cat:"Buses",q:"Name one of the three system buses, or something one of them carries.",gem:"Interrupt signal",ans:[
+  ["Data bus",28,"data","data and instructions","instructions"],["Address bus",22,"address","addresses","memory address","memory addresses"],
+  ["Control bus",20,"control","control signals","control signal"],["Read signal",4,"read","read request","memory read"],
+  ["Write signal",3,"write","write request","memory write"],["Clock signal",3,"clock","clock pulse","timing signal"],
+  ["Bus request / grant",.8,"bus request","bus grant"],["Interrupt signal",.4,"interrupt","interrupts","irq"]],
+  traps:[[["usb","pci","pcie","sata","usb bus"],"That's a peripheral or expansion bus. The CPU's three system buses are address, data and control."]]},
+ {id:"c06",spec:"A1.1.1",cat:"Processors",q:"Name a type of processor or co-processor.",gem:"Neural processing unit",ans:[
+  ["Multi-core processor",25,"multi core","multicore","multi core processor","dual core","quad core","octa core"],
+  ["Single-core processor",20,"single core","single core processor","uniprocessor"],["GPU",20,"graphics card","graphics processor","graphics processing unit"],
+  ["CPU",10,"central processing unit"],["Co-processor",6,"coprocessor","co processor"],
+  ["FPU / maths co-processor",2,"fpu","floating point unit","maths coprocessor","math coprocessor","math co processor"],
+  ["DSP",1,"digital signal processor","sound processor","audio processor"],["Security processor",1,"crypto processor","security chip","tpm","secure enclave"],
+  ["Microcontroller",1,"mcu","arduino"],["Neural processing unit",.4,"npu","tpu","ai accelerator","neural engine","ai chip"]],
+  traps:[[["ram","ssd","hdd","rom","cache"],"That's memory or storage, not a processor."]]},
+ {id:"c07",spec:"A1.1.5",cat:"Fetch-decode-execute",q:"Name a stage or step of the fetch-decode-execute cycle.",gem:"Check for interrupts",ans:[
+  ["Fetch",28],["Decode",22],["Execute",22],
+  ["Increment the PC",6,"increment pc","pc increments","pc incremented","add 1 to pc","increment program counter","update pc","increment the program counter"],
+  ["Copy PC to MAR",4,"pc to mar","address to mar","copy address to mar","copy pc to mar"],
+  ["Read instruction into MDR",3,"instruction to mdr","load into mdr","memory to mdr","mdr"],
+  ["Copy MDR to IR",2,"mdr to ir","mdr to cir","copy to ir","copy mdr to ir"],["Store / write back",2,"store","write back","writeback","store result"],
+  ["Send read signal",1,"read signal","control bus read","send read signal"],["Check for interrupts",.4,"interrupts","interrupt check","interrupt","check interrupts"]],
+  traps:[]},
+ {id:"c08",spec:"A1.1.5",cat:"The fetch stage",q:"Name a component used during the FETCH stage.",gem:"Control bus",ans:[
+  ["Program counter",22,"pc"],["MAR",16,"memory address register"],["MDR",14,"memory data register","mbr"],
+  ["RAM / main memory",14,"ram","main memory","memory","primary memory"],["Instruction register",8,"ir","cir","current instruction register"],
+  ["Address bus",7,"address"],["Data bus",6,"data"],["Control unit",6,"cu"],["Cache",3,"cache memory"],["Control bus",.4,"read signal","control signal"]],
+  traps:[[["alu","accumulator","acc","ac"],"The ALU and accumulator do their work in the execute stage, not fetch."]]},
+ {id:"c09",spec:"A1.1.5",cat:"The execute stage",q:"Name something that can happen in the EXECUTE stage.",gem:"PC overwritten by a jump",ans:[
+  ["ALU does a calculation",30,"calculation","calculations","calculate","arithmetic","alu","maths","add","addition","subtract","subtraction","alu calculates"],
+  ["Result stored in accumulator",14,"accumulator","acc","stored in accumulator","result stored","store result","saved in accumulator"],
+  ["Logic operation",6,"logic","logical operation","logic operations"],["Comparison",6,"compare","comparing","comparison"],
+  ["Data loaded from memory",6,"load","load data","loading data","read from memory","data loaded"],
+  ["Data written to memory",5,"write to memory","save to memory","written to memory","store to memory","store in memory"],
+  ["Output to a device",2,"output","display","print"],["Halt",1,"stop","halt the program","end program"],
+  ["PC overwritten by a jump",.4,"jump","branch","jmp","pc changed","pc overwritten","goto","jump instruction"]],
+  traps:[[["decode","fetch","decoding","fetching"],"That happens earlier in the cycle, before execute."]]},
+ {id:"c10",spec:"A1.1.5",cat:"The program counter",q:"Name a reason the program counter changes.",gem:"Returning from a subroutine",ans:[
+  ["Incremented after each fetch",35,"increment","increments","incremented","add 1","plus 1","next instruction","goes to next instruction","increased","increases","adds one","add one","incremented after fetch"],
+  ["Jump / branch instruction",15,"jump","branch","jmp","goto","jump instruction","branch instruction"],
+  ["IF statement or loop",6,"if statement","loop","loops","selection","iteration","condition"],
+  ["Interrupt",5,"interrupts","interrupt occurs"],["Calling a subroutine",3,"subroutine","function call","calling a function","procedure call","call"],
+  ["Reset / boot",1.5,"reset","boot","restart","power on","startup"],["Returning from a subroutine",.4,"return","ret","return from function","returning"]],
+  traps:[]},
+];
+const TIME = 25, PRIOR = 20, PER_DIVE = 7, COUNTDOWN = 3;
+
+/* ================= the computer, surface → deepest (in points) ================= */
+const BANDS = [
+  {name:"Outside the case", zone:"The case",          from:0,  to:40,  hue:205, bg:["#1c252c","#141b21"]},
+  {name:"Motherboard",      zone:"The motherboard",   from:40, to:100, hue:155, bg:["#082a1e","#061c15"]},
+  {name:"RAM",              zone:"Main memory · RAM", from:100,to:170, hue:180, bg:["#06232b","#04171d"]},
+  {name:"System buses",     zone:"The system buses",  from:170,to:250, hue:45,  bg:["#17150a","#100e07"]},
+  {name:"CPU",              zone:"The processor",     from:250,to:320, hue:218, bg:["#0b1324","#090e1c"]},
+  {name:"Cache",            zone:"Cache",             from:320,to:390, hue:270, bg:["#150b26","#0f081c"]},
+  {name:"Control Unit",     zone:"The control unit",  from:390,to:460, hue:322, bg:["#1f0a1c","#160714"]},
+  {name:"ALU",              zone:"Arithmetic logic unit", from:460,to:530, hue:18, bg:["#230f08","#190a05"]},
+  {name:"MAR & MDR",        zone:"Memory registers",  from:530,to:600, hue:46,  bg:["#1e1906","#151104"]},
+  {name:"The core",         zone:"PC · IR · AC — the core", from:600,to:760, hue:350, bg:["#22070d","#0c0204"]},
+];
+const FACTS = [
+  [-38,"packets stream in from every corner of the internet"],[-20,"your virus is hiding inside a download"],
+  [24,"most malware never gets past the case"],[34,"USB 2.0 moves up to 480 Mbit/s"],
+  [55,"every component plugs into the motherboard"],[82,"copper traces carry signals between chips"],
+  [112,"RAM is volatile: it forgets everything at power-off"],[138,"programs are loaded here from secondary storage"],[160,"every instruction is fetched from RAM"],
+  [190,"address bus: one-way, CPU → memory"],[210,"data bus: two-way, data and instructions"],[232,"control bus: read, write and clock signals"],
+  [268,"single-core, multi-core, or helped by a co-processor"],[298,"3 GHz = 3 billion clock ticks every second"],
+  [338,"L1 cache answers in about one nanosecond"],[368,"cache keeps recently used data next to the cores"],
+  [408,"every instruction is decoded here"],[440,"control signals tell each part what to do next"],
+  [478,"add · subtract · compare · AND · OR · NOT"],[510,"results are written to the accumulator"],
+  [548,"MAR → address bus. MDR ↔ data bus."],[578,"the MDR holds the data fetched from memory"],
+  [622,"PC: the address of the next instruction"],[652,"IR: the instruction being decoded"],[682,"AC: the result of the last calculation"],[730,"nothing is deeper than this"],
+];
+const PX = 14, SURF = 760, WORLD_H = SURF + 760*PX + 300;
+const Y = p => SURF + p*PX;
+const START_Y = SURF - 120;
+const vY = pts => pts === 0 ? START_Y : Y(pts);
+const UM = pts => Math.round(pts*10).toLocaleString() + " µm";
+const UMz = pts => Math.round(pts*10).toLocaleString() + ' <span style="text-transform:none">µm</span>';
+
+/* ================= helpers ================= */
+const $ = s => document.querySelector(s);
+const world = $("#world"), vp = $("#vp"), ui = $("#ui");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep = ms => new Promise(r => setTimeout(r, RM ? Math.min(ms,150) : ms));
+const easeInOut = k => k<.5 ? 4*k*k*k : 1-Math.pow(-2*k+2,3)/2;
+const easeSink = k => k<.25 ? 8*k*k : 1 - Math.pow(1-k,2.4)*(1/Math.pow(.75,2.4))*.5; // quick drop, long glide
+function tween(dur, fn, ease=easeInOut){ if (RM) dur = Math.min(dur,200);
+  return new Promise(res=>{ const t0=performance.now(); const step=now=>{ const k=Math.min(1,(now-t0)/dur); fn(ease(k)); if(k<1) requestAnimationFrame(step); else res(); }; requestAnimationFrame(step); }); }
+function srand(seed){ let s=seed; return ()=>{ s=(s*16807)%2147483647; return s/2147483647; }; }
+const f1 = n => Math.round(n*10)/10;
+
+/* ================= answer matching ================= */
+const normSp = s => String(s).toLowerCase().replace(/²/g,"2").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ")
+  .replace(/[^a-z0-9]+/g," ").trim().replace(/^(a|an|the) /,"");
+const norm = s => normSp(s).replace(/ /g,"");
+const STOP = new Set(["and","or","not","to","in","of","a","an","the","it","is","on","at"]);
+function lev(a,b){ if(Math.abs(a.length-b.length)>2) return 9; const d=Array.from({length:a.length+1},(_,i)=>[i]);
+  for(let j=1;j<=b.length;j++) d[0][j]=j;
+  for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[a.length][b.length]; }
+for (const p of PROMPTS){
+  const total = p.ans.reduce((s,a)=>s+a[1],0);
+  p.list = p.ans.map(([label,w,...al]) => { const all=[label,...al];
+    return {key:norm(label)||"x", label, prior:w/total, gem:label===p.gem, aliases:[...new Set(all.map(norm))], spaced:[...new Set(all.map(normSp))]}; });
+  p.trapList = (p.traps||[]).map(([al,msg])=>({aliases:al.map(norm), spaced:al.map(normSp), msg}));
+}
+function match(p, raw){
+  const n = norm(raw); if(!n) return {kind:"empty"};
+  const forms = [n]; if (n.length>3 && n.endsWith("s")) forms.push(n.slice(0,-1));
+  for (const f of forms){
+    for (const a of p.list) if (a.aliases.includes(f)) return {kind:"ok", ans:a};
+    for (const t of p.trapList) if (t.aliases.includes(f)) return {kind:"trap", msg:t.msg};
+  }
+  if (n.length >= 5){
+    let best=null, bd=9;
+    for (const a of p.list) for (const al of a.aliases){ if (al.length<5) continue; const d=lev(n,al); if(d<bd){bd=d;best=a;} }
+    if (best && (bd<=1 || (bd<=2 && n.length>=8))) return {kind:"ok", ans:best, fuzzy:true};
+  }
+  const hay = " " + normSp(raw) + " ";
+  let hit=null, hl=0;
+  const consider = (sp, res) => { if (sp.length<2 || STOP.has(sp)) return; if (hay.includes(" "+sp+" ") && sp.length>hl){ hl=sp.length; hit=res; } };
+  for (const a of p.list) for (const sp of a.spaced) consider(sp, {kind:"ok", ans:a, fuzzy:true});
+  for (const t of p.trapList) for (const sp of t.spaced) consider(sp, {kind:"trap", msg:t.msg});
+  return hit || {kind:"miss"};
+}
+
+/* ================= class stats (shared db) ================= */
+let db=null, me=null, canWrite=false, live={}, liveTotal={}, players=0, myAns={}, statusState="loading", writeChain=Promise.resolve();
+function share(p, a){ const lt=liveTotal[p.id]||0, lc=(live[p.id]||{})[a.key]||0; return (a.prior*PRIOR + lc)/(PRIOR + lt); }
+function tierOf(p, a){ if (a.gem) return "gem"; const s=share(p,a); return s>=.18?"spam":s>=.08?"adware":s>=.03?"trojan":"rootkit"; }
+function recount(docs){
+  live={}; liveTotal={}; players=0;
+  for (const [id,data] of docs){
+    if (id===me){ myAns = {...((data&&data.a)||{})}; continue; }
+    const a = data && data.a; if (!a || typeof a!=="object") continue;
+    players++;
+    for (const pid in a){ const k=String(a[pid]); (live[pid]??={}); live[pid][k]=(live[pid][k]||0)+1; liveTotal[pid]=(liveTotal[pid]||0)+1; }
+  }
+}
+function statusHTML(){
+  if (statusState==="live") return `<span class="status live"><i></i>Class stats live · ${players} other player${players===1?"":"s"}${canWrite?"":" · your answers aren't being added"}</span>`;
+  if (statusState==="loading") return `<span class="status"><i></i>Connecting to class stats…</span>`;
+  if (statusState==="slow") return `<span class="status"><i></i>Class stats can't be reached yet. Using built-in rarity estimates.</span>`;
+  return `<span class="status"><i></i>Playing offline. Rarity comes from built-in estimates.</span>`;
+}
+function paintStatus(){ document.querySelectorAll("[data-status]").forEach(el=>el.innerHTML=statusHTML()); }
+(async()=>{
+  try{
+    if (!window.claude || !window.claude.use){ statusState="offline"; paintStatus(); return; }
+    const [d,u] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if (!d || !u){ statusState="offline"; paintStatus(); return; }
+    me = await u.id();
+    if (!me){ statusState="offline"; paintStatus(); return; }
+    db = d;
+    let w = null; try { w = await u.can("data.write"); } catch(e){}
+    canWrite = w !== false;
+    const t = setTimeout(()=>{ if(statusState==="loading"){ statusState="slow"; paintStatus(); } }, 10000);
+    db.collection("subs").limit(1000).onSnapshot(snap=>{
+      recount(snap.docs.map(x=>[x.id, x.data()]));
+      if (!snap.metadata.fromCache){ clearTimeout(t); statusState="live"; }
+      paintStatus();
+    }, ()=>{ clearTimeout(t); statusState="offline"; paintStatus(); });
+  }catch(e){ statusState="offline"; paintStatus(); }
+})();
+function record(pid, key){
+  if (!db || !me || !canWrite || myAns[pid]) return;
+  myAns[pid] = key;
+  const body = {a:{...myAns}, t:Date.now()};
+  writeChain = writeChain.then(()=>db.collection("subs").doc(me).set(body)).catch(e=>{
+    if (e && e.code==="invalid_argument"){ canWrite=false; paintStatus(); }
+  });
+}
+
+/* ================= daily set ================= */
+const now = new Date();
+const dayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+const diveNo = Math.max(1, Math.floor((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()) - Date.UTC(2026,10,23))/864e5)+1);
+function rng(seed){ let h=2166136261; for (const c of seed){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } h=h||1;
+  return ()=>{ h^=h<<13; h^=h>>>17; h^=h<<5; return (h>>>0)/4294967296; }; }
+function pick(r){ const a=PROMPTS.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a.slice(0,PER_DIVE); }
+const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
+
+/* ================= building the world ================= */
+function wallSVG(i, H, side){
+  const r = srand(97 + i*13 + (side==="r"?5:0)); const hue = BANDS[i].hue; let s="";
+  const rep = (step, fn) => { for (let y=20; y<H-20; y+=step) fn(y); };
+  switch(i){
+    case 0: s+=`<rect width="120" height="${H}" fill="#27323a"/><rect x="${side==="l"?104:12}" width="4" height="${H}" fill="#3c4952"/>`;
+      rep(170, y=>{ for(let k=0;k<7;k++) s+=`<rect x="18" y="${y+k*14}" width="76" height="6" rx="3" fill="#10161a"/>`; s+=`<circle cx="60" cy="${y+128}" r="5" fill="#5a6872"/><path d="M56 ${y+128}h8" stroke="#2a343b" stroke-width="2"/>`; }); break;
+    case 1: for(let k=0;k<6;k++){ let x=8+k*19, y=0, d=`M${x} 0`; while(y<H){ y+=50+r()*90; d+=` V${f1(y)}`; if(r()<.55){ const nx=Math.max(6,Math.min(114,x+(r()<.5?-16:16))); d+=` L${nx} ${f1(y+16)}`; x=nx; y+=16; } }
+        s+=`<path d="${d}" fill="none" stroke="hsl(${hue} 60% 32%)" stroke-width="2"/>`; }
+      rep(240, y=>{ s+=`<circle cx="${30+r()*60}" cy="${y+60}" r="13" fill="#1d2b31" stroke="#9fc2cc" stroke-width="2"/><rect x="${20+r()*50}" y="${y+130}" width="44" height="34" rx="3" fill="#0d1418" stroke="hsl(${hue} 50% 40%)"/>`;
+        s+=`<circle cx="${10+r()*100}" cy="${y+200}" r="3.5" fill="#c9a640"/>`; }); break;
+    case 2: s+=`<rect x="22" y="0" width="62" height="${H}" fill="hsl(${hue} 45% 17%)" stroke="hsl(${hue} 55% 38%)"/>`;
+      rep(74, y=>{ s+=`<rect x="30" y="${y}" width="46" height="54" rx="2" fill="#090e11"/>`; });
+      for(let y=4;y<H;y+=9) s+=`<rect x="86" y="${y}" width="11" height="5" fill="#c9a640"/>`; break;
+    case 3: { const cols=["#f5d042","#5ad1ff","#ff7ab8"]; for(let k=0;k<6;k++){ const x=12+k*18, c=cols[Math.floor(k/2)];
+        s+=`<line x1="${x}" x2="${x}" y1="0" y2="${H}" stroke="${c}" stroke-opacity=".2" stroke-width="2.5"/><line x1="${x}" x2="${x}" y1="0" y2="${H}" stroke="${c}" stroke-width="2.5" class="flow ${k===3?"rev":""} ${k>=4?"slow":""}" style="animation-delay:${-k*.25}s"/>`; } } break;
+    case 4: rep(130, y=>{ for(let c=0;c<2;c++) s+=`<rect x="${10+c*54}" y="${y}" width="46" height="46" rx="4" fill="hsl(${hue} 40% 15%)" stroke="hsl(${hue} 65% 52%)"/><rect x="${18+c*54}" y="${y+8}" width="30" height="30" fill="none" stroke="hsl(${hue} 65% 52% / .4)"/>`; });
+      for(let y=0;y<H;y+=40) s+=`<path d="M0 ${y}h120" stroke="hsl(${hue} 50% 40% / .18)"/>`; break;
+    case 5: for(let y=8;y<H-8;y+=12) for(let x=8;x<114;x+=12){ const on=r()<.2; s+=`<rect x="${x}" y="${y}" width="9" height="9" rx="1.5" fill="${on?`hsl(${hue} 85% 64%)`:`hsl(${hue} 30% 17%)`}" ${on&&r()<.45?`class="blink" style="animation-delay:${f1(r()*1.7)}s"`:""}/>`; } break;
+    case 6: rep(190, y=>{ s+=`<rect x="14" y="${y}" width="64" height="40" rx="5" fill="hsl(${hue} 40% 15%)" stroke="hsl(${hue} 75% 62%)" stroke-width="1.5"/><path d="M78 ${y+20} C98 ${y+20} 96 ${y+70} 112 ${y+80}M46 ${y+40} V${y+110} H112" fill="none" stroke="hsl(${hue} 75% 62%)" stroke-width="1.6" class="flow slow"/>`; });
+      { let d=`M104 0`; for(let y=0;y<H;y+=24) d+=` V${y+12} H92 V${y+24} H104`; s+=`<path d="${d}" fill="none" stroke="#5ad1ff" stroke-width="1.6" opacity=".8"/>`; } break;
+    case 7: rep(150, (y)=>{ const k=Math.floor(y/150)%2; const x=22;
+        if(k===0) s+=`<path d="M${x} ${y} h26 a24 24 0 0 1 0 48 h-26 z" fill="hsl(${hue} 50% 16%)" stroke="hsl(${hue} 85% 62%)" stroke-width="2"/>`;
+        else s+=`<path d="M${x} ${y} q34 0 52 24 q-18 24 -52 24 q14 -24 0 -48 z" fill="hsl(${hue} 50% 16%)" stroke="hsl(${hue} 85% 62%)" stroke-width="2"/>`;
+        s+=`<path d="M0 ${y+12}h${x+6}M0 ${y+36}h${x+6}M${x+50} ${y+24}h${70-x}" stroke="hsl(${hue} 85% 62% / .6)" stroke-width="1.6"/>`; }); break;
+    case 8: rep(96, y=>{ s+=`<rect x="10" y="${y}" width="98" height="44" rx="5" fill="hsl(${hue} 45% 13%)" stroke="hsl(${hue} 85% 58%)" stroke-width="1.5"/>`;
+        for(let b=0;b<8;b++) s+=`<rect x="${18+b*11}" y="${y+16}" width="8" height="12" rx="1" fill="hsl(${hue} 90% ${r()<.5?65:22}%)" ${r()<.3?`class="blink" style="animation-delay:${f1(r()*1.7)}s"`:""}/>`; }); break;
+    case 9: rep(120, y=>{ s+=`<rect x="12" y="${y}" width="96" height="70" rx="7" fill="#1a060b" stroke="hsl(${hue} 90% 60%)" stroke-width="2"/><rect x="22" y="${y+44}" width="76" height="10" rx="2" fill="hsl(${hue} 90% 60% / .5)" class="blink" style="animation-delay:${f1(r()*1.7)}s"/>`; }); break;
+  }
+  return `<svg class="wall ${side}" viewBox="0 0 120 ${H}" preserveAspectRatio="${side==="l"?"xMinYMin":"xMaxYMin"} slice" aria-hidden="true">${s}</svg>`;
+}
+function buildWorld(){
+  world.style.height = WORLD_H + "px";
+  let h = "";
+  // the open internet
+  const r = srand(3); let net = "";
+  const nodes = Array.from({length:22},()=>[f1(6+r()*88), f1(40+r()*(SURF-140))]);
+  nodes.forEach((a,i)=>{ const b=nodes[(i*7+3)%nodes.length], c=nodes[(i+1)%nodes.length];
+    net += `<line x1="${a[0]}%" y1="${a[1]}" x2="${b[0]}%" y2="${b[1]}" stroke="#2f6aa8" stroke-opacity=".35"/><line x1="${a[0]}%" y1="${a[1]}" x2="${c[0]}%" y2="${c[1]}" stroke="#2f6aa8" stroke-opacity=".2"/>`; });
+  nodes.forEach(([x,y],i)=> net += `<circle cx="${x}%" cy="${y}" r="${i%4?3:5}" fill="#6cb6ff" ${i%3?"":'class="blink"'} style="animation-delay:${i*.2}s"/>`);
+  h += `<div class="band" style="top:0;height:${SURF}px;background:linear-gradient(#0b1d38,#081426 70%,#0c1a2a)"><svg width="100%" height="${SURF}" aria-hidden="true">${net}</svg>
+    <div class="zone" style="top:${SURF-560}px;color:#6cb6ff">Start · 0 <span style="text-transform:none">µm</span><b style="color:#e3edf2">The open internet</b></div></div>`;
+  BANDS.forEach((b,i)=>{
+    const top = Y(b.from), hgt = (i===BANDS.length-1 ? WORLD_H - 300 : Y(b.to)) - top;
+    h += `<div class="band" style="top:${top}px;height:${hgt}px;background:linear-gradient(${b.bg[0]},${b.bg[1]})">
+      ${wallSVG(i,hgt,"l")}${wallSVG(i,hgt,"r")}
+      <div class="boundary" style="top:0;border-color:hsl(${b.hue} 70% 55% / .45)"></div>
+      <div class="zone" style="top:${i===0?190:46}px;color:hsl(${b.hue} 85% 66%)">${UMz(b.from)}<b style="color:#e3edf2">${esc(b.zone)}</b></div>
+      ${i===4?`<div class="pins" style="top:4px"></div>`:""}
+      ${i===9?`<div class="coreglow" style="top:${(700-600)*PX}px"></div>`:""}
+    </div>`;
+  });
+  h += `<div class="usb" style="top:${Y(0)-8}px"></div>`;
+  h += `<div class="floor" style="top:${WORLD_H-300}px"></div>`;
+  FACTS.forEach(([p,t])=> h += `<div class="fact" style="top:${Y(p)}px">${esc(t)}</div>`);
+  // depth ruler
+  let ru = "";
+  for (let p=0; p<=760; p+=10){ const y=Y(p), big=p%50===0;
+    ru += `<line x1="${big?36:46}" x2="58" y1="${y}" y2="${y}" stroke="rgb(210 228 236 / ${big?.55:.25})"/>`;
+    if (big && p>0) ru += `<text x="33" y="${y+3}" text-anchor="end">${(p*10).toLocaleString()}</text>`; }
+  h += `<svg class="ruler" width="58" height="${WORLD_H}" aria-hidden="true">${ru}</svg>`;
+  h += `<div id="lines"></div><div id="you"><span>YOU</span></div><div id="virus"></div>`;
+  world.innerHTML = h;
+}
+function virusGlyph(level, hue){
+  const n=8+level, rr=12+level*.6, len=8+level*.45; let s="";
+  for(let i=0;i<n;i++){ const a=i/n*Math.PI*2, c=Math.cos(a), si=Math.sin(a);
+    s+=`<line x1="${f1(c*rr)}" y1="${f1(si*rr)}" x2="${f1(c*(rr+len))}" y2="${f1(si*(rr+len))}" stroke="hsl(${hue} 85% 64%)" stroke-width="2.4" stroke-linecap="round"/><circle cx="${f1(c*(rr+len))}" cy="${f1(si*(rr+len))}" r="2.8" fill="hsl(${hue} 95% 72%)"/>`; }
+  s+=`<circle r="${rr}" fill="hsl(${hue} 55% 13%)" stroke="hsl(${hue} 90% 64%)" stroke-width="2.4"/>`;
+  const k=4+Math.floor(level/2); for(let i=0;i<k;i++){ const a=i/k*Math.PI*2+level; s+=`<circle cx="${f1(Math.cos(a)*rr*.5)}" cy="${f1(Math.sin(a)*rr*.5)}" r="2.6" fill="hsl(${hue} 95% 72%)"/>`; }
+  return `<svg width="74" height="74" viewBox="0 0 74 74" aria-hidden="true"><g class="bob"><g transform="translate(37 37)"><g class="vspin">${s}</g></g></g></svg>`;
+}
+
+/* ================= camera + actors ================= */
+let cam = 0, focusY = START_Y, focusFrac = .6, curBand = -1;
+const vh = () => vp.clientHeight;
+function setCam(v){ cam = Math.max(0, Math.min(WORLD_H - vh(), v)); world.style.transform = `translate3d(0,${-cam}px,0)`; }
+function look(y, frac){ focusY = y; if (frac!=null) focusFrac = frac; setCam(y - vh()*focusFrac); }
+addEventListener("resize", () => setCam(focusY - vh()*focusFrac));
+function setVirus(y){ const v=$("#virus"), you=$("#you"); v.style.top = y+"px"; you.style.top = y+"px"; }
+function setHue(h){ document.documentElement.style.setProperty("--hue", h); }
+const bandFor = pts => { let i=0; BANDS.forEach((b,k)=>{ if(pts>=b.from) i=k; }); return i; };
+function setBand(pts, animate){
+  const b = pts===0 ? 0 : bandFor(pts);
+  if (b === curBand) return false;
+  curBand = b; const v=$("#virus");
+  v.innerHTML = virusGlyph(b, BANDS[b].hue); setHue(BANDS[b].hue);
+  if (animate){ v.classList.remove("mutate"); void v.offsetWidth; v.classList.add("mutate"); }
+  return true;
+}
+function toast(eyebrow, title){ const t=document.createElement("div"); t.className="toast"; t.innerHTML=`${esc(eyebrow)}<b>${esc(title)}</b>`; document.body.appendChild(t); setTimeout(()=>t.remove(), 2500); }
+
+/* ================= HUD ================= */
+function hud(depthPts, score){ $("#hDepth").textContent = UM(depthPts); $("#hScore").textContent = Math.round(score); }
+function pips(){ const n = S ? S.set.length : PER_DIVE;
+  $("#pips").innerHTML = Array.from({length:n},(_,i)=>{ const r=S&&S.results[i]; return `<i class="${S&&i===S.i&&!r?"cur":""}" style="${r?`background:${TIERS[r.tier].hex};border-color:${TIERS[r.tier].hex}`:""}"></i>`; }).join(""); }
+
+/* ================= sprites for the reveal ================= */
+function sprite(rows, colors, px=7){ let s=""; rows.forEach((row,y)=>[...row].forEach((ch,x)=>{ if(ch===".") return; s+=`<rect x="${x*px}" y="${y*px}" width="${px}" height="${px}" fill="${colors[ch]}"/>`; }));
+  const w=rows[0].length*px, h=rows.length*px; return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges">${s}</svg>`; }
+function entity(t){
+  const c = TIERS[t].hex;
+  if (t==="gem") return sprite(["..#.#.#.#..","..#.#.#.#..","###########","#.........#","#....o....#","#...oo....#","#....o....#","#....o....#","#...ooo...#","#.........#","###########","..#.#.#.#..","..#.#.#.#.."],{"#":c,"o":"#fff6ff"},7);
+  if (t==="rootkit") return sprite(["..#####..",".#######.","#########","##..#..##","##..#..##","#########",".###.###.","..#####..","..#.#.#.."],{"#":c},9);
+  if (t==="trojan") return sprite(["....##........","...####.......","..##.##.......","..#..##.......",".....###......",".....#########",".....#########",".....#########",".....#.#...#.#",".....#.#...#.#","....##########",".....o..o..o.."],{"#":c,"o":"#7a4a1c"},7);
+  if (t==="adware") return `<svg width="190" height="100" viewBox="0 0 190 100">${[[0,20,"WIN!!"],[62,0,"CLICK"],[118,30,"FREE"]].map(([x,y,w],i)=>`<g class="drift" style="animation-delay:${-i*1.4}s;animation-duration:${2+i*.6}s"><rect x="${x}" y="${y}" width="70" height="52" rx="4" fill="#191505" stroke="${c}" stroke-width="2"/><rect x="${x}" y="${y}" width="70" height="12" fill="${c}"/><text x="${x+62}" y="${y+10}" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="700" fill="#191505" text-anchor="middle">×</text><text x="${x+35}" y="${y+38}" font-family="Chakra Petch,sans-serif" font-size="14" font-weight="700" fill="${c}" text-anchor="middle">${w}</text></g>`).join("")}</svg>`;
+  if (t==="spam") return `<svg width="200" height="96" viewBox="0 0 200 96">${[[10,30],[52,6],[92,40],[134,10],[160,52],[70,62]].map(([x,y],i)=>`<g class="drift" style="animation-delay:${-i*1.1}s;animation-duration:${3+i*.5}s"><rect x="${x}" y="${y}" width="34" height="24" rx="2" fill="#121a1f" stroke="${c}" stroke-width="2"/><path d="M${x} ${y} l17 13 l17 -13" fill="none" stroke="${c}" stroke-width="2"/></g>`).join("")}</svg>`;
+  return sprite(["#########","#.......#","#.x...x.#","#..x.x..#","#...x...#","#..x.x..#",".#x...x#.","..#...#..","...###..."],{"#":c,"x":"#ff5470"},9);
+}
+
+/* ================= game flow ================= */
+let S = null, raf = null, flowId = 0;
+function clearUI(){ ui.innerHTML = ""; $("#lines").innerHTML = ""; const tg=$("#tag"); if (tg) tg.remove(); stopTimer(); }
+
+function titleScreen(){
+  flowId++; S = null; clearUI(); curBand=-1; setBand(0,false); setVirus(START_Y); look(START_Y, .7); hud(0,0); pips();
+  $("#hPrompt").textContent = "Ready to infect";
+  const done = store.get("oiac3-day-"+dayStr);
+  ui.innerHTML = `<div class="overlay"><section class="sheet" aria-labelledby="tt">
+    <div><div class="eyebrow">IB Computer Science · A1.1.1 &amp; A1.1.5 · Dive #${diveNo}</div><h1 id="tt">One in a <em>Computer</em></h1></div>
+    <p class="lede">You're a virus on the open internet. Each prompt has many correct answers. <b>Obvious answers barely sink. Valid answers your classmates didn't think of plunge you deeper</b>, through the case, the motherboard, RAM and the buses, into the CPU's registers.</p>
+    <div class="row"><button class="btn" id="daily">${done?"Replay today's dive":"Start today's dive"} ▼</button><button class="btn ghost" id="practice">Practice dive</button></div>
+    <p class="small">${PER_DIVE} prompts · ${TIME} seconds each · one answer per prompt${done?` · Today's best: <b>${done.score}</b> pts, reached ${esc(done.layer)}`:""}</p>
+    <span data-status>${statusHTML()}</span>
+    <div class="ladder">${TIER_ORDER.map(t=>`<div style="--c:${TIERS[t].hex}"><b>${TIERS[t].name}</b><span class="n">+${TIERS[t].pts}</span><span>${TIERS[t].desc}</span></div>`).join("")}</div>
+    <p class="small">Rarity comes from what everyone playing this page has answered, blended with built-in estimates so it works from the first game. Your first answer to each prompt joins the class stats. Small typos and short phrases are accepted.</p>
+  </section></div>`;
+  $("#daily").onclick = () => newGame(true);
+  $("#practice").onclick = () => newGame(false);
+}
+
+function newGame(daily){
+  flowId++;
+  const set = daily ? pick(rng("oiac2"+dayStr)) : pick(rng(String(Math.random())));
+  S = {daily, set, i:0, score:0, results:[], id:flowId};
+  clearUI(); curBand=-1; setBand(0,false); setVirus(START_Y); look(START_Y, .42); hud(0,0); pips();
+  showPrompt();
+}
+
+async function showPrompt(){
+  const id = flowId, p = S.set[S.i];
+  pips(); $("#hPrompt").textContent = `Prompt ${S.i+1} of ${S.set.length}`;
+  ui.innerHTML = `
+    <section class="card" id="card" aria-live="polite">
+      <div class="eyebrow">Prompt ${S.i+1} of ${S.set.length}<span class="spec">${p.spec}</span><span style="color:var(--muted);letter-spacing:.1em">${esc(p.cat)}</span></div>
+      <p class="q">${esc(p.q)}</p>
+      <p class="hint">▼ rarer answers sink deeper ▼</p>
+    </section>
+    <div class="countdown" id="cd">descending · the clock starts in <b id="cdn">${COUNTDOWN}</b></div>
+    <div class="bar out" id="bar"><form id="f" autocomplete="off">
+      <div class="ring" id="ring"><svg width="46" height="46"><circle cx="23" cy="23" r="20" fill="rgb(6 10 13 / .9)" stroke="#22323d" stroke-width="3"/><circle id="rc" cx="23" cy="23" r="20" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="125.7" stroke-dashoffset="0" stroke-linecap="round"/></svg><b id="rn">${TIME}</b></div>
+      <input id="ans" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type your answer" aria-label="Your answer" maxlength="80">
+      <button class="btn inject" type="submit">Inject</button>
+    </form></div>`;
+  for (let n=COUNTDOWN; n>0; n--){ if (id!==flowId) return; const el=$("#cdn"); if (el) el.textContent=n; await sleep(1000); }
+  if (id!==flowId) return;
+  $("#cd").remove(); $("#bar").classList.remove("out");
+  $("#f").onsubmit = e => { e.preventDefault(); submit(false); };
+  $("#ans").focus({preventScroll:true});
+  S.locked = false; startTimer();
+}
+function startTimer(){
+  stopTimer(); const t0 = performance.now();
+  const tick = () => { const left = Math.max(0, TIME - (performance.now()-t0)/1000); const rc=$("#rc"); if(!rc) return;
+    rc.setAttribute("stroke-dashoffset", (125.7*(1-left/TIME)).toFixed(1)); $("#rn").textContent = Math.ceil(left); $("#ring").classList.toggle("low", left<6);
+    if (left<=0){ submit(true); return; } raf = requestAnimationFrame(tick); };
+  raf = requestAnimationFrame(tick);
+}
+function stopTimer(){ if (raf) cancelAnimationFrame(raf); raf=null; }
+const pct = s => s>=.1 ? Math.round(s*100)+"%" : s>=.01 ? (s*100).toFixed(1)+"%" : "<1%";
+
+async function submit(timeout){
+  if (!S || S.locked) return;
+  const id = flowId, p = S.set[S.i]; const raw = $("#ans").value.trim();
+  if (!raw && !timeout){ $("#ans").focus(); return; }
+  S.locked = true; stopTimer(); $("#ans").blur();
+  const m = raw ? match(p, raw) : {kind:"empty"};
+  let tier="blocked", msg="", ans=null;
+  if (m.kind==="ok"){
+    ans = m.ans; tier = tierOf(p, ans); const sh = share(p, ans);
+    const lc = (live[p.id]||{})[ans.key]||0, lt = liveTotal[p.id]||0;
+    msg = TIERS[tier].note + (lt ? ` ${lc} of ${lt} classmate${lt===1?"":"s"} said this.` : ans.gem ? "" : ` About ${pct(sh)} of answers.`);
+    if (m.fuzzy) msg = `Accepted as “${ans.label}”. ` + msg;
+    record(p.id, ans.key);
+  } else if (m.kind==="trap") msg = m.msg;
+  else if (m.kind==="empty") msg = "Out of time. The antivirus caught you, so you didn't move.";
+  else msg = "That isn't one of the accepted answers, so the firewall stopped it.";
+  const pts = TIERS[tier].pts;
+  S.results[S.i] = {p, raw, tier, pts, msg, ans, label: ans ? ans.label : (raw || "—")};
+  $("#card").classList.add("out"); $("#bar").classList.add("out");
+  await sleep(350); if (id!==flowId) return;
+
+  // rank lines below the virus
+  const startY = vY(S.score), base = S.score;
+  const lines = $("#lines");
+  lines.innerHTML = LINE_TIERS.map(t=>`<div class="tline" data-t="${t}" style="--c:${TIERS[t].hex};top:${Y(base+TIERS[t].pts)}px"><span>${TIERS[t].name.toUpperCase()} · ${TIERS[t].pts}</span></div>`).join("")
+    + `<div class="tline fw" data-t="fw" style="--c:var(--t-rootkit);top:${startY+70}px"><span>FIREWALL</span></div>`;
+  requestAnimationFrame(()=>lines.querySelectorAll(".tline").forEach(l=>l.classList.add("on")));
+
+  if (m.kind==="empty"){ $("#virus").classList.remove("hit"); void $("#virus").offsetWidth; $("#virus").classList.add("hit"); await sleep(600); }
+  else {
+    // the sinking answer
+    const tag = document.createElement("div"); tag.id = "tag";
+    const bits = Array.from({length:12},(_,k)=>`<i style="--r:${70+(k%4)*18}px;--d:${2.2+(k%5)*.5}s;--dl:${-k*.37}s">${k%3?1:0}</i>`).join("");
+    tag.innerHTML = `<div class="bits">${bits}</div><span class="pill">“${esc(raw)}” ▼</span>`;
+    tag.style.top = startY + "px"; world.appendChild(tag);
+    await sleep(300); if (id!==flowId) return;
+    const endY = pts>0 ? Y(base+pts) - 24 : startY + 70 - 24;
+    const lineEls = [...lines.querySelectorAll(".tline")];
+    const dur = pts>0 ? 1300 + pts*30 : 700;
+    await tween(dur, k=>{
+      if (id!==flowId) return; const y = startY + (endY-startY)*k; tag.style.top = y + "px"; look(y, .46);
+      lineEls.forEach(l=>{ const ly=parseFloat(l.style.top); if (y+24>=ly-2 && !l.classList.contains("hit") && (l.dataset.t!=="fw" || pts===0)) { l.classList.add("hit"); setTimeout(()=>l.classList.remove("hit"), 500); } });
+    }, pts>0 ? easeSink : easeInOut);
+    if (id!==flowId) return;
+    if (pts===0){ tag.classList.add("denied"); }
+    else { tag.style.setProperty("--tc", TIERS[tier].hex); const ln = lineEls.find(l=>l.dataset.t===tier); if (ln) ln.classList.add("hit"); }
+    await sleep(500);
+    const ty = parseFloat(tag.style.top), f0 = focusFrac;
+    await tween(600, k=>{ if (id===flowId) look(ty, f0 + (.8-f0)*k); });
+  }
+  if (id!==flowId) return;
+  showReveal();
+}
+
+function showReveal(){
+  const r = S.results[S.i], p = r.p, t = r.tier, c = TIERS[t].hex;
+  S.score += r.pts; hud(S.score - r.pts, S.score); pips();
+  const rows = p.list.map(a=>({a, s:share(p,a), t:tierOf(p,a)})).sort((x,y)=>(x.a.gem-y.a.gem) || (y.s-x.s));
+  const max = Math.max(...rows.map(x=>x.s));
+  const last = S.i === S.set.length-1;
+  ui.innerHTML = `
+    <section class="reveal" style="--c:${c}" aria-live="polite">
+      <div class="entity" style="--c:${c}">${entity(t)}</div>
+      <div class="rank">${t==="blocked" ? (r.raw?"Access denied":"Timed out") : TIERS[t].name}</div>
+      <div class="quote">${r.raw ? `“${esc(r.ans ? r.ans.label : r.raw)}”` : "no answer"}</div>
+      <div class="gain"><b>+${r.pts} PTS</b> · ${r.pts ? `sink ${UM(r.pts)}` : "no movement"}</div>
+      <div class="note">${esc(r.msg)}</div>
+      <button class="linkbtn" id="specBtn" aria-expanded="false">All accepted answers ▾</button>
+      <div class="spectrum" id="spec" hidden><ul>${rows.map(x=>`<li class="${r.ans && x.a.key===r.ans.key?"mine":""}" style="--c:${TIERS[x.t].hex}"><span class="lab"><i class="sw"></i><span>${esc(x.a.label)}${x.a.gem?" · <b>gem</b>":""}</span></span><span class="b"><i style="width:${x.a.gem?3:Math.max(3,x.s/max*100)}%"></i></span><span class="pc">${x.a.gem?"gem":pct(x.s)}</span></li>`).join("")}</ul></div>
+    </section>
+    <div class="dock"><button class="btn descend" id="go">${r.pts ? "Descend ▼" : (last ? "Infection report ▼" : "Next prompt ▼")}</button></div>`;
+  $("#specBtn").onclick = e => { const sp=$("#spec"); sp.hidden=!sp.hidden; e.currentTarget.setAttribute("aria-expanded", String(!sp.hidden)); e.currentTarget.textContent = sp.hidden ? "All accepted answers ▾" : "Hide answers ▴"; };
+  $("#go").onclick = descend; $("#go").focus({preventScroll:true});
+}
+const curPts = () => S ? S.results.reduce((s,r)=>s+(r?r.pts:0),0) : 0;
+
+async function descend(){
+  const id = flowId, r = S.results[S.i];
+  ui.innerHTML = "";
+  const tg = $("#tag"); if (tg){ tg.style.transition="opacity .5s"; tg.style.opacity="0"; setTimeout(()=>tg.remove(),500); }
+  $("#lines").querySelectorAll(".tline").forEach(l=>l.classList.remove("on"));
+  const from = S.score - r.pts, to = S.score;
+  if (r.pts > 0){
+    const y0 = vY(from), y1 = vY(to);
+    await tween(900 + r.pts*16, k=>{ if (id!==flowId) return; const y = y0+(y1-y0)*k, pnow = from + (to-from)*k; setVirus(y); look(y, .42); hud(pnow, S.score);
+      setBand(pnow, true); });
+    if (id!==flowId) return;
+  } else look(vY(to), .42);
+  $("#lines").innerHTML = "";
+  S.i++;
+  if (S.i >= S.set.length) report(); else showPrompt();
+}
+
+function report(){
+  const b = bandFor(S.score), where = S.score===0 ? "the open internet" : BANDS[b].name;
+  const counts = {}; S.results.forEach(r=>counts[r.tier]=(counts[r.tier]||0)+1);
+  const shareText = `One in a Computer · ${S.daily?"Dive #"+diveNo:"Practice"}\n🦠 ${S.score} pts · ${UM(S.score)} · reached ${where}\n${S.results.map(r=>TIERS[r.tier].sq).join("")}`;
+  if (S.daily){ const prev = store.get("oiac3-day-"+dayStr); if (!prev || S.score>prev.score) store.set("oiac3-day-"+dayStr, {score:S.score, layer:where}); }
+  $("#hPrompt").textContent = "Dive complete";
+  ui.innerHTML = `<div class="overlay"><section class="sheet" aria-labelledby="rt">
+    <div><div class="eyebrow">Infection report · ${S.daily?"Dive #"+diveNo:"Practice"}</div><h1 id="rt">Reached <em>${esc(where)}</em></h1></div>
+    <div class="stats3"><div><b>${S.score}</b><span>Points</span></div><div><b>${UM(S.score)}</b><span>Depth</span></div><div><b>${(counts.gem||0)+(counts.rootkit||0)}</b><span>Rootkit or better</span></div></div>
+    <div class="recap">${S.results.map(r=>`<div style="--c:${TIERS[r.tier].hex}"><span class="p"><span class="spec">${r.p.spec}</span> ${esc(r.p.q)}</span><span class="t">${TIERS[r.tier].name}<small>+${r.pts}</small></span><span class="a">${esc(r.label)}</span></div>`).join("")}</div>
+    <pre class="share" id="sharetext">${esc(shareText)}</pre>
+    <div class="row"><button class="btn" id="copy">Copy result</button><span class="small" id="copied" aria-live="polite"></span></div>
+    <div class="row"><button class="btn ghost" id="again">Practice dive</button><button class="btn ghost" id="surface">Back to the surface ▲</button></div>
+  </section></div>`;
+  $("#copy").onclick = () => {
+    const ok = () => $("#copied").textContent = "Copied. Paste it in your class chat.";
+    const fallback = () => { const rg=document.createRange(); rg.selectNodeContents($("#sharetext")); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(rg); $("#copied").textContent="Selected. Press Ctrl+C or ⌘C to copy."; };
+    try { navigator.clipboard.writeText(shareText).then(ok, fallback); } catch(e){ fallback(); }
+  };
+  $("#again").onclick = () => newGame(false);
+  $("#surface").onclick = async () => { ui.innerHTML=""; const y0=focusY; await tween(1600, k=>look(y0+(START_Y-y0)*k, .42+(.7-.42)*k)); titleScreen(); };
+}
+
+/* ================= menu ================= */
+$("#menuBtn").onclick = () => { const m=$("#menu"); m.hidden=!m.hidden; $("#menuBtn").setAttribute("aria-expanded", String(!m.hidden)); };
+$("#mTitle").onclick = () => { $("#menu").hidden=true; titleScreen(); };
+$("#mRestart").onclick = () => { $("#menu").hidden=true; if (S) newGame(S.daily); else newGame(false); };
+
+buildWorld();
+titleScreen();
+</script>
+
+</body>
+</html>
