@@ -321,6 +321,7 @@ details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:
 }
 </style>
 <link rel="stylesheet" href="classroom.css">
+<link rel="stylesheet" href="themes.css">
 </head>
 <body>
 <div class="viewport" id="vp"><div id="world"></div></div>
@@ -361,6 +362,9 @@ function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 <script src="subjects/phys.js"></script>
 <script src="subjects/biz.js"></script>
 <script src="subjects/hist.js"></script>
+<script src="subjects/geo.js"></script>
+<script src="subjects/fr.js"></script>
+<script src="subjects/gk.js"></script>
 <script src="explain.js"></script>
 <script src="mcq.js"></script>
 <script>
@@ -395,7 +399,7 @@ function tween(dur, fn, ease=easeInOut){ if (RM) dur = Math.min(dur,200);
 const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
 
 /* ================= answer matching ================= */
-const normSp = s => String(s).toLowerCase().replace(/²/g,"2").replace(/³/g,"3").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ")
+const normSp = s => String(s).toLowerCase().replace(/œ/g,"oe").replace(/æ/g,"ae").replace(/²/g,"2").replace(/³/g,"3").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ")
   .replace(/[^a-z0-9]+/g," ").trim().replace(/^(a|an|the) /,"");
 const norm = s => normSp(s).replace(/ /g,"");
 const TOL = n => n < 4 ? 0 : n < 6 ? 1 : n < 10 ? 2 : 3;
@@ -411,6 +415,7 @@ for (const key of SUBJECT_ORDER) for (const p of SUBJECTS[key].prompts){
   p.trapList = (p.traps||[]).map(([al,msg])=>({aliases:al.map(norm), spaced:al.map(normSp), msg}));
 }
 function match(p, raw){
+  if (p.pre) raw = p.pre(raw);   // e.g. French drops "le / la / un…" before matching
   const n = norm(raw); if(!n) return {kind:"empty"};
   const forms = [n]; if (n.length>3 && n.endsWith("s")) forms.push(n.slice(0,-1));
   for (const f of forms){
@@ -508,7 +513,7 @@ function extBands(){
 function buildWorld(){
   AX = M.axis; DIR = AX==="up" ? -1 : 1;
   L = LEAD + WMAX*PX + TAIL; BX = extBands();
-  world.className = "ax-"+AX;
+  world.className = "ax-"+AX; world.dataset.world = M.key;
   world.style.cssText = isV() ? `height:${L}px` : `width:${L}px`;
   let h = "";
   const startSpan = AX==="up" ? span(L-LEAD, L) : span(0, LEAD);
@@ -561,7 +566,16 @@ addEventListener("resize", () => look(focusC, focusFrac, true));
 function setAvatar(c){ const v=$("#virus"), you=$("#you"); avC = c;
   if (isV()){ v.style.left = M.avX||""; v.style.transform = `translate3d(-37px,${(c-37).toFixed(2)}px,0)`; you.style.transform = `translate3d(0,${c.toFixed(2)}px,0)`; }
   else { v.style.transform = `translate3d(${(c-37).toFixed(2)}px,0,0)`; you.style.transform = `translate3d(${c.toFixed(2)}px,0,0)`; }
+  const sh = $("#shout"); if (sh){ sh.style.left = v.style.left; sh.style.transform = v.style.transform; }
   world.style.setProperty("--av", c+"px"); }
+/* a subject can make its avatar shout when it moves (French: "SACRÉ BLEU !", louder for rarer answers) */
+function shout(tier){
+  const old = $("#shout"); if (old) old.remove();
+  const s = M.shout && M.shout(tier); if (!s) return;
+  const el = document.createElement("div"); el.id = "shout"; el.className = `shout t-${tier}`; el.setAttribute("aria-hidden", "true");
+  el.innerHTML = `<b>${esc(s)}</b>`; world.appendChild(el); setAvatar(avC);
+  setTimeout(() => { el.classList.add("bye"); setTimeout(() => el.remove(), 500); }, tier === "blocked" ? 1600 : 2600);
+}
 function setHue(h){ document.documentElement.style.setProperty("--hue", h); }
 function setBand(pts, animate){
   const b = pts===0 ? 0 : bandFor(pts);
@@ -581,7 +595,7 @@ function ensureWorld(need){
 function resetWorld(){ if (WMAX !== 760){ WMAX = 760; buildWorld(); curBand = -1; } }
 
 /* ================= HUD ================= */
-function hud(at, score){ $("#hMeterLabel").textContent = M.meter.label; $("#hMeter").textContent = M.meter.fmt(at); $("#hScore").textContent = Math.round(score); }
+function hud(at, score){ $("#hMeterLabel").textContent = M.meter.label; $("#hMeter").textContent = M.meter.fmt(at); $("#hScore").textContent = Math.round(score); if (M.gauge) M.gauge(at); }
 function pips(){
   if (S && S.endless){ $("#pips").innerHTML = Array.from({length:LIVES},(_,i)=>`<b class="hp ${i<S.hearts?"on":""}" aria-label="${i<S.hearts?"heart":"lost heart"}">♥</b>`).join(""); return; }
   const n = S ? S.set.length : PER_DIVE;
@@ -607,6 +621,7 @@ function clearUI(){ ui.innerHTML = ""; const ln=$("#lines"); if (ln) ln.innerHTM
 function setMode(key){
   if (!SUBJECTS[key]) key = SUBJECT_ORDER[0];
   M = SUBJECTS[key]; store.set("oiac-mode", key); WMAX = 760;
+  const g = $("#gauge"); if (g) g.remove();
   if (!M.topicName){ const o={}; M.catalog.forEach(th=>th.units.forEach(u=>u.topics.forEach(([c,n])=>{ o[c]=n; }))); M.topicName=o; }
   buildWorld(); curBand = -1;
 }
@@ -617,6 +632,7 @@ function getPick(){
     const first = M.catalog.flatMap(t=>t.units).flatMap(u=>u.topics).map(t=>t[0]).find(c=>M.prompts.some(p=>topicOf(p)===c));
     st = {level:"HL", sel:first?[first]:[]};
   }
+  if (M.noLevel) st.level = "HL";   // one course level: every prompt counts
   return st;
 }
 let pickState = null;
@@ -659,14 +675,14 @@ function renderPicker(focusSel){
     <div class="pick-top">
       <div><h2 class="pick-title">Choose what to revise</h2>
         <p class="small" aria-live="polite">${n ? `Practice mix: <b>${esc(M.name)} · ${esc(scopeLabel())}</b> · ${n} prompt${n===1?"":"s"}` : "Tick at least one topic below to practise."}</p></div>
-      <div class="seg" role="group" aria-label="Course level">
-        <button data-lv="SL" aria-pressed="${pickState.level==="SL"}">SL</button><button data-lv="HL" aria-pressed="${pickState.level==="HL"}">HL</button></div>
+      ${M.noLevel ? `<span class="seg-note">${esc(M.noLevel)}</span>` : `<div class="seg" role="group" aria-label="Course level">
+        <button data-lv="SL" aria-pressed="${pickState.level==="SL"}">SL</button><button data-lv="HL" aria-pressed="${pickState.level==="HL"}">HL</button></div>`}
     </div>
     <div class="row">
       <button class="btn" id="daily">${done?"Replay today's dive":"Today's dive"} ${M.arrow}</button>
       <button class="btn ghost" id="practice" ${n?"":"disabled"}>Practice · endless</button>
     </div>
-    <p class="small"><b>Today's dive:</b> ${PER_DIVE} prompts from all of ${esc(M.name)} (${pickState.level}), the same for everyone today, up to ${PER_DIVE*100} points.${done?` Your best today: <b>${done.score}</b> pts, reached ${esc(done.layer)}.`:""}<br><b>Practice:</b> endless prompts from the topics you tick below. You have ${LIVES} hearts, and a wrong answer or running out of time costs one. Go as far as you can.${best?` Your best: <b>${best.score}</b> pts over ${best.prompts} prompts.`:""}</p>
+    <p class="small"><b>Today's dive:</b> ${PER_DIVE} prompts from all of ${esc(M.name)} (${esc(M.noLevel || pickState.level)}), the same for everyone today, up to ${PER_DIVE*100} points.${done?` Your best today: <b>${done.score}</b> pts, reached ${esc(done.layer)}.`:""}<br><b>Practice:</b> endless prompts from the topics you tick below. You have ${LIVES} hearts, and a wrong answer or running out of time costs one. Go as far as you can.${best?` Your best: <b>${best.score}</b> pts over ${best.prompts} prompts.`:""}</p>
     <span data-status>${statusHTML()}</span>
     <div class="row"><button class="mini" id="pAll">Select all</button><button class="mini" id="pNone">Clear</button></div>
     ${M.catalog.map(th=>`<div class="theme"><h3>${esc(th.label || `Theme ${th.code} · ${th.name}`)}</h3>${th.units.map(u=>{
@@ -693,7 +709,7 @@ function newGame(daily){
   flowId++;
   const set = daily ? pick(rng("oiac6"+dayStr+dailyKey()), Pl, Math.min(PER_DIVE, Pl.length)) : [];
   S = {daily, endless:!daily, pool:Pl, queue:[], hearts:LIVES, set, i:0, score:0, results:[], id:flowId, bonus:0, bonusAsked:0, bonusUsed:new Set(),
-       scope: daily ? dailyKey() : scopeKey(), label: daily ? `All topics (${pickState.level})` : scopeLabel()};
+       scope: daily ? dailyKey() : scopeKey(), label: daily ? `All topics (${M.noLevel || pickState.level})` : scopeLabel()};
   clearUI(); resetWorld(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.av[AX]); hud(0,0); pips();
   showPrompt();
 }
@@ -895,6 +911,7 @@ async function descend(){
   const tg = $("#tag"); if (tg){ tg.style.transition="opacity .5s"; tg.style.opacity="0"; setTimeout(()=>tg.remove(),500); }
   $("#lines").querySelectorAll(".tline").forEach(l=>l.classList.remove("on"));
   const from = S.score - r.pts, to = S.score;
+  shout(r.tier);
   if (r.pts > 0){
     const c0 = avPos(from), c1 = avPos(to);
     await tween(900 + r.pts*16, k=>{ if (id!==flowId) return; const c = c0+(c1-c0)*k, pnow = from + (to-from)*k; setAvatar(c); look(c, FR.av[AX]); hud(pnow, S.score); setBand(pnow, true); }, EASE.move);

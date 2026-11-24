@@ -12,8 +12,11 @@ A reverse-trivia revision game for **IB Diploma** subjects. Every prompt has man
 | Physics | A cannon firing your answers further across the landscape | sideways |
 | Business Management | A bottle of money that fills and rises, from $1 to $1 trillion | up |
 | History | A time traveller crossing the ages, from the dinosaurs to the new generation | sideways |
+| Geography | A pirate ship sailing past sharks, sirens, sea serpents, ghost ships and the kraken to where "here be dragons" | sideways |
+| French ab initio | A baguette growing past Paris landmarks until it is taller than the Eiffel Tower, shouting "SACRÉ BLEU !" louder for rarer answers. Answers must be in French; English answers are caught and translated | up |
+| General knowledge (just for fun, not IB) | A crashed UFO climbing from a farm field past the Moon and the planets into endless space: riddles, films, music, games, the world and sport | up |
 
-Pick a subject and switch between **SL** and **HL**. **Today's dive** is 7 prompts from the whole subject (up to 700 points), the same for everyone that day. **Practice** is endless: prompts come from the topics you tick, the world keeps going deeper, and you play until you lose all 3 hearts.
+Pick a subject and switch between **SL** and **HL** (French ab initio is SL only; general knowledge has no levels). **Today's dive** is 7 prompts from the whole subject (up to 700 points), the same for everyone that day. **Practice** is endless: prompts come from the topics you tick, the world keeps going deeper, and you play until you lose all 3 hearts.
 
 **Bonus questions:** every correct answer unlocks a multiple-choice bonus written with IB command terms (`mcq.js`), with a markscheme-style explanation.
 **Explanations:** tap any accepted answer to see why it counts (`explain.js`).

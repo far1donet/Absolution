@@ -25,7 +25,7 @@ body.in-class .hud, body.in-class .menu, body.in-class #ui{display:none!importan
 .cj-field input:focus,.cj-field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
 .cr-join fieldset{border:0;padding:0;margin:0;min-width:0}
 .cr-join legend{font:600 12px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.cj-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.cj-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
 .cj-skin{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:rgb(255 255 255 / .03);text-align:center;position:relative}
 .cj-skin input,.cj-hue input{position:absolute;opacity:0;pointer-events:none}
 .cj-skin:has(input:checked){border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 0 1px var(--accent)}
