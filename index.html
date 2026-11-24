@@ -212,6 +212,36 @@ button{font:inherit;color:inherit}
 .spectrum .b{height:6px;background:#1b2730;border-radius:3px;overflow:hidden}
 .spectrum .b i{display:block;height:100%;background:var(--c)}
 .spectrum .pc{font:400 11px var(--f-mono);color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.spectrum li{display:block;padding:0}
+.sp-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 40px;gap:8px;align-items:center;width:100%;padding:4px 6px;background:none;border:0;border-radius:5px;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.sp-row:hover,.sp-row:focus-visible{background:rgb(255 255 255 / .06);outline:none}
+.sp-row[aria-expanded="true"]{background:rgb(255 255 255 / .06)}
+.sp-tip{margin:0 0 6px;font:500 11px var(--f-mono);color:var(--muted)}
+.sp-why{margin:2px 6px 8px 22px;padding:8px 10px;border-left:2px solid var(--c);background:rgb(0 0 0 / .25);border-radius:0 6px 6px 0;font-size:13px;line-height:1.45}
+.sp-why p{margin:0 0 4px}
+.sp-soon{color:var(--muted);font-style:italic}
+.sp-meta{color:var(--muted);font-size:12px}
+.sp-meta b{color:var(--accent);font-family:var(--f-mono)}
+.bonus-btn{border-color:#ffd85a!important;color:#ffd85a!important;box-shadow:0 0 18px rgb(255 216 90 / .3)!important}
+.reveal.bonus{background:radial-gradient(ellipse 80% 60% at 50% 35%,rgb(3 5 7 / .9),transparent 80%);gap:10px}
+.bq-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;width:min(520px,100%)}
+.bq-star{font:700 13px var(--f-display);letter-spacing:.14em;color:#ffd85a;text-transform:uppercase}
+.bq-term{font:700 10px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:#05080a;background:#ffd85a;border-radius:4px;padding:2px 6px}
+.bq-time{font:700 12px var(--f-mono);color:var(--muted);margin-left:auto}
+.bq-bar{width:min(520px,100%);height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.bq-bar i{display:block;height:100%;background:#ffd85a;transform-origin:left}
+.bq-q{margin:4px 0;font:600 clamp(18px,4.6vw,23px)/1.3 var(--f-display);max-width:32ch;text-wrap:balance}
+.bq-opts{display:flex;flex-direction:column;gap:8px;width:min(520px,100%)}
+.bq-opt{display:flex;gap:10px;align-items:center;text-align:left;padding:11px 12px;border-radius:9px;border:1.5px solid var(--line);background:var(--panel);cursor:pointer;font:500 14.5px/1.35 var(--f-body);color:var(--fg)}
+.bq-opt b{font:700 12px var(--f-mono);color:#ffd85a;min-width:16px}
+.bq-opt:hover:not(:disabled),.bq-opt:focus-visible{border-color:#ffd85a;outline:none}
+.bq-opt.right{border-color:#3ee089;background:rgb(62 224 137 / .15)}
+.bq-opt.wrong{border-color:#ff5470;background:rgb(255 84 112 / .15)}
+.bq-opt:disabled{cursor:default}
+.bq-why{width:min(520px,100%);text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.5}
+.bq-why b{font:700 13px var(--f-display);letter-spacing:.08em;text-transform:uppercase}
+.bq-why b.ok{color:#3ee089}.bq-why b.no{color:#ff5470}
+.bq-why p{margin:4px 0 0}
 .dock{position:fixed;z-index:16;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);display:flex;justify-content:center}
 
 /* ---------- title + report overlays ---------- */
@@ -331,6 +361,8 @@ function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 <script src="subjects/phys.js"></script>
 <script src="subjects/biz.js"></script>
 <script src="subjects/hist.js"></script>
+<script src="explain.js"></script>
+<script src="mcq.js"></script>
 <script>
 /* ================= ranks ================= */
 const TIER_BASE = {
@@ -366,8 +398,9 @@ const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(
 const normSp = s => String(s).toLowerCase().replace(/²/g,"2").replace(/³/g,"3").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ")
   .replace(/[^a-z0-9]+/g," ").trim().replace(/^(a|an|the) /,"");
 const norm = s => normSp(s).replace(/ /g,"");
+const TOL = n => n < 4 ? 0 : n < 6 ? 1 : n < 10 ? 2 : 3;
 const STOP = new Set(["and","or","not","to","in","of","a","an","the","it","is","on","at"]);
-function lev(a,b){ if(Math.abs(a.length-b.length)>2) return 9; const d=Array.from({length:a.length+1},(_,i)=>[i]);
+function lev(a,b){ if(Math.abs(a.length-b.length)>3) return 99; const d=Array.from({length:a.length+1},(_,i)=>[i]);
   for(let j=1;j<=b.length;j++) d[0][j]=j;
   for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
   return d[a.length][b.length]; }
@@ -384,17 +417,24 @@ function match(p, raw){
     for (const a of p.list) if (a.aliases.includes(f)) return {kind:"ok", ans:a};
     for (const t of p.trapList) if (t.aliases.includes(f)) return {kind:"trap", msg:t.msg};
   }
-  if (n.length >= 5){
-    let best=null, bd=9;
-    for (const a of p.list) for (const al of a.aliases){ if (al.length<5) continue; const d=lev(n,al); if(d<bd){bd=d;best=a;} }
-    if (best && (bd<=1 || (bd<=2 && n.length>=8))) return {kind:"ok", ans:best, fuzzy:true};
+  // auto-correct: forgive 1 slip in short words, 2 in medium, 3 in long ones
+  if (n.length >= 4){
+    let best=null, bd=99;
+    for (const a of p.list) for (const al of a.aliases){ if (al.length<4) continue; const d=lev(n,al); if (d<=TOL(al.length) && d<bd){ bd=d; best=a; } }
+    if (best) return {kind:"ok", ans:best, fuzzy:true};
   }
   const hay = " " + normSp(raw) + " ";
   let hit=null, hl=0;
   const consider = (sp, res) => { if (sp.length<2 || STOP.has(sp)) return; if (hay.includes(" "+sp+" ") && sp.length>hl){ hl=sp.length; hit=res; } };
   for (const a of p.list) for (const sp of a.spaced) consider(sp, {kind:"ok", ans:a, fuzzy:true});
   for (const t of p.trapList) for (const sp of t.spaced) consider(sp, {kind:"trap", msg:t.msg});
-  return hit || {kind:"miss"};
+  if (hit) return hit;
+  // word by word, in any order, each word allowed a typo ("contol unti" → "control unit")
+  const toks = normSp(raw).split(" ").filter(t => t.length >= 2);
+  let tb=null, tl=0;
+  for (const a of p.list) for (const sp of a.spaced){ const at = sp.split(" ").filter(t => !STOP.has(t)); if (at.length < 2) continue;
+    if (at.every(t => toks.some(x => lev(x,t) <= TOL(t.length))) && sp.length > tl){ tl = sp.length; tb = a; } }
+  return tb ? {kind:"ok", ans:tb, fuzzy:true} : {kind:"miss"};
 }
 
 /* ================= class stats (only where the page is hosted with a shared store) ================= */
@@ -652,7 +692,7 @@ function newGame(daily){
   const Pl = daily ? dailyPool() : pool(); if (!Pl.length){ titleScreen(); return; }
   flowId++;
   const set = daily ? pick(rng("oiac6"+dayStr+dailyKey()), Pl, Math.min(PER_DIVE, Pl.length)) : [];
-  S = {daily, endless:!daily, pool:Pl, queue:[], hearts:LIVES, set, i:0, score:0, results:[], id:flowId,
+  S = {daily, endless:!daily, pool:Pl, queue:[], hearts:LIVES, set, i:0, score:0, results:[], id:flowId, bonus:0, bonusAsked:0, bonusUsed:new Set(),
        scope: daily ? dailyKey() : scopeKey(), label: daily ? `All topics (${pickState.level})` : scopeLabel()};
   clearUI(); resetWorld(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.av[AX]); hud(0,0); pips();
   showPrompt();
@@ -718,7 +758,7 @@ async function submit(timeout){
     ans = m.ans; tier = tierOf(p, ans); const sh = share(p, ans);
     const lc = liveCount(p.id, ans.key), lt = liveTotal[p.id]||0;
     msg = tierNote(tier) + (lt ? ` ${lc} of ${lt} classmate${lt===1?"":"s"} said this.` : ans.gem ? "" : ` About ${pct(sh)} of answers.`);
-    if (m.fuzzy) msg = `Accepted as “${ans.label}”. ` + msg;
+    if (m.fuzzy) msg = `Auto-corrected to “${ans.label}”. ` + msg;
     record(p.id, ans.key);
   } else if (m.kind==="trap") msg = m.msg;
   else if (m.kind==="empty") msg = "Out of time, so you didn't move.";
@@ -779,12 +819,72 @@ function showReveal(){
       <div class="quote">${r.raw ? `“${esc(r.ans ? r.ans.label : r.raw)}”` : "no answer"}</div>
       <div class="gain"><b>+${r.pts} PTS</b> · ${r.pts ? esc(M.meter.gain(from, S.score)) : "no movement"}${S.endless && !r.pts ? ` · <b style="color:#ff4f6e">−1 ♥</b>` : ""}</div>
       <div class="note">${esc(r.msg)}</div>
-      <button class="linkbtn" id="specBtn" aria-expanded="false">All accepted answers ▾</button>
-      <div class="spectrum" id="spec" hidden><ul>${rows.map(x=>`<li class="${r.ans && x.a.key===r.ans.key?"mine":""}" style="--c:${TIER_BASE[x.t].hex}"><span class="lab"><i class="sw"></i><span>${esc(x.a.label)}${x.a.gem?" · <b>gem</b>":""}</span></span><span class="b"><i style="width:${x.a.gem?3:Math.max(3,x.s/max*100)}%"></i></span><span class="pc">${x.a.gem?"gem":pct(x.s)}</span></li>`).join("")}</ul></div>
+      <button class="linkbtn" id="specBtn" aria-expanded="${!r.pts}">${r.pts ? "All accepted answers ▾" : "Hide answers ▴"}</button>
+      <div class="spectrum" id="spec" ${r.pts ? "hidden" : ""}><p class="sp-tip">Tap an answer to see why it counts.</p><ul>${rows.map((x,k)=>`<li class="${r.ans && x.a.key===r.ans.key?"mine":""}" style="--c:${TIER_BASE[x.t].hex}"><button class="sp-row" aria-expanded="false" aria-controls="why${k}"><span class="lab"><i class="sw"></i><span>${esc(x.a.label)}${x.a.gem?" · <b>gem</b>":""}</span></span><span class="b"><i style="width:${x.a.gem?3:Math.max(3,x.s/max*100)}%"></i></span><span class="pc">${x.a.gem?"gem":pct(x.s)}</span></button><div class="sp-why" id="why${k}" hidden>${whyHTML(p, x.a)}</div></li>`).join("")}</ul></div>
     </section>
-    <div class="dock"><button class="btn descend" id="go">${r.pts ? esc(M.verbs.cta) : (last ? "Results" : "Next prompt")}</button></div>`;
+    <div class="dock">${r.pts ? `<button class="btn descend bonus-btn" id="bonus">★ Bonus question</button>` : `<button class="btn descend" id="go">${last ? "Results" : "Next prompt"}</button>`}</div>`;
   $("#specBtn").onclick = e => { const sp=$("#spec"); sp.hidden=!sp.hidden; e.currentTarget.setAttribute("aria-expanded", String(!sp.hidden)); e.currentTarget.textContent = sp.hidden ? "All accepted answers ▾" : "Hide answers ▴"; };
-  $("#go").onclick = descend; $("#go").focus({preventScroll:true});
+  document.querySelectorAll(".sp-row").forEach(b => b.onclick = () => { const w = $("#" + b.getAttribute("aria-controls")); w.hidden = !w.hidden; b.setAttribute("aria-expanded", String(!w.hidden)); });
+  if (r.pts){ $("#bonus").onclick = showBonus; $("#bonus").focus({preventScroll:true}); }
+  else { $("#go").onclick = descend; $("#go").focus({preventScroll:true}); }
+}
+
+/* ---------- explanations for accepted answers ---------- */
+function whyHTML(p, a){
+  const ex = typeof EXPLAIN !== "undefined" && EXPLAIN[p.id] && EXPLAIN[p.id][a.label];
+  const raw = p.ans.find(x => x[0] === a.label) || [];
+  const also = raw.slice(2).filter(x => norm(x) !== norm(a.label)).slice(0, 6);
+  return `${ex ? `<p>${esc(ex)}</p>` : `<p class="sp-soon">The full markscheme explanation for this answer is still being written.</p>`}
+    <p class="sp-meta"><b>${esc(p.spec)}</b> ${esc(M.topicName[topicOf(p)] || "")}${also.length ? ` · also accepted as: ${also.map(esc).join(", ")}` : ""}</p>`;
+}
+
+/* ---------- bonus multiple-choice question after a correct answer ---------- */
+const BONUS_TIME = 15;
+function bonusFor(p){
+  const topic = topicOf(p);
+  const cur = (typeof MCQ !== "undefined" ? MCQ : []).filter(m => m.s === M.key && topicOf(m) === topic && (pickState.level === "HL" || !(M.prompts.find(x => topicOf(x) === topic) || {}).hl) && !S.bonusUsed.has(m.q));
+  if (cur.length){ const m = cur[Math.floor(Math.random()*cur.length)]; S.bonusUsed.add(m.q);
+    return {term:m.term, q:m.q, spec:m.spec, opts:m.o.map((t,i)=>({t, ok:i===m.a})), why:m.why}; }
+  // built from the prompt itself: one more accepted answer, plus answers to other prompts in the subject
+  const given = S.results[S.i].ans, right = p.list.filter(a => a !== given);
+  const c = right[Math.floor(Math.random()*right.length)];
+  const seen = new Set([norm(c.label)]), wrong = [];
+  for (const x of pick(rng(String(Math.random())), M.prompts.filter(x => x !== p), 40)){
+    const a = x.list[Math.floor(Math.random()*x.list.length)];
+    if (seen.has(norm(a.label)) || match(p, a.label).kind !== "miss") continue;
+    seen.add(norm(a.label)); wrong.push({t:a.label, from:x.q}); if (wrong.length === 3) break; }
+  const ex = typeof EXPLAIN !== "undefined" && EXPLAIN[p.id] && EXPLAIN[p.id][c.label];
+  return {term:"Identify", q:`Identify another correct answer to: “${p.q}”`, spec:p.spec,
+    opts:[{t:c.label, ok:true}, ...wrong.map(w => ({t:w.t, ok:false}))],
+    why:`“${c.label}” is on the accepted list for this prompt.${ex ? " " + ex : ""} ${wrong.map(w => `“${w.t}” answers a different question (“${w.from}”).`).join(" ")}`};
+}
+async function showBonus(){
+  const id = flowId, p = S.results[S.i].p, B = bonusFor(p);
+  const opts = pick(rng(String(Math.random())), B.opts, B.opts.length);
+  S.bonusAsked++;
+  document.querySelectorAll(".reveal,.dock").forEach(e=>e.classList.add("leave")); await sleep(220); if (id!==flowId) return;
+  ui.innerHTML = `
+    <section class="reveal bonus" aria-live="polite">
+      <div class="bq-top"><span class="bq-star">★ Bonus</span><span class="spec">${esc(B.spec)}</span><span class="bq-term">${esc(B.term)}</span><span class="bq-time" id="bqT">${BONUS_TIME}s</span></div>
+      <div class="bq-bar"><i id="bqBar"></i></div>
+      <p class="bq-q">${esc(B.q)}</p>
+      <div class="bq-opts">${opts.map((o,k)=>`<button class="bq-opt" data-k="${k}"><b>${"ABCD"[k]}</b><span>${esc(o.t)}</span></button>`).join("")}</div>
+      <div class="bq-why" id="bqWhy" hidden></div>
+    </section>
+    <div class="dock" id="bqDock" hidden><button class="btn descend" id="go">${esc(M.verbs.cta)}</button></div>`;
+  let done = false; const t0 = performance.now();
+  const finish = k => { if (done) return; done = true; cancelAnimationFrame(bt);
+    const ok = k != null && opts[k].ok; if (ok) S.bonus++;
+    document.querySelectorAll(".bq-opt").forEach((b,j) => { b.disabled = true; if (opts[j].ok) b.classList.add("right"); else if (j === k) b.classList.add("wrong"); });
+    const w = $("#bqWhy"); w.hidden = false;
+    w.innerHTML = `<b class="${ok ? "ok" : "no"}">${ok ? "Correct! ★ +1 bonus" : k == null ? "Out of time" : "Not quite"}</b><p>${esc(B.why)}</p>`;
+    $("#bqDock").hidden = false; $("#go").onclick = descend; $("#go").focus({preventScroll:true}); pips(); };
+  document.querySelectorAll(".bq-opt").forEach(b => b.onclick = () => finish(+b.dataset.k));
+  let bt = 0; const tick = () => { if (done || id!==flowId) return; const left = Math.max(0, BONUS_TIME - (performance.now()-t0)/1000);
+    const bar = $("#bqBar"); if (!bar) return; bar.style.transform = `scaleX(${left/BONUS_TIME})`; $("#bqT").textContent = Math.ceil(left) + "s";
+    if (left <= 0) return finish(null); bt = requestAnimationFrame(tick); };
+  bt = requestAnimationFrame(tick);
+  document.querySelector(".bq-opt").focus({preventScroll:true});
 }
 
 async function descend(){
@@ -808,7 +908,7 @@ async function descend(){
 function report(){
   const b = bandFor(S.score), where = S.score===0 ? M.start.zone : BX[b].name, n = S.results.length;
   const counts = {}; S.results.forEach(r=>counts[r.tier]=(counts[r.tier]||0)+1);
-  const shareText = `One in a ${M.gemWord} · ${M.name} ${S.label} · ${S.daily?"Dive #"+diveNo:`Practice · ${n} prompts`}\n${M.emoji} ${S.score} pts · ${M.meter.fmt(S.score)} · reached ${where}\n${S.results.map(r=>TIER_BASE[r.tier].sq).join("")}`;
+  const shareText = `One in a ${M.gemWord} · ${M.name} ${S.label} · ${S.daily?"Dive #"+diveNo:`Practice · ${n} prompts`}\n${M.emoji} ${S.score} pts · ${M.meter.fmt(S.score)} · reached ${where}${S.bonusAsked ? ` · ★ ${S.bonus}/${S.bonusAsked} bonus` : ""}\n${S.results.map(r=>TIER_BASE[r.tier].sq).join("")}`;
   let newBest = false;
   if (S.daily){ const dk = "oiac6-day-"+dayStr+"-"+S.scope; const prev = store.get(dk); if (!prev || S.score>prev.score) store.set(dk, {score:S.score, layer:where}); }
   else { const bk = "oiac6-best-"+M.key+":"+pickState.level, prev = store.get(bk); if (!prev || S.score>prev.score){ store.set(bk, {score:S.score, prompts:n}); newBest = S.score > 0; } }
@@ -816,6 +916,7 @@ function report(){
   ui.innerHTML = `<div class="overlay"><section class="sheet" aria-labelledby="rt">
     <div><div class="eyebrow">${esc(M.name)} report · ${esc(S.label)} · ${S.daily?"Dive #"+diveNo:"Practice"}${newBest?" · new best!":""}</div><h1 id="rt">${S.endless ? "Out of hearts at" : "Reached"} <em>${esc(where)}</em></h1></div>
     <div class="stats3"><div><b>${S.score}</b><span>Points${S.daily?` / ${PER_DIVE*100}`:""}</span></div><div><b>${esc(M.meter.fmt(S.score))}</b><span>${esc(M.meter.label.toLowerCase())}</span></div>${S.endless ? `<div><b>${n}</b><span>Prompts answered</span></div>` : `<div><b>${(counts.gem||0)+(counts.rootkit||0)}</b><span>${esc(tierName("rootkit"))} or better</span></div>`}</div>
+    ${S.bonusAsked ? `<p class="small">★ Bonus questions: <b>${S.bonus} of ${S.bonusAsked}</b> correct.</p>` : ""}
     <div class="recap">${S.results.map(r=>`<div style="--c:${TIER_BASE[r.tier].hex}"><span class="p"><span class="spec">${esc(r.p.spec)}</span> ${esc(r.p.q)}</span><span class="t">${esc(tierName(r.tier))}<small>+${r.pts}</small></span><span class="a">${esc(r.label)}</span></div>`).join("")}</div>
     <pre class="share" id="sharetext">${esc(shareText)}</pre>
     <div class="row"><button class="btn" id="copy">Copy result</button><span class="small" id="copied" aria-live="polite"></span></div>

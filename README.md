@@ -15,13 +15,17 @@ A reverse-trivia revision game for **IB Diploma** subjects. Every prompt has man
 
 Pick a subject and switch between **SL** and **HL**. **Today's dive** is 7 prompts from the whole subject (up to 700 points), the same for everyone that day. **Practice** is endless: prompts come from the topics you tick, the world keeps going deeper, and you play until you lose all 3 hearts.
 
+**Bonus questions:** every correct answer unlocks a multiple-choice bonus written with IB command terms (`mcq.js`), with a markscheme-style explanation.
+**Explanations:** tap any accepted answer to see why it counts (`explain.js`).
+**Auto-correction:** small spelling mistakes are forgiven and shown as "Auto-corrected to …".
+
 ## Join the classroom (multiplayer)
 
 Tap **Join the classroom**, pick a nickname, a skin (any subject's character) and a colour.
 **Host a classroom** to get a 6-character code, or enter a friend's code to join. Share the invite link or the code.
 
-- Players sit round the class and take turns clockwise on the same question.
-- A correct answer nobody has said yet scores 10–100 points by rarity. A wrong answer, a repeat or running out of time scores 0 and costs a heart; whoever slipped up picks the next subject and topic, then the next person starts.
+- Players sit round the class and take turns clockwise on the same question. A teacher in the middle points at whoever's turn it is.
+- A correct answer nobody has said yet scores 10–100 points by rarity. A wrong answer, a repeat or running out of time scores 0 and costs a heart. Everyone else then answers that question once more, and when it comes back round, whoever slipped up picks the next subject and topic.
 - Fill your points bar to win back a heart. Last player with hearts wins.
 - The host sets the seats (2–8), hearts, seconds per turn, points per heart, SL/HL and which subjects and topics come up.
 

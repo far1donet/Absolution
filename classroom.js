@@ -113,7 +113,7 @@ function pub(){
   return {code:R.code, phase:R.phase, settings:R.settings, players:R.players, turn:R.turn,
     left: R.phase === "playing" && R.turn ? Math.max(0, R.deadline - t) : 0,
     q:R.q, used:R.used, chooser:R.chooser, chooseLeft: R.phase === "choosing" ? Math.max(0, R.chooseDeadline - t) : 0,
-    log:R.log.slice(-6), ranking:R.ranking, round:R.round};
+    log:R.log.slice(-6), ranking:R.ranking, round:R.round, lap:R.lap ? {failer:R.lap.failer, left:R.lap.left.length} : null};
 }
 function push(){ if (role !== "host") return; const s = pub(); net.broadcast({t:"state", s}); apply(s); }
 function addPlayer(id, info){
@@ -165,8 +165,10 @@ function handleAnswer(id, text){
     pl.points += pts; R.used.push({key:m.ans.key, label:m.ans.label, tier, pts, by:id});
     log(`${pl.name}: “${m.ans.label}” · ${SUBJECTS[R.q.subject].tiers[tier]} +${pts}`, tier);
     bank(pl, pts);
-    if (R.used.length >= p.list.length){ log("Every answer has been given. Here's a new question!", "info"); newQuestion(); }
-    setTurn(nextAlive(id)); push(); return;
+    if (R.used.length >= p.list.length){
+      if (R.lap){ log("Every answer has been given!", "info"); return endLap(); }
+      log("Every answer has been given. Here's a new question!", "info"); newQuestion(); }
+    advance(id); push(); return;
   }
   fail(id, m.kind === "trap" ? `said “${text}”. ${m.msg}` : `said “${text}”, which isn't an accepted answer`, text);
 }
@@ -178,8 +180,29 @@ function fail(id, why){
   if (pl.bank >= R.settings.heartPts){ pl.bank -= R.settings.heartPts; pl.hearts++; log(`${pl.name}'s full points bar saved the heart`, "heart"); }
   if (pl.hearts <= 0){ pl.out = true; log(`${pl.name} is out of hearts!`, "out"); }
   if (alive().length <= 1) return gameOver();
-  R.phase = "choosing"; R.turn = null; R.after = id;
-  R.chooser = pl.out ? nextAlive(id) : id;
+  if (R.lap){ advance(id); push(); return; }   // someone else slipped during the lap: it carries on
+  // start a lap: everyone else answers this same question once, then it comes back to whoever slipped
+  R.lap = {failer:id, left:alive().map(p => p.id).filter(x => x !== id)};
+  log(`Everyone else answers this question once, then it's back to ${pl.name} to pick the next topic`, "info");
+  if (!R.lap.left.length) return endLap();
+  advance(id); push();
+}
+// move the turn on clockwise; during a lap, skip anyone who has already had their go
+function advance(id){
+  if (!R.lap){ setTurn(nextAlive(id)); return; }
+  const aliveIds = new Set(alive().map(p => p.id));
+  R.lap.left = R.lap.left.filter(x => x !== id && aliveIds.has(x));
+  if (!R.lap.left.length){ endLap(); return; }
+  let nx = nextAlive(id), guard = 0;
+  while (nx && !R.lap.left.includes(nx) && guard++ < 10) nx = nextAlive(nx);
+  setTurn(nx);
+}
+function endLap(){
+  clearTimeout(hostTimer); turnSeq++;
+  const f = R.lap ? R.lap.failer : R.turn; R.lap = null;
+  const fp = player(f);
+  R.phase = "choosing"; R.turn = null; R.after = f;
+  R.chooser = fp && !fp.out && fp.connected ? f : nextAlive(f);
   armChoose(); push();
 }
 function armChoose(){
@@ -207,14 +230,14 @@ function startGame(){
   R.players = R.players.filter(p => p.connected);
   if (R.players.length < 2) return;
   for (const p of R.players){ p.hearts = R.settings.lives; p.points = 0; p.bank = 0; p.out = false; }
-  usedIds = new Set(); R.log = []; R.ranking = null; R.round = 0;
+  usedIds = new Set(); R.log = []; R.ranking = null; R.round = 0; R.lap = null;
   if (!newQuestion()){ toast("No questions match the room's filter. Turn on more subjects or topics."); return; }
   log("The lesson has started. Go clockwise!", "info");
   setTurn(R.players[Math.floor(Math.random()*R.players.length)].id); push();
 }
 function backToLobby(){
   clearTimeout(hostTimer); turnSeq++;
-  R.phase = "lobby"; R.turn = null; R.q = null; R.used = []; R.chooser = null; R.ranking = null; R.log = [];
+  R.phase = "lobby"; R.turn = null; R.q = null; R.used = []; R.chooser = null; R.ranking = null; R.log = []; R.lap = null;
   R.players = R.players.filter(p => p.connected);
   for (const p of R.players){ p.hearts = R.settings.lives; p.points = 0; p.bank = 0; p.out = false; }
   push();
@@ -238,7 +261,7 @@ function onHostClose(id){
   pl.connected = false; pl.out = true; log(`${pl.name} left the class`, "out");
   if (R.phase === "over") return push();
   if (alive().length <= 1) return gameOver();
-  if (R.phase === "playing" && R.turn === id) setTurn(nextAlive(id));
+  if (R.phase === "playing" && R.turn === id) advance(id);
   else if (R.phase === "choosing" && R.chooser === id){ R.chooser = nextAlive(id); armChoose(); }
   push();
 }
@@ -370,7 +393,15 @@ function enterRoom(){
       <svg class="cr-ring" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><ellipse cx="50" cy="50" rx="38" ry="34" fill="none" stroke="rgb(255 240 210 / .35)" stroke-width=".5" stroke-dasharray="1.6 2.4" class="cr-flow"/></svg>
       <div class="cr-rug"></div>
       <div id="crSeats"></div>
-      <div class="cr-cw" aria-hidden="true">↻ clockwise</div>
+      <div class="cr-teacher" id="crTeacher" aria-hidden="true"><svg viewBox="-60 -70 120 130">
+        <ellipse cx="0" cy="52" rx="30" ry="6" fill="rgb(0 0 0 / .3)"/>
+        <path d="M-20 50 L-16 8 Q0 -2 16 8 L20 50 Z" fill="#3b5ba5"/><path d="M-6 6 L0 22 L6 6Z" fill="#f4f0e2"/><path d="M-2 10 L0 26 L2 10Z" fill="#c83a3a"/>
+        <circle cx="0" cy="-12" r="15" fill="#f1c9a0"/><path d="M-15 -14 Q-14 -32 0 -30 Q14 -32 15 -14 Q8 -22 0 -21 Q-8 -22 -15 -14Z" fill="#5a3a22"/>
+        <circle cx="-6" cy="-12" r="4.5" fill="none" stroke="#222" stroke-width="1.6"/><circle cx="6" cy="-12" r="4.5" fill="none" stroke="#222" stroke-width="1.6"/><path d="M-1.5 -12h3" stroke="#222" stroke-width="1.6"/>
+        <path d="M-5 -4 Q0 -1 5 -4" stroke="#7a3a2a" stroke-width="1.6" fill="none"/>
+        <path d="M-17 12 Q-26 28 -20 40" stroke="#3b5ba5" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <g id="crStick" class="cr-stick"><path d="M0 0 H22" stroke="#3b5ba5" stroke-width="7" stroke-linecap="round"/><circle cx="24" cy="0" r="4" fill="#f1c9a0"/><path d="M24 0 H64" stroke="#8a5a2a" stroke-width="3" stroke-linecap="round"/><circle cx="65" cy="0" r="2.6" fill="#ffe9a8"/></g>
+      </svg><span class="cr-cw">↻ clockwise</span></div>
     </section>
     <footer class="cr-bar" id="crBar"></footer>
     <div class="cr-sheet" id="crSheet" hidden></div>`;
@@ -396,12 +427,12 @@ function render(){
   if (!S || !q$("#cr")) return;
   q$("#crCode").textContent = S.code;
   q$("#crSet").hidden = !(role === "host" && S.phase === "lobby");
-  renderBoard(); renderSeats(); renderBar(); renderFeed();
+  renderBoard(); renderSeats(); renderBar(); renderFeed(); requestAnimationFrame(aimTeacher);
 }
 function renderBoard(){
   const b = q$("#crBoard"), st = S.settings, mine = me();
   const subjNames = st.subjects.length === SUBJECT_ORDER.length ? "all subjects" : st.subjects.map(k => SUBJECTS[k].name).join(", ") || "no subjects";
-  let key = S.phase + "|" + S.round + "|" + S.used.length + "|" + S.chooser + "|" + S.players.length + "|" + JSON.stringify(st) + "|" + (choosePick||"");
+  let key = S.phase + "|" + S.round + "|" + (S.lap ? S.lap.left + ":" + S.turn : "") + "|" + S.used.length + "|" + S.chooser + "|" + S.players.length + "|" + JSON.stringify(st) + "|" + (choosePick||"");
   if (key === boardKey) return; boardKey = key;
   if (S.phase === "lobby"){
     const n = S.players.length;
@@ -417,6 +448,7 @@ function renderBoard(){
     const chips = S.used.map(u => `<span class="ch-chip" style="--c:${TIER_BASE[u.tier].hex}">${esc(u.label)} <i>${esc(sub.tiers[u.tier])} +${u.pts}</i> <em>${esc(pname(u.by))}</em></span>`).join("");
     b.innerHTML = `<div class="ch-eye">${esc(sub.name)} · ${esc(q.spec)}${q.hl?" · HL":""} · ${esc(q.topic)}</div>
       <div class="ch-q">${esc(q.text)}</div>
+      ${S.lap && S.phase === "playing" ? `<p class="ch ch-lap">Lap: everyone answers once more (${S.lap.left} to go), then it's back to ${esc(pname(S.lap.failer))} to pick the next topic.</p>` : ""}
       ${S.phase === "choosing" ? `<p class="ch ch-wait">${esc(pname(S.chooser))} is choosing the next topic… <b id="crChooseLeft"></b></p>` : ""}
       <div class="ch-used">${chips || `<span class="ch-s">No answers yet. Rarer answers score more.</span>`}</div>
       <div class="ch-foot"><span>${q.total - S.used.length} answer${q.total - S.used.length === 1 ? "" : "s"} left on the list</span><span>Question ${S.round}</span></div>`;
@@ -446,6 +478,20 @@ function renderBoard(){
   }
   if (S.phase !== "choosing" || S.chooser !== myId) choosePick = null;
 }
+// the teacher turns to point the stick at whoever is answering (or choosing)
+let stickDeg = 0;
+function aimTeacher(){
+  const t = q$("#crTeacher"), st = q$("#crStick"); if (!t || !st || !S) return;
+  const target = document.querySelector(".seat.on .st-av");
+  t.classList.toggle("idle", !target);
+  if (!target) return;
+  const a = t.querySelector("svg").getBoundingClientRect(), b = target.getBoundingClientRect();
+  const sx = a.left + a.width*(78/120), sy = a.top + a.height*(78/130);      // the shoulder (18, 8) in screen space
+  let deg = Math.atan2(b.top + b.height/2 - sy, b.left + b.width/2 - sx) * 180/Math.PI;
+  while (deg - stickDeg > 180) deg -= 360; while (deg - stickDeg < -180) deg += 360;   // turn the short way round
+  stickDeg = deg; st.style.transform = `translate(18px, 8px) rotate(${deg.toFixed(1)}deg)`;
+}
+addEventListener("resize", () => aimTeacher());
 function renderSeats(){
   const box = q$("#crSeats"), n = S.settings.seats;
   if (seatEls.length !== n){ box.innerHTML = ""; seatEls = [];
