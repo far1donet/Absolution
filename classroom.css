@@ -191,3 +191,10 @@ body.in-class .hud, body.in-class .menu, body.in-class #ui{display:none!importan
 @media (prefers-reduced-motion:reduce){
   .cr .bob,.cr .vspin,.cj-av .bob,.cj-av .vspin,.cr-flow,.cr-toast{animation:none!important}
 }
+
+/* reconnecting banner */
+.cr-mend{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:10px;
+  max-width:calc(100vw - 32px);padding:10px 16px;border-radius:999px;background:#2a1d0c;border:1px solid #e9a23b;color:#ffe2b0;font:600 13px/1.3 "IBM Plex Sans",system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.cr-mend-dot{width:10px;height:10px;border-radius:50%;background:#e9a23b;flex:none;animation:crMend 1s ease-in-out infinite alternate}
+@keyframes crMend{from{opacity:.3;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.cr-mend-dot{animation:none}}

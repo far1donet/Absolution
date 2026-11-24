@@ -29,7 +29,10 @@ Tap **Join the classroom**, pick a nickname, a skin (any subject's character) an
 - Fill your points bar to win back a heart. Last player with hearts wins.
 - The host sets the seats (2–8), hearts, seconds per turn, points per heart, SL/HL and which subjects and topics come up.
 
-The host's browser runs the game and connects to friends directly (WebRTC via [PeerJS](https://peerjs.com), bundled in `vendor/`), so there is no server to run. The host needs to keep the page open. Some school networks block this kind of connection; a phone hotspot usually works.
+The host's browser runs the game, so there is no server to run and the host must keep the page open. Players connect two ways at once and keep whichever works first:
+a direct phone-to-phone link (WebRTC via [PeerJS](https://peerjs.com), bundled in `vendor/`), and a relay through free public MQTT brokers over secure WebSockets (EMQX, HiveMQ and Mosquitto; the host listens on all three). If a player's connection drops, they are put back in their seat automatically, and the seat is kept for 60 seconds. Reloading the page and entering the code again also gets you your seat back.
+
+Testing: `?net=local` plays across tabs on one computer, `?net=relay` or `?net=direct` forces one connection type, and `?relay=ws://localhost:8888` points the relay at your own broker.
 Add `?net=local` to the URL to test with several tabs on one computer.
 
 ## Adding prompts

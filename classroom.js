@@ -16,42 +16,193 @@ const rid = () => Math.random().toString(36).slice(2, 10);
 /* every subject needs topic names, not only the one open in single player */
 for (const k of SUBJECT_ORDER){ const S = SUBJECTS[k]; if (!S.topicName){ const o = {}; S.catalog.forEach(th=>th.units.forEach(u=>u.topics.forEach(([c,n])=>{ o[c]=n; }))); S.topicName = o; } }
 
-/* ================= transports ================= */
+/* ================= transports =================
+   Two ways to reach the host run side by side, and a guest uses whichever answers first:
+   - "direct": PeerJS / WebRTC, phone to phone. Fast, but often blocked between different networks.
+   - "relay": messages go through a public MQTT broker over a secure WebSocket. Works almost anywhere.
+   The host listens on both, so it doesn't matter which one a guest gets through on. */
+const PEER_OPTS = {debug:0, config:{iceServers:[
+  {urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302","stun:stun.cloudflare.com:3478"]},
+  {urls:["turn:eu-0.turn.peerjs.com:3478","turn:us-0.turn.peerjs.com:3478"], username:"peerjs", credential:"peerjsp"},
+], sdpSemantics:"unified-plan"}};
 function peerTransport(){
-  const ok = () => typeof window.Peer === "function";
+  const ok = () => typeof window.Peer === "function" && typeof RTCPeerConnection === "function";
   return {
     ok,
     host(code, h){ return new Promise((res, rej) => {
       if (!ok()) return rej("nolib");
-      const peer = new Peer(PREFIX + code, {debug:0}), conns = new Map(); let opened = false;
-      const t = setTimeout(() => { if (!opened){ try{ peer.destroy(); }catch(e){} rej("timeout"); } }, 15000);
-      peer.on("open", () => { opened = true; clearTimeout(t); res({
+      const peer = new Peer(PREFIX + code, PEER_OPTS), conns = new Map(); let opened = false, dead = false;
+      const t = setTimeout(() => { if (!opened){ dead = true; try{ peer.destroy(); }catch(e){} rej("timeout"); } }, 12000);
+      peer.on("open", () => { if (opened) return; opened = true; clearTimeout(t); res({
+        has(id){ return conns.has(id); },
         sendTo(id, m){ const c = conns.get(id); if (c && c.open) try{ c.send(m); }catch(e){} },
         broadcast(m){ conns.forEach(c => { if (c.open) try{ c.send(m); }catch(e){} }); },
-        close(){ try{ peer.destroy(); }catch(e){} },
+        close(){ dead = true; try{ peer.destroy(); }catch(e){} },
       }); });
       peer.on("connection", c => {
-        conns.set(c.peer, c);
-        c.on("data", d => h.onData(c.peer, d));
+        c.on("open", () => conns.set(c.peer, c));
+        c.on("data", d => { conns.set(c.peer, c); h.onData(c.peer, d); });
         const gone = () => { if (conns.get(c.peer) === c){ conns.delete(c.peer); h.onClose(c.peer); } };
         c.on("close", gone); c.on("error", gone);
       });
-      peer.on("disconnected", () => { try{ peer.reconnect(); }catch(e){} });
-      peer.on("error", e => { if (!opened){ clearTimeout(t); try{ peer.destroy(); }catch(x){} rej(e && e.type === "unavailable-id" ? "taken" : "network"); } });
+      peer.on("disconnected", () => { if (!dead) setTimeout(() => { try{ if (!dead && peer.disconnected) peer.reconnect(); }catch(e){} }, 1000); });
+      peer.on("error", e => { if (!opened){ clearTimeout(t); dead = true; try{ peer.destroy(); }catch(x){} rej(e && e.type === "unavailable-id" ? "taken" : "network"); } });
     }); },
-    join(code, h){ return new Promise((res, rej) => {
+    join(code, h){ let peer = null, cancelled = false; const p = new Promise((res, rej) => {
       if (!ok()) return rej("nolib");
-      const peer = new Peer({debug:0}); let done = false;
+      peer = new Peer(PEER_OPTS); let done = false;
       const fail = r => { if (done) return; done = true; clearTimeout(t); try{ peer.destroy(); }catch(e){} rej(r); };
-      const t = setTimeout(() => fail("timeout"), 15000);
+      const t = setTimeout(() => fail("timeout"), 20000);
       peer.on("error", e => fail(e && e.type === "peer-unavailable" ? "nocode" : "network"));
       peer.on("open", () => {
         const c = peer.connect(PREFIX + code, {reliable:true});
-        c.on("open", () => { done = true; clearTimeout(t); res({ send(m){ if (c.open) try{ c.send(m); }catch(e){} }, close(){ try{ c.close(); peer.destroy(); }catch(e){} } }); });
-        c.on("data", d => h.onData(d));
-        c.on("close", () => h.onClose()); c.on("error", () => h.onClose());
+        c.on("open", () => { if (done) return; done = true; clearTimeout(t); res({ kind:"direct", send(m){ if (c.open) try{ c.send(m); }catch(e){} }, close(){ try{ c.close(); peer.destroy(); }catch(e){} } }); });
+        c.on("data", d => { if (!cancelled) h.onData(d); });
+        const gone = () => { if (!done) return fail("network"); if (!cancelled) h.onClose(); };
+        c.on("close", gone); c.on("error", gone);
+        c.on("iceStateChanged", s => { if (s === "failed" && !done) fail("network"); });
+      });
+    }); p.cancel = () => { cancelled = true; try{ peer && peer.destroy(); }catch(e){} }; return p; },
+  };
+}
+
+/* ---- a small MQTT 3.1.1 client over WebSocket (publish/subscribe at QoS 0, last will) ---- */
+const RELAYS = (() => { const m = location.search.match(/[?&]relay=([^&]+)/); if (m) return decodeURIComponent(m[1]).split(","); return [
+  "wss://broker.emqx.io:8084/mqtt", "wss://broker.hivemq.com:8884/mqtt", "wss://test.mosquitto.org:8081/mqtt",
+]; })();
+const RELAY_ROOT = "absolution-ib/v1/";
+function mqtt(url, {will, onMsg, onDown}){ return new Promise((res, rej) => {
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const str = s => { const b = enc.encode(s); return [b.length >> 8, b.length & 255, ...b]; };
+  const len = n => { const o = []; do { let d = n % 128; n = Math.floor(n / 128); if (n) d |= 128; o.push(d); } while (n); return o; };
+  const pkt = (h, body) => new Uint8Array([h, ...len(body.length), ...body]);
+  let ws, up = false, gone = false, buf = new Uint8Array(0), ping = 0, pid = 1;
+  try { ws = new WebSocket(url, "mqtt"); } catch(e){ return rej("network"); }
+  ws.binaryType = "arraybuffer";
+  const t = setTimeout(() => { if (!up){ try{ ws.close(); }catch(e){} rej("network"); } }, 7000);
+  const down = () => { if (gone) return; gone = true; clearInterval(ping); clearTimeout(t); if (!up) rej("network"); else onDown && onDown(); };
+  const send = a => { if (ws.readyState === 1) try{ ws.send(a); }catch(e){} };
+  ws.onopen = () => {
+    const flags = 0x02 | (will ? 0x04 : 0);
+    const body = [...str("MQTT"), 4, flags, 0, 30, ...str("abs" + rid() + rid())];
+    if (will) body.push(...str(will.topic), ...str(JSON.stringify(will.msg)));
+    send(pkt(0x10, body));
+  };
+  ws.onmessage = e => {
+    const b = new Uint8Array(e.data), nb = new Uint8Array(buf.length + b.length); nb.set(buf); nb.set(b, buf.length); buf = nb;
+    for (;;){
+      if (buf.length < 2) break;
+      let i = 1, n = 0, mul = 1, d; do { if (i >= buf.length) return; d = buf[i++]; n += (d & 127) * mul; mul *= 128; } while (d & 128);
+      if (buf.length < i + n) break;
+      const type = buf[0] >> 4, qos = (buf[0] >> 1) & 3, p = buf.subarray(i, i + n); buf = buf.slice(i + n);
+      if (type === 2){
+        if (p[1] !== 0){ try{ ws.close(); }catch(x){} continue; }
+        up = true; clearTimeout(t); ping = setInterval(() => send(new Uint8Array([0xC0, 0])), 20000);
+        res({
+          sub(topic){ const id = pid++ & 0xffff || 1; send(pkt(0x82, [id >> 8, id & 255, ...str(topic), 0])); },
+          pub(topic, msg){ send(pkt(0x30, [...str(topic), ...enc.encode(JSON.stringify(msg))])); },
+          close(){ gone = true; clearInterval(ping); send(new Uint8Array([0xE0, 0])); setTimeout(() => { try{ ws.close(); }catch(x){} }, 50); },
+        });
+      } else if (type === 3){
+        const tl = (p[0] << 8) | p[1], topic = dec.decode(p.subarray(2, 2 + tl)); let o = 2 + tl;
+        if (qos) o += 2;
+        let m; try { m = JSON.parse(dec.decode(p.subarray(o))); } catch(x){ continue; }
+        onMsg && onMsg(topic, m);
+      }
+    }
+  };
+  ws.onclose = down; ws.onerror = () => { try{ ws.close(); }catch(e){} down(); };
+}); }
+function relayTransport(){
+  const ok = () => typeof WebSocket === "function" && typeof TextEncoder === "function";
+  return {
+    ok,
+    /* the host joins every broker it can reach, so a guest can come in on any of them */
+    host(code, h){ return new Promise((res, rej) => {
+      if (!ok()) return rej("nolib");
+      const base = RELAY_ROOT + code, where = new Map(), clients = []; let left = RELAYS.length, opened = false;
+      const api = {
+        has(id){ return where.has(id); },
+        sendTo(id, m){ const c = where.get(id); if (c) c.pub(base + "/g/" + id, {k:"data", d:m}); },
+        broadcast(m){ const seen = new Set(where.values()); seen.forEach(c => c.pub(base + "/all", {k:"data", d:m})); },
+        close(){ clients.forEach(c => { c.pub(base + "/all", {k:"close"}); setTimeout(() => c.close(), 80); }); },
+      };
+      RELAYS.forEach(url => {
+        let me = null;
+        mqtt(url, {will:{topic:base + "/all", msg:{k:"close"}},
+          onMsg: (topic, m) => { if (!m || typeof m.from !== "string" || !/^g[a-z0-9]{6,20}$/.test(m.from)) return;
+            if (m.k === "ping"){ where.set(m.from, me); me.pub(base + "/g/" + m.from, {k:"pong"}); }
+            else if (m.k === "data"){ if (where.get(m.from) !== me) where.set(m.from, me); h.onData(m.from, m.d); }
+            else if (m.k === "close"){ if (where.get(m.from) === me){ where.delete(m.from); h.onClose(m.from); } } },
+          onDown: () => { const i = clients.indexOf(me); if (i >= 0) clients.splice(i, 1); where.forEach((c, id) => { if (c === me){ where.delete(id); h.onClose(id); } }); },
+        }).then(c => { me = c; clients.push(c); c.sub(base + "/h"); if (!opened){ opened = true; res(api); } })
+          .catch(() => { if (--left === 0 && !opened) rej("network"); });
       });
     }); },
+    /* a guest tries every broker at once and keeps the first one where the host answers */
+    join(code, h){ const live = []; let won = null, cancelled = false; const p = new Promise((res, rej) => {
+      if (!ok()) return rej("nolib");
+      const base = RELAY_ROOT + code, id = "g" + rid() + rid(); let left = RELAYS.length, reached = 0, done = false;
+      const t = setTimeout(() => finish(null, reached ? "nocode" : "network"), 9000);
+      const finish = (c, why) => {
+        if (done) return; done = true; clearTimeout(t);
+        live.forEach(x => { if (x !== c) x.close(); });
+        if (!c) return rej(why);
+        won = c;
+        res({ kind:"relay", send(m){ c.pub(base + "/h", {k:"data", from:id, d:m}); }, close(){ c.pub(base + "/h", {k:"close", from:id}); setTimeout(() => c.close(), 80); } });
+      };
+      RELAYS.forEach(url => {
+        let me = null;
+        mqtt(url, {will:{topic:base + "/h", msg:{k:"close", from:id}},
+          onMsg: (topic, m) => { if (!m || cancelled) return;
+            if (m.k === "pong"){ if (!done) finish(me); }
+            else if (m.k === "data"){ if (won === me) h.onData(m.d); }
+            else if (m.k === "close"){ if (won === me) h.onClose(); } },
+          onDown: () => { if (won === me && !cancelled) h.onClose(); },
+        }).then(c => { me = c; if (done){ c.close(); return; } live.push(c); reached++;
+            c.sub(base + "/g/" + id); c.sub(base + "/all");
+            const ask = () => { if (!done){ c.pub(base + "/h", {k:"ping", from:id}); setTimeout(ask, 1500); } }; setTimeout(ask, 150); })
+          .catch(() => { if (--left === 0 && !reached) finish(null, "network"); });
+      });
+    }); p.cancel = () => { cancelled = true; live.forEach(x => x.close()); }; return p; },
+  };
+}
+
+/* both at once: the host listens on both, a guest keeps whichever connects first */
+function bothTransport(){
+  const A = peerTransport(), B = relayTransport();
+  const ok = () => A.ok() || B.ok();
+  return {
+    ok,
+    host(code, h){
+      const tries = [A, B].filter(x => x.ok()).map(x => x.host(code, h));
+      return new Promise((res, rej) => {
+        const got = []; let pending = tries.length, sent = false, why = [];
+        const api = {
+          sendTo(id, m){ const n = got.find(x => x.has(id)); if (n) n.sendTo(id, m); },
+          broadcast(m){ got.forEach(x => x.broadcast(m)); },
+          close(){ got.forEach(x => x.close()); },
+          get count(){ return got.length; },
+        };
+        tries.forEach(p => p.then(n => { got.push(n); if (!sent){ sent = true; res(api); } })
+          .catch(e => { why.push(e); if (--pending === 0 && !sent) rej(why.includes("taken") && why.length === 1 ? "taken" : why[0] || "network"); }));
+      });
+    },
+    join(code, h){
+      /* only the winning connection's messages reach the game */
+      let winner = null;
+      const wrap = tag => ({ onData: d => { if (winner === tag) h.onData(d); }, onClose: () => { if (winner === tag) h.onClose(); } });
+      const tries = [];
+      if (A.ok()) tries.push(["direct", A.join(code, wrap("direct"))]);
+      if (B.ok()) tries.push(["relay", B.join(code, wrap("relay"))]);
+      return new Promise((res, rej) => {
+        let pending = tries.length; const why = [];
+        tries.forEach(([tag, p]) => p.then(n => {
+          if (winner){ n.close(); return; }
+          winner = tag; tries.forEach(([t2, p2]) => { if (t2 !== tag && p2.cancel) p2.cancel(); }); res(n);
+        }).catch(e => { why.push(e); if (--pending === 0 && !winner) rej(why.includes("nocode") ? "nocode" : why.includes("timeout") ? "timeout" : why[0] || "network"); }));
+      });
+    },
   };
 }
 function localTransport(){
@@ -77,16 +228,19 @@ function localTransport(){
     }); },
   };
 }
-const Transport = LOCAL ? localTransport() : peerTransport();
+const NET = (location.search.match(/[?&]net=(\w+)/) || [])[1];
+const Transport = LOCAL ? localTransport() : NET === "relay" ? relayTransport() : NET === "direct" ? peerTransport() : bothTransport();
 
 /* ================= profile ================= */
 let prof = Object.assign({name:"", skin:"bio", hue:HUES[0]}, store.get("oiac-me") || {});
+/* identifies this tab to the host so a dropped or reloaded tab gets its own seat back (per tab, so two tabs are two players) */
+const myKey = (() => { let k = null; try { k = sessionStorage.getItem("oiac-key"); } catch(e){} if (!k || k.length < 8){ k = rid() + rid(); try { sessionStorage.setItem("oiac-key", k); } catch(e){} } return k; })();
 if (!SUBJECTS[prof.skin]) prof.skin = "cs";
 if (!HUES.includes(prof.hue)) prof.hue = HUES[0];
 const skinSVG = (skin, hue) => (SUBJECTS[skin] || SUBJECTS.cs).avatar(4, hue);
 
 /* ================= room state ================= */
-let role = null, net = null, myId = null, R = null, S = null;
+let role = null, net = null, myId = null, R = null, S = null, joined = "";
 let deadlineLocal = 0, chooseLocal = 0, raf = 0, hostTimer = 0, turnSeq = 0, usedIds = new Set();
 let seatEls = [], barKey = "", boardKey = "", choosePick = null;
 
@@ -107,6 +261,10 @@ function poolFor(st, subj, topic){
 /* ---------- host: the referee ---------- */
 const player = id => R.players.find(p => p.id === id);
 const alive = () => R.players.filter(p => !p.out && p.connected);
+const standing = () => R.players.filter(p => !p.out);
+const GRACE = 60;   /* seconds a dropped player has to come back before they are out */
+const owner = new Map(), route = new Map();   /* connection id → player id, and back */
+const graceT = new Map();
 function log(text, kind){ R.log.push({text, kind:kind||"", id:rid()}); if (R.log.length > 30) R.log.shift(); }
 function pub(){
   const t = now();
@@ -179,7 +337,7 @@ function fail(id, why){
   log(why ? `${pl.name} ${why} · −1 heart` : `${pl.name} ran out of time · −1 heart`, "fail");
   if (pl.bank >= R.settings.heartPts){ pl.bank -= R.settings.heartPts; pl.hearts++; log(`${pl.name}'s full points bar saved the heart`, "heart"); }
   if (pl.hearts <= 0){ pl.out = true; log(`${pl.name} is out of hearts!`, "out"); }
-  if (alive().length <= 1) return gameOver();
+  if (standing().length <= 1) return gameOver();
   if (R.lap){ advance(id); push(); return; }   // someone else slipped during the lap: it carries on
   // start a lap: everyone else answers this same question once, then it comes back to whoever slipped
   R.lap = {failer:id, left:alive().map(p => p.id).filter(x => x !== id)};
@@ -242,25 +400,57 @@ function backToLobby(){
   for (const p of R.players){ p.hearts = R.settings.lives; p.points = 0; p.bank = 0; p.out = false; }
   push();
 }
-function onHostData(id, m){
+function onHostData(cid, m){
   if (!m || typeof m !== "object" || !R) return;
   if (m.t === "hello"){
-    if (player(id)) return;
-    if (R.phase !== "lobby") return net.sendTo(id, {t:"reject", why:"started"});
-    if (R.players.length >= R.settings.seats) return net.sendTo(id, {t:"reject", why:"full"});
-    const info = cleanInfo(m); if (!info) return net.sendTo(id, {t:"reject", why:"name"});
+    /* the same phone saying hello again (a resend, or it reconnected) */
+    if (owner.has(cid)){ const pl = player(owner.get(cid)); if (pl){ net.sendTo(cid, {t:"welcome", you:pl.id}); push(); } return; }
+    const key = typeof m.key === "string" ? m.key.slice(0, 40) : "";
+    const back = key && R.players.find(p => p.key === key && p.id !== "host" && !p.out);
+    if (back){
+      const old = route.get(back.id); if (old && old !== cid) owner.delete(old);
+      owner.set(cid, back.id); route.set(back.id, cid); clearTimeout(graceT.get(back.id)); graceT.delete(back.id);
+      const was = back.connected; back.connected = true;
+      net.sendTo(cid, {t:"welcome", you:back.id}); if (!was) log(`${back.name} is back`, "info");
+      push(); return;
+    }
+    if (R.phase !== "lobby") return net.sendTo(cid, {t:"reject", why:"started"});
+    if (R.players.length >= R.settings.seats) return net.sendTo(cid, {t:"reject", why:"full"});
+    const info = cleanInfo(m); if (!info) return net.sendTo(cid, {t:"reject", why:"name"});
     let n = 2, base = info.name; while (R.players.some(p => p.name.toLowerCase() === info.name.toLowerCase())) info.name = `${base.slice(0,13)} ${n++}`;
-    addPlayer(id, info); net.sendTo(id, {t:"welcome", you:id}); log(`${info.name} joined the class`, "info"); push();
-  } else if (m.t === "answer") handleAnswer(id, m.text);
+    owner.set(cid, cid); route.set(cid, cid);
+    addPlayer(cid, info); player(cid).key = key; net.sendTo(cid, {t:"welcome", you:cid}); log(`${info.name} joined the class`, "info"); push();
+    return;
+  }
+  const id = owner.get(cid); if (!id) return;
+  if (m.t === "answer") handleAnswer(id, m.text);
   else if (m.t === "choose") choose(id, typeof m.subject === "string" ? m.subject : null, typeof m.topic === "string" ? m.topic : null);
-  else if (m.t === "leave") onHostClose(id);
+  else if (m.t === "leave"){ owner.delete(cid); if (route.get(id) === cid){ route.delete(id); dropPlayer(id, true); } }
 }
-function onHostClose(id){
-  const pl = player(id); if (!pl || !pl.connected) return;
+function onHostClose(cid){
+  const id = owner.get(cid); if (!id) return;
+  owner.delete(cid);
+  if (route.get(id) !== cid) return;   /* an old connection; they're already back on a new one */
+  route.delete(id); dropPlayer(id, false);
+}
+/* someone's connection dropped (quit = they pressed Leave) */
+function dropPlayer(id, quit){
+  const pl = R && player(id); if (!pl || !pl.connected) return;
   if (R.phase === "lobby"){ R.players = R.players.filter(p => p.id !== id); log(`${pl.name} left`, "info"); push(); return; }
-  pl.connected = false; pl.out = true; log(`${pl.name} left the class`, "out");
+  pl.connected = false;
   if (R.phase === "over") return push();
-  if (alive().length <= 1) return gameOver();
+  if (quit) return knockOut(id);
+  log(`${pl.name} lost connection. Their seat is kept for ${GRACE}s`, "out");
+  graceT.set(id, setTimeout(() => { graceT.delete(id); const p = R && player(id); if (p && !p.connected) knockOut(id); }, GRACE * 1000));
+  if (R.phase === "playing" && R.turn === id) advance(id);
+  else if (R.phase === "choosing" && R.chooser === id){ R.chooser = nextAlive(id); armChoose(); }
+  push();
+}
+function knockOut(id){
+  const pl = R && player(id); if (!pl || pl.out) return;
+  pl.out = true; pl.connected = false; log(`${pl.name} left the class`, "out");
+  if (R.phase === "over") return push();
+  if (standing().length <= 1) return gameOver();
   if (R.phase === "playing" && R.turn === id) advance(id);
   else if (R.phase === "choosing" && R.chooser === id){ R.chooser = nextAlive(id); armChoose(); }
   push();
@@ -304,9 +494,10 @@ function openJoin(code){
       <ul class="cj-rules">
         <li>Everyone takes turns clockwise round the class, answering the same question.</li>
         <li>A correct answer nobody has said yet scores 10–100 points. Rarer answers score more.</li>
-        <li>A wrong answer, a repeat or running out of time scores 0 and costs a heart. Whoever slipped up picks the next topic, and the next person starts.</li>
+        <li>A wrong answer, a repeat or running out of time scores 0 and costs a heart. Then everyone else answers that same question once, and when it comes back round, whoever slipped up picks the next topic.</li>
         <li>Fill your points bar to win back a heart. If your hearts are full, the bar saves the next heart you lose.</li>
         <li>The last player with hearts left wins. The host sets the seats, hearts, timer, points per heart and which questions come up.</li>
+        <li>The host's phone runs the game, so the host should keep this page open. If your connection drops, you're put back in your seat automatically (you have 60 seconds).</li>
       </ul>
     </details>
     <button class="linkbtn" id="cjBack">← Back to single player</button>
@@ -338,33 +529,61 @@ function openJoin(code){
 async function hostRoom(){
   let code, t;
   for (let i = 0; i < 4; i++){ code = randCode(); try { t = await Transport.host(code, {onData:onHostData, onClose:onHostClose}); break; } catch(e){ if (e !== "taken" || i === 3) throw e; } }
-  net = t; role = "host"; myId = "host";
+  net = t; role = "host"; myId = "host"; owner.clear(); route.clear(); graceT.forEach(x => clearTimeout(x)); graceT.clear();
   R = {code, phase:"lobby", settings:defaultSettings(), players:[], turn:null, deadline:0, q:null, used:[], chooser:null, after:null, chooseDeadline:0, log:[], ranking:null, round:0};
   addPlayer("host", prof); log(`${prof.name} opened the classroom`, "info");
-  enterRoom(); push();
+  enterRoom(); push(); awake(true);
 }
-async function joinRoom(code){
-  let welcomed = false, rejected = null;
-  const t = await Transport.join(code, {
-    onData: m => { if (!m) return;
+/* connect to the host and wait to be let in; the same function is used to get back in after a dropped connection */
+async function joinRoom(code, again){
+  let welcomed = false, rejected = null, link = null;
+  link = await Transport.join(code, {
+    onData: m => { if (!m || (net && net !== link)) return;
       if (m.t === "welcome"){ myId = m.you; welcomed = true; }
       else if (m.t === "reject"){ rejected = m.why; }
-      else if (m.t === "state"){ if (!q$("#cr")) enterRoom(); apply(m.s); }
-      else if (m.t === "closed") hostGone(); },
-    onClose: () => hostGone(),
+      else if (m.t === "state"){ if (!welcomed) return; if (!q$("#cr")) enterRoom(); apply(m.s); }
+      else if (m.t === "closed"){ hostGone("The host closed the classroom."); } },
+    onClose: () => { if (net === link) lostLink(); },
   });
-  net = t; role = "guest";
-  net.send({t:"hello", name:prof.name, skin:prof.skin, hue:prof.hue});
-  const t0 = now();
-  while (!welcomed && !rejected && now() - t0 < 10000) await new Promise(r => setTimeout(r, 100));
-  if (!welcomed){ const why = rejected || "timeout"; try{ net.close(); }catch(e){} net = null; role = null; const cr = q$("#cr"); if (cr) cr.remove(); throw why; }
+  net = link; role = "guest"; joined = code;
+  const hello = () => link.send({t:"hello", name:prof.name, skin:prof.skin, hue:prof.hue, key:myKey});
+  hello();
+  const t0 = now(); let last = t0;
+  while (!welcomed && !rejected && now() - t0 < 12000){ await new Promise(r => setTimeout(r, 100)); if (now() - last > 2000){ last = now(); hello(); } }
+  if (!welcomed){ const why = rejected || "timeout"; try{ link.close(); }catch(e){} net = null; if (!again){ role = null; const cr = q$("#cr"); if (cr) cr.remove(); } throw why; }
+  awake(true);
 }
-function hostGone(){
+/* the link to the host dropped without the host saying goodbye: quietly try to get back in */
+let mending = false;
+async function lostLink(){
+  if (role !== "guest" || mending) return;
+  mending = true; const old = net; net = null; try{ old && old.close(); }catch(e){}
+  const flag = document.createElement("div"); flag.className = "cr-mend"; flag.id = "crMend"; flag.setAttribute("role", "status");
+  flag.innerHTML = `<span class="cr-mend-dot"></span> Connection lost. Getting you back into the classroom…`;
+  const cr = q$("#cr"); if (cr) cr.appendChild(flag);
+  const t0 = now(); let why = "timeout";
+  while (role === "guest" && now() - t0 < (GRACE - 5) * 1000){
+    try { await joinRoom(joined, true); why = null; break; }
+    catch(e){ why = e; if (e === "started" || e === "full") break; await new Promise(r => setTimeout(r, 1500)); }
+  }
+  mending = false; const f = q$("#crMend"); if (f) f.remove();
+  if (why && role === "guest") hostGone(why === "nocode" ? "The classroom has closed." : "Lost the connection to the classroom.");
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && role) awake(true); });
+let lock = null;
+function awake(on){
+  try {
+    if (on && !lock && navigator.wakeLock) navigator.wakeLock.request("screen").then(l => { lock = l; l.addEventListener("release", () => { lock = null; }); }).catch(() => {});
+    else if (!on && lock){ lock.release(); lock = null; }
+  } catch(e){}
+}
+function hostGone(text){
   if (!role) return;
   const was = role; leave(true);
-  if (was === "guest"){ openJoin(""); const m = q$("#cjMsg"); if (m) m.textContent = "The host closed the classroom."; }
+  if (was === "guest"){ openJoin(""); const m = q$("#cjMsg"); if (m) m.textContent = text || "The host closed the classroom."; }
 }
 function leave(silent){
+  awake(false); mending = false;
   cancelAnimationFrame(raf); raf = 0; clearTimeout(hostTimer); turnSeq++;
   if (net){ try { if (role === "host") net.broadcast({t:"closed"}); else net.send({t:"leave"}); } catch(e){} setTimeout((n => () => { try{ n.close(); }catch(e){} })(net), 150); }
   net = null; role = null; R = null; S = null; myId = null; seatEls = []; barKey = ""; boardKey = ""; choosePick = null;
