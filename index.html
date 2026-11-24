@@ -324,6 +324,7 @@ details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:
 <link rel="stylesheet" href="themes.css">
 <link rel="stylesheet" href="heaven.css">
 <link rel="stylesheet" href="life.css">
+<link rel="stylesheet" href="calc.css">
 </head>
 <body>
 <div class="viewport" id="vp"><div id="world"></div></div>
@@ -358,6 +359,7 @@ const escH = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">"
 const avatarSVG = inner => `<svg width="74" height="74" viewBox="0 0 74 74" overflow="visible" aria-hidden="true"><g class="bob"><g transform="translate(37 37)">${inner}</g></g></svg>`;
 function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 </script>
+<script src="calc.js"></script>
 <script src="subjects/cs.js"></script>
 <script src="subjects/bio.js"></script>
 <script src="subjects/chem.js"></script>
@@ -366,6 +368,8 @@ function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 <script src="subjects/hist.js"></script>
 <script src="subjects/geo.js"></script>
 <script src="subjects/fr.js"></script>
+<script src="subjects/eng.js"></script>
+<script src="subjects/math.js"></script>
 <script src="subjects/gk.js"></script>
 <script src="specials.js"></script>
 <script src="explain.js"></script>
@@ -379,6 +383,7 @@ function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 <script src="qbank/hist.js"></script>
 <script src="qbank/geo.js"></script>
 <script src="qbank/fr.js"></script>
+<script src="qbank/eng.js"></script>
 <script src="qbank/gk.js"></script>
 <script>
 /* ================= ranks ================= */
@@ -422,6 +427,7 @@ function lev(a,b){ if(Math.abs(a.length-b.length)>3) return 99; const d=Array.fr
   for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
   return d[a.length][b.length]; }
 for (const key of SUBJECT_ORDER) for (const p of SUBJECTS[key].prompts){
+  if (!p.ans) continue;                                      // multiple-choice prompts (Maths) have options instead
   const total = p.ans.reduce((s,a)=>s+a[1],0);
   p.list = p.ans.map(([label,w,...al]) => { const all=[label,...al];
     return {key:norm(label)||"x", label, prior:w/total, gem:label===p.gem, aliases:[...new Set(all.map(norm))], spaced:[...new Set(all.map(normSp))]}; });
@@ -641,7 +647,7 @@ function defaultEntity(t){
 
 /* ================= game flow ================= */
 let S = null, raf = null, flowId = 0;
-function clearUI(){ ui.innerHTML = ""; const ln=$("#lines"); if (ln) ln.innerHTML = ""; const tg=$("#tag"); if (tg) tg.remove(); stopTimer(); }
+function clearUI(){ if (window.GDC) GDC.stop($("#calcSlot")); document.body.classList.remove("mcq-ask"); ui.innerHTML = ""; const ln=$("#lines"); if (ln) ln.innerHTML = ""; const tg=$("#tag"); if (tg) tg.remove(); stopTimer(); }
 
 /* ---------- subjects + syllabus picker ---------- */
 function setMode(key){
@@ -684,8 +690,8 @@ function titleScreen(){
     <p class="lede">${M.blurb}</p>
     <div class="picker" id="picker"></div>
     <details class="how"><summary>How scoring works</summary>
-      <div class="ladder">${TIER_ORDER.map(t=>`<div style="--c:${TIER_BASE[t].hex}"><b>${esc(tierName(t))}</b><span class="n">+${TIER_BASE[t].pts}</span><span>${TIER_BASE[t].desc}</span></div>`).join("")}</div>
-      <p class="small">${TIME} seconds per prompt, one answer each. Today's dive is ${PER_DIVE} prompts, up to ${PER_DIVE*100} points. Practice is endless until you lose all ${LIVES} hearts. Rarity comes from built-in estimates of how often each answer is given, blended with live answers where class stats are available. Small typos and short phrases are accepted.</p>
+      <div class="ladder">${TIER_ORDER.map(t=>`<div style="--c:${TIER_BASE[t].hex}"><b>${esc(tierName(t))}</b><span class="n">+${TIER_BASE[t].pts}</span><span>${esc((M.ladder && M.ladder[t]) || TIER_BASE[t].desc)}</span></div>`).join("")}</div>
+      <p class="small">${M.mcq ? `${M.time} seconds per question. Pick one of four answers; if it's wrong you get one more try for fewer points. Today's dive is ${PER_DIVE} questions, up to ${PER_DIVE*100} points. Practice is endless until you lose all ${LIVES} hearts. After every question Scipa shows how to solve it on a graphic display calculator.</p>` : `${TIME} seconds per prompt, one answer each. Today's dive is ${PER_DIVE} prompts, up to ${PER_DIVE*100} points. Practice is endless until you lose all ${LIVES} hearts. Rarity comes from built-in estimates of how often each answer is given, blended with live answers where class stats are available. Small typos and short phrases are accepted.</p>`}
     </details>
   </section></div>`;
   $("#classBtn").onclick = () => { if (window.openClassroom) window.openClassroom(); };
@@ -710,7 +716,7 @@ function renderPicker(focusSel){
       <button class="btn ghost" id="practice" ${n?"":"disabled"}>Practice · endless</button>
       <button class="btn heaven-btn" id="heaven" ${hn?"":"disabled"}>Go to heaven</button>
     </div>
-    <p class="small"><b>Today's dive:</b> ${PER_DIVE} prompts from all of ${esc(M.name)} (${esc(M.noLevel || pickState.level)}), the same for everyone today, up to ${PER_DIVE*100} points.${done?` Your best today: <b>${done.score}</b> pts, reached ${esc(done.layer)}.`:""}<br><b>Practice:</b> endless prompts from the topics you tick below. You have ${LIVES} hearts, and a wrong answer or running out of time costs one. Go as far as you can.${best?` Your best: <b>${best.score}</b> pts over ${best.prompts} prompts.`:""}<br><b>Go to heaven:</b> Satan locks you in his dungeon. Escape by writing full answers to exam-style questions on the topics you tick${hn ? ` (${hn} question${hn===1?"":"s"})` : ""}, marked against a markscheme. Full marks climbs a floor; zero marks drags you back down.</p>
+    <p class="small"><b>Today's dive:</b> ${PER_DIVE} prompts from all of ${esc(M.name)} (${esc(M.noLevel || pickState.level)}), the same for everyone today, up to ${PER_DIVE*100} points.${done?` Your best today: <b>${done.score}</b> pts, reached ${esc(done.layer)}.`:""}<br><b>Practice:</b> endless prompts from the topics you tick below. You have ${LIVES} hearts, and a wrong answer or running out of time costs one. Go as far as you can.${best?` Your best: <b>${best.score}</b> pts over ${best.prompts} prompts.`:""}<br><b>Go to heaven:</b> Satan locks you in his dungeon. ${M.mcq ? `Escape by answering exam-style questions on the topics you tick${hn ? ` (${hn} question${hn===1?"":"s"})` : ""}. A right answer climbs a floor; a wrong one drags you back down.` : `Escape by writing full answers to exam-style questions on the topics you tick${hn ? ` (${hn} question${hn===1?"":"s"})` : ""}, marked against a markscheme. Full marks climbs a floor; zero marks drags you back down.`}</p>
     <span data-status>${statusHTML()}</span>
     <div class="row"><button class="mini" id="pAll">Select all</button><button class="mini" id="pNone">Clear</button></div>
     ${M.catalog.map(th=>`<div class="theme"><h3>${esc(th.label || `Theme ${th.code} · ${th.name}`)}</h3>${th.units.map(u=>{
@@ -756,6 +762,7 @@ async function showPrompt(){
   if (S.endless) ensureWorld(S.score + 180);
   const id = flowId, p = S.set[S.i];
   pips(); $("#hPrompt").textContent = `${M.name} · ${S.endless ? "Practice · " : ""}${promptLabel()}`;
+  if (p.mcq) return showMCQ(p);
   ui.innerHTML = `
     <section class="card" id="card" aria-live="polite">
       <div class="eyebrow">${promptLabel()}<span class="spec">${esc(p.spec)}${p.hl?" · HL":""}</span><span style="color:var(--muted);letter-spacing:.1em">${esc(M.topicName[topicOf(p)]||"")}</span></div>
@@ -775,11 +782,11 @@ async function showPrompt(){
   $("#ans").focus({preventScroll:true});
   S.locked = false; startTimer();
 }
-function startTimer(){
-  stopTimer(); const t0 = performance.now();
-  const tick = () => { const left = Math.max(0, TIME - (performance.now()-t0)/1000); const rc=$("#rc"); if(!rc) return;
-    rc.setAttribute("stroke-dashoffset", (125.7*(1-left/TIME)).toFixed(1)); $("#rn").textContent = Math.ceil(left); $("#ring").classList.toggle("low", left<6);
-    if (left<=0){ submit(true); return; } raf = requestAnimationFrame(tick); };
+function startTimer(onEnd = () => submit(true)){
+  stopTimer(); const t0 = performance.now(), T = M.time || TIME;
+  const tick = () => { const left = Math.max(0, T - (performance.now()-t0)/1000); const rc=$("#rc"); if(!rc) return;
+    rc.setAttribute("stroke-dashoffset", (125.7*(1-left/T)).toFixed(1)); $("#rn").textContent = Math.ceil(left); $("#ring").classList.toggle("low", left < (T > 30 ? 10 : 6));
+    if (left<=0){ onEnd(); return; } raf = requestAnimationFrame(tick); };
   raf = requestAnimationFrame(tick);
 }
 function stopTimer(){ if (raf) cancelAnimationFrame(raf); raf=null; }
@@ -813,7 +820,11 @@ async function submit(timeout){
   S.results[S.i] = {p, raw, tier, pts, msg, ans, label: ans ? ans.label : (raw || "—")};
   $("#card").classList.add("out"); $("#bar").classList.add("out");
   await sleep(350); if (id!==flowId) return;
+  if (await launch(id, tier, pts, raw, m.kind==="empty")) showReveal();
+}
 
+/* the skin carries the answer through the world: a bounce off the wall for 0, a plunge and a transformation for One in a … */
+async function launch(id, tier, pts, raw, empty){
   const base = S.score, startC = avC, gem = tier === "gem";
   const lines = $("#lines"); lines.classList.remove("quiet");
   lines.innerHTML = LINE_TIERS.map((t,k)=>`<div class="tline ${isV()?"":"v"}" data-t="${t}" style="--c:${TIER_BASE[t].hex};${along(pos(base+TIER_BASE[t].pts))}"><span style="${isV()?"":`top:${120+k*22}px`}">${esc(tierName(t).toUpperCase())} · ${TIER_BASE[t].pts}</span></div>`).join("")
@@ -821,7 +832,7 @@ async function submit(timeout){
   requestAnimationFrame(()=>lines.querySelectorAll(".tline").forEach(l=>l.classList.add("on")));
   const v = $("#virus");
 
-  if (m.kind==="empty"){ v.classList.remove("hit"); void v.offsetWidth; v.classList.add("hit"); await sleep(600); }
+  if (empty){ v.classList.remove("hit"); void v.offsetWidth; v.classList.add("hit"); await sleep(600); }
   else {
     // the answer rides with the skin: the skin carries it down through the layers
     const tag = document.createElement("div"); tag.id = "tag";
@@ -872,8 +883,104 @@ async function submit(timeout){
     }
   }
   document.body.classList.remove("gem-dive");
+  return id===flowId;
+}
+
+/* ---------- multiple choice (Mathematics AA): four options, a second try, then Scipa shows the GDC method ---------- */
+const fmtM = t => esc(t).replace(/\^\{([^}]*)\}/g, "<sup>$1</sup>").replace(/_\{([^}]*)\}/g, "<sub>$1</sub>");
+const plainM = t => String(t).replace(/\^\{([^}]*)\}/g, "^$1").replace(/_\{([^}]*)\}/g, "$1");
+async function showMCQ(p){
+  const id = flowId, T = M.time || TIME, order = pick(rng("opt" + p.id), p.opts.map((_, i) => i), p.opts.length);
+  S.opt = {order, tries:0, wrong:[], t0:0};
+  ui.innerHTML = `
+    <section class="card mcq-card" id="card" aria-live="polite">
+      <div class="eyebrow">${promptLabel()}<span class="spec">${esc(p.spec)}${p.hl?" · HL":""}</span><span style="color:var(--muted);letter-spacing:.1em">${esc(M.topicName[topicOf(p)]||"")}</span></div>
+      <p class="q">${fmtM(p.q)}</p>
+      <p class="hint" id="mcqMsg">${esc(M.verbs.hint)}</p>
+    </section>
+    <div class="countdown" id="cd">${esc(M.verbs.count)} · the clock starts in <b id="cdn">${COUNTDOWN}</b></div>
+    <div class="bar mcq-bar out" id="bar">
+      <div class="ring" id="ring"><svg width="46" height="46"><circle cx="23" cy="23" r="20" fill="rgb(6 10 13 / .9)" stroke="#22323d" stroke-width="3"/><circle id="rc" cx="23" cy="23" r="20" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="125.7" stroke-dashoffset="0" stroke-linecap="round"/></svg><b id="rn">${T}</b></div>
+      <div class="mcq-opts" role="group" aria-label="Answers">${order.map((oi, k) => `<button class="mcq-opt" data-o="${oi}" disabled><b>${"ABCD"[k]}</b><span>${fmtM(p.opts[oi])}</span></button>`).join("")}</div>
+    </div>`;
+  for (let n=COUNTDOWN; n>0; n--){ if (id!==flowId) return; const el=$("#cdn"); if (el){ el.textContent=n; el.style.animation="none"; void el.offsetWidth; el.style.animation=""; } await sleep(1000); }
   if (id!==flowId) return;
-  showReveal();
+  $("#cd").remove(); $("#bar").classList.remove("out");
+  document.querySelectorAll(".mcq-opt").forEach(b => { b.disabled = false; b.onclick = () => chooseOption(+b.dataset.o); });
+  document.querySelector(".mcq-opt").focus({preventScroll:true});
+  liftForOptions(true);
+  S.locked = false; S.opt.t0 = performance.now(); startTimer(() => chooseOption(-1));
+}
+// A–D or 1–4 picks an option
+document.addEventListener("keydown", e => {
+  if (!S || S.locked || !S.opt || !document.querySelector(".mcq-opts") || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target.closest && e.target.closest("input,textarea,select") || document.body.classList.contains("in-class") || document.body.classList.contains("in-heaven")) return;
+  const k = "abcd".indexOf(e.key.toLowerCase()), n = "1234".indexOf(e.key), idx = k >= 0 ? k : n;
+  const b = idx >= 0 && document.querySelectorAll(".mcq-opt")[idx];
+  if (b && !b.disabled){ e.preventDefault(); b.click(); }
+});
+// sideways worlds keep the skin near the bottom of the screen: lift the world while the options cover it
+function liftForOptions(on){
+  const bar = $("#bar"), lift = on && !isV() && bar ? Math.max(0, bar.offsetHeight - 76) : 0;
+  vp.style.setProperty("--lift", lift + "px"); document.body.classList.toggle("mcq-ask", lift > 0);
+}
+async function chooseOption(oi){
+  if (!S || S.locked || !S.opt) return;
+  const id = flowId, p = S.set[S.i], O = S.opt, secs = (performance.now() - O.t0) / 1000;
+  const btn = oi >= 0 ? document.querySelector(`.mcq-opt[data-o="${oi}"]`) : null;
+  if (oi >= 0 && oi !== p.a && O.tries === 0){            // first wrong answer: Scipa is disappointed, one more try
+    O.tries = 1; O.wrong.push(oi);
+    if (btn){ btn.classList.add("wrong"); btn.disabled = true; btn.setAttribute("aria-label", btn.textContent + " (wrong)"); }
+    const msg = $("#mcqMsg"); if (msg){ msg.textContent = "Not quite. One more try, for fewer points."; msg.classList.add("bad"); }
+    if (window.GDC) GDC.sad();
+    const next = [...document.querySelectorAll(".mcq-opt")].find(b => !b.disabled); if (next) next.focus({preventScroll:true});
+    return;
+  }
+  S.locked = true; stopTimer(); liftForOptions(false);
+  const correct = oi === p.a, timeout = oi < 0;
+  let tier = "blocked";
+  if (correct) tier = O.tries === 0 ? (secs <= 15 ? "gem" : secs <= 35 ? "rootkit" : "trojan") : (secs <= 40 ? "adware" : "spam");
+  if (!correct && !timeout){ O.wrong.push(oi); if (window.GDC) GDC.sad(); }
+  let msg = correct ? `${tierNote(tier)} Answered in ${secs < 10 ? secs.toFixed(1) : Math.round(secs)} s.` : timeout ? "Out of time, so you didn't move." : "Wrong twice, so you didn't move.";
+  const pts = TIER_BASE[tier].pts;
+  if (S.endless && tier === "blocked"){ S.hearts = Math.max(0, S.hearts - 1); msg += S.hearts ? ` You lost a heart: ${S.hearts} left.` : " That was your last heart."; }
+  const raw = timeout ? "" : plainM(p.opts[oi]);
+  S.results[S.i] = {p, raw, tier, pts, msg, ans:null, label: timeout ? "—" : raw, mcq:true, correct, tries:O.tries + 1, timeout, wrong:O.wrong.slice(), order:O.order, secs};
+  document.querySelectorAll(".mcq-opt").forEach(b => b.disabled = true);
+  if (btn) btn.classList.add(correct ? "right" : "wrong");
+  await sleep(correct ? 420 : 950); if (id!==flowId) return;
+  $("#card").classList.add("out"); $("#bar").classList.add("out");
+  await sleep(350); if (id!==flowId) return;
+  if (await launch(id, tier, pts, raw, timeout)) showReveal();
+}
+function showRevealMCQ(r){
+  $("#lines").classList.add("quiet");
+  const p = r.p, t = r.tier, c = TIER_BASE[t].hex;
+  const from = S.score; S.score += r.pts; hud(S.score, S.score); pips();
+  if (r.pts){ const sc = $("#hScore"); sc.classList.remove("bump"); void sc.offsetWidth; sc.classList.add("bump"); }
+  const last = S.endless ? S.hearts <= 0 : S.i === S.set.length-1;
+  const art = (M.entity && M.entity(t, c)) || defaultEntity(t);
+  ui.innerHTML = `
+    <section class="reveal mcq-reveal" style="--c:${c}" aria-live="polite">
+      <div class="entity" style="--c:${c}">${art}</div>
+      <div class="rank">${t==="blocked" ? esc(r.timeout ? "Timed out" : M.blocked) : esc(tierName(t))}</div>
+      <div class="gain"><b>+${r.pts} PTS</b> · ${r.pts ? esc(M.meter.gain(from, S.score)) : "no movement"}${S.endless && !r.pts ? ` · <b style="color:#ff4f6e">−1 ♥</b>` : ""}</div>
+      <div class="note">${esc(r.msg)}</div>
+      <div class="mr-body">
+        <div class="mr-text">
+          <p class="mr-q"><span class="spec">${esc(p.spec)}${p.hl ? " · HL" : ""}</span> ${fmtM(p.q)}</p>
+          <ul class="mr-opts">${r.order.map((oi, k) => { const ok = oi === p.a, bad = r.wrong.includes(oi);
+            return `<li class="${ok ? "right" : bad ? "wrong" : ""}"><b>${"ABCD"[k]}</b><span>${fmtM(p.opts[oi])}</span><i>${ok ? "✓ correct" : bad ? "✗ your answer" : ""}</i></li>`; }).join("")}</ul>
+          <div class="mr-why"><b>Worked solution</b><p>${fmtM(p.why)}</p></div>
+        </div>
+        <div class="mr-calc"><div class="mr-cap">${r.correct ? "Here's how Scipa solves it on the GDC" : "Watch Scipa solve it on the GDC"}</div><div class="calc-slot" id="calcSlot"></div>
+          <button class="linkbtn" id="replay">Replay ↻</button></div>
+      </div>
+    </section>
+    <div class="dock"><button class="btn descend" id="go">${last ? "Results" : "Next question"}</button></div>`;
+  const play = () => { if (window.GDC) GDC.play($("#calcSlot"), p.steps); };
+  play(); $("#replay").onclick = play;
+  $("#go").onclick = descend; $("#go").focus({preventScroll:true});
 }
 
 /* a burst of sparks from the skin (drawn by life.js on the particle layer) */
@@ -908,6 +1015,20 @@ function spreadHTML(sp, still){
   const path = (d, col, w, k, extra = "") => `<path class="sp-grow" pathLength="1" d="${d}" stroke="${col}" stroke-width="${w}" fill="none" stroke-linecap="round"${grow(k)}${extra}/>`;
   const walk = (x, y, ang, len, steps, jag) => { let d = `M${f1(x)} ${f1(y)}`; for (let i=0; i<steps; i++){ ang += (r()-.5)*jag; x += Math.cos(ang)*len/steps; y += Math.sin(ang)*len/steps; d += ` L${f1(x)} ${f1(y)}`; } return {d, x, y, ang}; };
   const kind = cfg.kind;
+  // pages and symbols are drawn as HTML so the letters and paper keep their shape at any screen width
+  if (kind === "pages" || kind === "symbols"){
+    const pages = kind === "pages", N = pages ? 8 + sp.n * 3 : 20 + sp.n * 5, oy2 = isV() ? 380 : 299;
+    const SYM = ["π","∑","∫","∞","√","θ","∂","λ","φ","Δ","e","i","±","≠","∈","ℝ","ℂ","x²","dy/dx","10¹⁰⁰"];
+    let h = "";
+    for (let i=0; i<N; i++){
+      const a = r()*6.283, d = (pages ? 70 : 50) + r()*(pages ? 230 : 300), dx = Math.cos(a)*d*(isV() ? 1.3 : 1), dy = Math.sin(a)*d*.8, rot = f1((r()-.5)*(pages ? 70 : 40));
+      const x = isV() ? `calc(${M.avX ? 50 : 68}% + ${f1(dx)}px)` : `${f1(380 + dx)}px`, del = still ? "" : `animation-delay:${f1(i*.06)}s,${f1(1.2 + i*.06)}s;`;
+      h += pages ? `<i class="sp-page" style="left:${x};top:${f1(oy2 + dy)}px;--r:${rot}deg;--dx:${f1(-dx)}px;--dy:${f1(-dy)}px;${del}"></i>`
+        : `<i class="sp-sym" style="left:${x};top:${f1(oy2 + dy)}px;--r:${rot}deg;--dx:${f1(-dx)}px;--dy:${f1(-dy)}px;--c:${cols[i % cols.length]};--fs:${f1(16 + r()*26)}px;${del}">${SYM[Math.floor(r()*SYM.length)]}</i>`;
+    }
+    const st = isV() ? `top:${f1(pos(sp.p) - oy2)}px;left:0;right:0;height:760px` : `left:${f1(pos(sp.p) - 380)}px;bottom:0;width:760px;height:420px`;
+    return `<div class="spread sp-html${still ? " still" : ""}" style="${st}" aria-hidden="true">${h}</div>`;
+  }
   if (kind === "veins" || kind === "cracks" || kind === "arcs"){
     const arms = kind === "arcs" ? 9 : 8, jag = kind === "arcs" ? 2.2 : kind === "cracks" ? .5 : .9, steps = kind === "arcs" ? 12 : 9;
     for (let i=0; i<arms; i++){
@@ -934,6 +1055,7 @@ function spreadHTML(sp, still){
 }
 
 function showReveal(){
+  if (S.results[S.i].mcq) return showRevealMCQ(S.results[S.i]);
   $("#lines").classList.add("quiet");
   const r = S.results[S.i], p = r.p, t = r.tier, c = TIER_BASE[t].hex;
   const from = S.score; S.score += r.pts; hud(S.score, S.score); pips();
@@ -1019,6 +1141,7 @@ async function showBonus(){
 
 async function descend(){
   const id = flowId;
+  if (window.GDC) GDC.stop($("#calcSlot"));
   const go = $("#go"); if (go) go.disabled = true;
   document.querySelectorAll(".reveal,.dock").forEach(e=>e.classList.add("leave")); await sleep(230); if (id!==flowId) return;
   ui.innerHTML = "";

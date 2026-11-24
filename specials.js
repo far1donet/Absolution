@@ -109,6 +109,34 @@ const FORMS = {
       + `<ellipse cx="-4" cy="-11" rx="3" ry="4" fill="#7aff9a"/><ellipse cx="5" cy="-10" rx="3" ry="4" fill="#7aff9a"/><circle cx="-4" cy="-12" r="1" fill="#0a1a10"/><circle cx="5" cy="-11" r="1" fill="#0a1a10"/></g>`
       + Array.from({length: 1 + power}, (_, k) => orbit(56, 20, (3 + k * .8).toFixed(1), (k * 1.5).toFixed(1), escort)).join(""));
   },
+  /* Mathematics AA: Scipa Prime. A black-and-gold calculator with a crown, infinity eyes and symbols in orbit */
+  math(level, hue, power){
+    const sym = k => `<text text-anchor="middle" y="5" font-family="Georgia,serif" font-size="15" font-weight="700" fill="${k % 2 ? "#7ad8ff" : "#ffd25a"}">${["π","∑","∫","∞","√","θ"][k % 6]}</text>`;
+    const keys = Array.from({length:15}, (_, k) => `<rect x="${-17 + (k % 3) * 12}" y="${4 + Math.floor(k / 3) * 6.4}" width="10" height="4.4" rx="1.3" fill="${k === 14 ? "#ffd25a" : k % 3 === 2 ? "#7a5a1a" : "#2a2418"}"/>`).join("");
+    return avatarSVG(glow(uid(), "#ffd25a", 58, .4)
+      + `<g class="av-hover"><path class="av-tip" d="M-24 -4 q-14 -6 -17 -24 M24 -4 q14 -6 17 -24" stroke="#ffd25a" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="-41" cy="-29" r="3.4" fill="#ffd25a"/><circle cx="41" cy="-29" r="3.4" fill="#ffd25a"/>`
+      + `<rect x="-23" y="-36" width="46" height="76" rx="10" fill="#16120a" stroke="#ffd25a" stroke-width="2.6"/><rect x="-18" y="-30" width="36" height="27" rx="4" fill="#0e2a40" stroke="#7ad8ff" stroke-width="1.2"/>`
+      + `<g class="av-blink"><text x="-8" y="-13" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#7ad8ff">∞</text><text x="8" y="-13" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#7ad8ff">∞</text></g>`
+      + `<path d="M-7 -8 q7 5 14 0" stroke="#7ad8ff" stroke-width="1.8" fill="none" stroke-linecap="round"/>${keys}`
+      + `<path d="M-17 -36 l4 -11 l6 6 l7 -10 l7 10 l6 -6 l4 11z" fill="#ffd25a" stroke="#fff4c8" stroke-width="1"/><circle cy="-44" r="2" fill="#7ad8ff"/>`
+      + `<path d="M-12 40 v6 M12 40 v6" stroke="#ffd25a" stroke-width="3.4" stroke-linecap="round"/></g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(46, 18, (3 + k * .5).toFixed(1), (k * 1.3).toFixed(1), sym(k))).join(""));
+  },
+  /* English A: the Quill. A tough dark feather pen in shades, with a gold nib, an ink aura and letters in orbit */
+  eng(level, hue, power){
+    const barbs = Array.from({length: 10}, (_, k) => { const t = k / 9, x = -4 + t * 17, y = 26 - t * 66;
+      return `<path d="M${f1(x)} ${f1(y)} q${f1(-9 + t * 3)} ${f1(-3 - t * 3)} ${f1(-13 + t * 5)} ${f1(-9 - t * 4)} M${f1(x)} ${f1(y)} q${f1(7 - t * 2)} ${f1(-2)} ${f1(11 - t * 3)} ${f1(-6 - t * 2)}" stroke="#a87aff" stroke-width="1.1" fill="none" opacity=".75"/>`; }).join("");
+    const letter = k => `<text text-anchor="middle" y="5" font-family="Georgia,serif" font-style="italic" font-size="15" font-weight="700" fill="${k % 2 ? "#ffd25a" : "#c8a8ff"}">${["A","&","¶","Æ","Q","§"][k % 6]}</text>`;
+    return avatarSVG(glow(uid(), "#9a5aff", 58, .5)
+      + `<g class="av-hover"><g transform="rotate(20)">`
+      + `<path d="M-3 34 C-16 6 -9 -26 13 -50 C27 -30 22 -2 5 22 Z" fill="#170c26" stroke="#ffd25a" stroke-width="2"/>${barbs}`
+      + `<path d="M-1 38 Q4 -6 13 -48" stroke="#ffd25a" stroke-width="2.2" fill="none"/>`
+      + `<path d="M-9 -9 h22 v2 q-1 7 -7 7 q-4 0 -4.5 -5.5 h-1 q-.5 5.5 -4.5 5.5 q-5 0 -5 -7z" fill="#05030a" stroke="#ffd25a" stroke-width=".9"/><path d="M-7 -7 l3 0" stroke="#fff" stroke-width="1" opacity=".6"/>`
+      + `<path d="M-1 6 q5 3 9 -2" stroke="#ffd25a" stroke-width="1.7" fill="none" stroke-linecap="round"/>`
+      + `<path d="M-6 33 L0 56 L6 33z" fill="#ffd25a" stroke="#fff4c8" stroke-width="1"/><path d="M0 38 v12" stroke="#6a4a00" stroke-width="1.1"/><circle cy="38" r="1.6" fill="#6a4a00"/>`
+      + `</g></g><g class="drift" style="animation-duration:2.2s"><path d="M-19 58 q-3 5 0 7 q3 -2 0 -7z" fill="#9a5aff"/></g>`
+      + Array.from({length: 1 + power}, (_, k) => orbit(46, 20, (3.2 + k * .6).toFixed(1), (k * 1.4).toFixed(1), letter(k))).join(""));
+  },
 };
 
 /* how each form is introduced, glows, trails and spreads */
@@ -121,6 +149,8 @@ const SPECIAL = {
   hist:{name:"TIME LORD", line:"You control time itself.", glow:"#b07aff", trail:"#c9a3ff", sky:{kind:"glint", c:["201 163 255", "255 214 160"], n:50}, spread:{kind:"rings", c:["#b07aff", "#e8d8ff", "#ffd25a"]}},
   geo: {name:"KRAKEN FLAGSHIP", line:"The kraken sails with you now.", glow:"#5affb0", trail:"#5affb0", sky:{kind:"spray", c:["90 255 176", "200 242 255"], n:54}, spread:{kind:"tentacles", c:["#8a2a6a", "#5a1a4a"]}},
   fr:  {name:"BAGUETTE ROYALE", line:"Vive la baguette ! The crown is yours.", glow:"#ffd25a", trail:"#ffe58a", sky:{kind:"petal", c:["0 85 164", "255 255 255", "239 65 53"], n:46}, spread:{kind:"ribbons", c:["#0055a4", "#ffffff", "#ef4135"]}},
+  math:{name:"SCIPA PRIME", line:"Infinite precision. Every equation bends to you.", glow:"#ffd25a", trail:"#ffd25a", sky:{kind:"glyph", c:["255 210 90", "122 216 255", "255 255 255"], n:58, chars:["π","∑","∫","∞","√","θ","∂","λ","φ","e","i","10¹⁰⁰"], alpha:.75}, spread:{kind:"symbols", c:["#ffd25a", "#7ad8ff", "#ffffff"]}},
+  eng: {name:"THE QUILL", line:"The pencil is gone. The quill writes whole pages now.", glow:"#9a5aff", trail:"#9a5aff", sky:{kind:"glyph", c:["90 50 170", "40 26 80", "190 140 30"], n:46, chars:["A","a","é","&","¶","§","?","!","“","”","Q","æ","—"], alpha:.55, blend:"source-over", font:"Georgia, serif"}, spread:{kind:"pages", c:["#5a2aa8", "#2a1a50"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

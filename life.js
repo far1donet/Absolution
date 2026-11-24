@@ -60,6 +60,7 @@ function Sky(canvas){
     else if (k === "star"){ p.r = (.5 + R() * 1.4) * (p.d > 1 ? 1.4 : 1); }
     else if (k === "ember"){ p.r = 1 + R() * 2.2; p.vy = -(18 + R() * 30) * p.d; }
     else if (k === "firefly"){ p.r = 1.4 + R() * 1.6; p.vx = (R() - .5) * 16; p.vy = (R() - .5) * 16; }
+    else if (k === "glyph"){ p.r = (11 + R() * 13) * (.55 + p.d * .45); p.ch = st.chars[Math.floor(R() * st.chars.length)]; p.vy = -(4 + R() * 9) * p.d; p.vx = (R() - .5) * 7; p.rot = (R() - .5) * .8; }
     return p;
   }
   function setStyle(s, k){
@@ -77,7 +78,7 @@ function Sky(canvas){
     camVel += (dc / Math.max(dt, 1e-3) - camVel) * Math.min(1, dt * 10);
     const k = st.kind, speed = Math.abs(camVel);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-    ctx.globalCompositeOperation = "lighter";
+    ctx.globalCompositeOperation = st.blend || "lighter";              // light worlds (paper) draw normally
     for (const p of parts){
       // drift, wobble and parallax with the camera
       if (k === "jitter"){ p.vx += (R() - .5) * 240 * dt; p.vy += (R() - .5) * 240 * dt; p.vx *= .92; p.vy *= .92; }
@@ -87,10 +88,10 @@ function Sky(canvas){
       if (horizontal) p.x -= dc * p.d; else p.y -= dc * p.d;
       if (p.x < -40){ p.x += W + 80; if (horizontal) p.y = R() * H; } else if (p.x > W + 40){ p.x -= W + 80; if (horizontal) p.y = R() * H; }
       if (p.y < -40){ p.y += H + 80; if (!horizontal) p.x = R() * W; } else if (p.y > H + 40){ p.y -= H + 80; if (!horizontal) p.x = R() * W; }
-      p.rot += dt * (k === "petal" ? 2.4 : .6);
+      p.rot += dt * (k === "petal" ? 2.4 : k === "glyph" ? Math.sin(t * .7 + p.ph) * .25 : .6);
       // twinkle
       const tw = .5 + .5 * Math.sin(t * (k === "star" ? 1.8 : 2.6) + p.ph);
-      const a = k === "star" ? .25 + .65 * tw * Math.min(1, p.d) : k === "cell" ? .16 + .1 * tw : k === "wind" ? .12 + .14 * tw : k === "glint" ? .15 + .75 * tw * tw : k === "firefly" ? .1 + .8 * tw * tw : k === "ember" ? .35 + .5 * tw : .2 + .45 * tw;
+      const a = k === "star" ? .25 + .65 * tw * Math.min(1, p.d) : k === "cell" ? .16 + .1 * tw : k === "wind" ? .12 + .14 * tw : k === "glint" ? .15 + .75 * tw * tw : k === "firefly" ? .1 + .8 * tw * tw : k === "ember" ? .35 + .5 * tw : k === "glyph" ? (st.alpha || .5) * (.35 + .65 * tw) * Math.min(1, p.d) : .2 + .45 * tw;
       ctx.fillStyle = ctx.strokeStyle = `rgb(${p.c} / ${a.toFixed(3)})`;
       // speed lines on fast camera moves
       const trail = p.d > .55 ? clamp(speed * p.d * .016, 0, 46) : 0;
@@ -105,6 +106,7 @@ function Sky(canvas){
       else if (k === "glint"){ const r = p.r * (.6 + .6 * tw); ctx.beginPath(); ctx.moveTo(p.x, p.y - r * 2); ctx.lineTo(p.x + r * .4, p.y); ctx.lineTo(p.x, p.y + r * 2); ctx.lineTo(p.x - r * .4, p.y); ctx.closePath(); ctx.fill();
         ctx.beginPath(); ctx.moveTo(p.x - r * 2, p.y); ctx.lineTo(p.x, p.y + r * .4); ctx.lineTo(p.x + r * 2, p.y); ctx.lineTo(p.x, p.y - r * .4); ctx.closePath(); ctx.fill(); }
       else if (k === "petal"){ ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r, p.r * .45, p.rot, 0, 6.283); ctx.fill(); }
+      else if (k === "glyph"){ ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.font = `${st.weight || 600} ${p.r.toFixed(1)}px ${st.font || "Georgia, serif"}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(p.ch, 0, 0); ctx.restore(); }
       else if (k === "firefly" || k === "ember"){ ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 2.6, 0, 6.283); ctx.fillStyle = `rgb(${p.c} / ${(a * .18).toFixed(3)})`; ctx.fill();
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fillStyle = `rgb(${p.c} / ${a.toFixed(3)})`; ctx.fill(); }
       else { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); }

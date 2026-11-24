@@ -40,8 +40,10 @@ window.markHeaven = markAnswer;
 
 /* ================= which questions ================= */
 function hlTopics(S){ const s = new Set(); S.catalog.forEach(t => t.units.forEach(u => u.topics.forEach(x => { if (x[2]) s.add(x[0]); }))); return s; }
+// multiple-choice subjects (Maths) escape with their own questions: one mark for the right option
+const mcBank = S => S.prompts.map(p => ({...p, s:S.key, term:"Choose", marks:1, mc:true}));
 window.heavenPool = () => {
-  const list = BANK[M.key] || [], sel = new Set(pickState.sel), hl = hlTopics(M);
+  const list = (BANK[M.key] && BANK[M.key].length) ? BANK[M.key] : M.mcq ? (M.mcBank || (M.mcBank = mcBank(M))) : [], sel = new Set(pickState.sel), hl = hlTopics(M);
   return list.filter(q => sel.has(topicOf(q)) && (pickState.level === "HL" || !hl.has(topicOf(q))));
 };
 
@@ -274,6 +276,16 @@ function ask(){
   const q = H.cur = nextQ(), panel = q$("#hvPanel");
   const topic = M.topicName[topicOf(q)] || "";
   panel.hidden = false;
+  if (q.mc){
+    const order = pick(rng("hv" + q.id + Math.random()), q.opts.map((_, i) => i), q.opts.length); q.order = order;
+    panel.innerHTML = `<div class="hv-qhead"><span class="spec">${esc(q.spec)}</span><span class="hv-topic">${esc(topic)}</span></div>
+      <p class="hv-q"><b class="hv-term">Choose</b> ${fmtM(q.q)}</p>
+      <div class="bq-opts hv-opts">${order.map((oi, k) => `<button class="bq-opt" data-o="${oi}"><b>${"ABCD"[k]}</b><span>${fmtM(q.opts[oi])}</span></button>`).join("")}</div>
+      <p class="small hv-tip">The right answer climbs a floor. A wrong one and Satan drags you back down.</p>`;
+    panel.querySelectorAll(".bq-opt").forEach(b => b.onclick = () => answer("", false, +b.dataset.o));
+    setTimeout(() => { const f = panel.querySelector(".bq-opt"); if (f) f.focus({preventScroll:true}); }, 60);
+    setCam(camFor(floorY(H.level))); return;
+  }
   panel.innerHTML = `<div class="hv-qhead"><span class="spec">${esc(q.spec)}</span><span class="hv-topic">${esc(topic)}</span></div>
     <p class="hv-q"><b class="hv-term">${esc(q.term)}</b> ${esc(q.q)} <span class="hv-marks">[${q.marks} mark${q.marks === 1 ? "" : "s"}]</span></p>
     <textarea id="hvAns" rows="4" placeholder="Write a full answer, as you would in the exam…" aria-label="Your answer"></textarea>
@@ -287,11 +299,12 @@ function ask(){
   setCam(camFor(floorY(H.level)));
 }
 
-async function answer(text, gaveUp){
+async function answer(text, gaveUp, choice){
   if (!H || !H.cur) return;
   const id = H.id, q = H.cur; H.cur = null;
-  if (!text.trim() && !gaveUp){ H.cur = q; q$("#hvAns").focus(); return; }
-  const {hits, earned} = markAnswer(q, text);
+  if (!q.mc && !text.trim() && !gaveUp){ H.cur = q; q$("#hvAns").focus(); return; }
+  if (q.mc) text = q.opts[choice] || "";
+  const {hits, earned} = q.mc ? {hits:[choice === q.a], earned: choice === q.a ? 1 : 0} : markAnswer(q, text);
   H.answered++; H.avail += q.marks; H.earned += earned;
   const pass = !gaveUp && earned >= needFor(q), zero = !gaveUp && earned === 0;
   if (earned >= q.marks) H.full++;
@@ -304,10 +317,11 @@ async function answer(text, gaveUp){
     : zero ? (from > 0 ? "0 marks. Satan drags you back down a floor!" : "0 marks. You're still locked in the cage.")
     : `${earned}/${q.marks}. Not enough to climb. This question will come back later.`;
   panel.innerHTML = `<div class="hv-result ${pass ? "up" : zero ? "down" : "stay"}"><b class="hv-score">${earned}<small>/${q.marks}</small></b><p>${esc(verdict)}</p></div>
-    <p class="hv-q small"><b class="hv-term">${esc(q.term)}</b> ${esc(q.q)}</p>
-    ${text.trim() ? `<details class="hv-mine"><summary>Your answer</summary><p>${esc(text.trim())}</p></details>` : ""}
+    <p class="hv-q small"><b class="hv-term">${esc(q.term)}</b> ${q.mc ? fmtM(q.q) : esc(q.q)}</p>
+    ${q.mc ? `<div class="hv-ms"><h3>Answer</h3><ul><li class="${hits[0] ? "got" : ""}"><i aria-hidden="true">${hits[0] ? "✓" : "·"}</i><span>${fmtM(q.opts[q.a])}${hits[0] ? "" : ` <small>(you chose ${fmtM(text)})</small>`}</span>${hits[0] ? "<em>+1</em>" : ""}</li></ul><p class="small">${fmtM(q.why)}</p></div>`
+    : `${text.trim() ? `<details class="hv-mine"><summary>Your answer</summary><p>${esc(text.trim())}</p></details>` : ""}
     <div class="hv-ms"><h3>Markscheme${q.pts.length > q.marks ? ` <small>· any ${q.marks} of these, 1 mark each</small>` : ""}</h3>
-      <ul>${q.pts.map((p,k) => `<li class="${hits[k] ? "got" : ""}"><i aria-hidden="true">${hits[k] ? "✓" : "·"}</i><span>${esc(p.t)}</span>${hits[k] ? `<em>+1</em>` : ""}</li>`).join("")}</ul></div>
+      <ul>${q.pts.map((p,k) => `<li class="${hits[k] ? "got" : ""}"><i aria-hidden="true">${hits[k] ? "✓" : "·"}</i><span>${esc(p.t)}</span>${hits[k] ? `<em>+1</em>` : ""}</li>`).join("")}</ul></div>`}
     <div class="row hv-actions"><button class="btn" id="hvNext" disabled>${H.passes >= H.need ? "Approach the gates ▲" : "Next question"}</button></div>`;
   await move(from, to, pass, zero);
   if (!alive(id)) return;

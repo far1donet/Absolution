@@ -244,13 +244,15 @@ let role = null, net = null, myId = null, R = null, S = null, joined = "";
 let deadlineLocal = 0, chooseLocal = 0, raf = 0, hostTimer = 0, turnSeq = 0, usedIds = new Set();
 let seatEls = [], barKey = "", boardKey = "", choosePick = null;
 
+// classroom rounds are typed answers, so multiple-choice subjects (Maths) aren't in the question mix (their skins still are)
+const Q_SUBJECTS = () => SUBJECT_ORDER.filter(k => !SUBJECTS[k].mcq);
 function defaultSettings(){
-  return {seats:4, lives:3, timer:20, heartPts:150, level:"HL", subjects:SUBJECT_ORDER.slice(), off:{}};
+  return {seats:4, lives:3, timer:20, heartPts:150, level:"HL", subjects:Q_SUBJECTS(), off:{}};
 }
 function poolFor(st, subj, topic){
   const out = [];
   for (const k of st.subjects){
-    if (subj && k !== subj) continue;
+    if ((subj && k !== subj) || !SUBJECTS[k] || SUBJECTS[k].mcq) continue;
     const off = new Set(st.off[k] || []);
     for (const p of SUBJECTS[k].prompts){ const t = topicOf(p);
       if (off.has(t) || (topic && t !== topic) || (st.level === "SL" && p.hl)) continue; out.push([k,p]); }
@@ -652,7 +654,7 @@ function render(){
 }
 function renderBoard(){
   const b = q$("#crBoard"), st = S.settings, mine = me();
-  const subjNames = st.subjects.length === SUBJECT_ORDER.length ? "all subjects" : st.subjects.map(k => SUBJECTS[k].name).join(", ") || "no subjects";
+  const subjNames = st.subjects.length === Q_SUBJECTS().length ? "all subjects" : st.subjects.map(k => SUBJECTS[k].name).join(", ") || "no subjects";
   let key = S.phase + "|" + S.round + "|" + (S.lap ? S.lap.left + ":" + S.turn : "") + "|" + S.used.length + "|" + S.chooser + "|" + S.players.length + "|" + JSON.stringify(st) + "|" + (choosePick||"");
   if (key === boardKey) return; boardKey = key;
   if (S.phase === "lobby"){
@@ -795,7 +797,7 @@ function openSettings(){
     </div>
     <div class="row"><span class="small">Level</span><div class="seg" role="group" aria-label="Level"><button data-lv="SL" aria-pressed="${st.level==="SL"}">SL</button><button data-lv="HL" aria-pressed="${st.level==="HL"}">HL</button></div><span class="small" id="csCount"></span></div>
     <h3 class="cs-h3">Questions come from</h3>
-    <div class="cs-subjects">${SUBJECT_ORDER.map(k => { const Sx = SUBJECTS[k], off = new Set(st.off[k] || []);
+    <div class="cs-subjects">${Q_SUBJECTS().map(k => { const Sx = SUBJECTS[k], off = new Set(st.off[k] || []);
       return `<div class="cs-subj"><label class="cs-sl"><input type="checkbox" data-s="${k}" ${st.subjects.includes(k)?"checked":""}><span class="cs-ic">${skinSVG(k, Sx.bands[2].hue)}</span><b>${esc(Sx.name)}</b></label>
         <details><summary>Topics</summary><div class="cs-topics">${Object.keys(Sx.topicName).map(c => `<label><input type="checkbox" data-s="${k}" data-t="${esc(c)}" ${off.has(c)?"":"checked"}> <b>${esc(c)}</b> ${esc(Sx.topicName[c])}</label>`).join("")}</div></details></div>`; }).join("")}</div>
   </section>`;
@@ -807,7 +809,7 @@ function openSettings(){
   q$("#csTimer").onchange = e => { R.settings.timer = clamp(e.target.value, 5, 120, 20); e.target.value = R.settings.timer; upd(); };
   q$("#csHeart").onchange = e => { R.settings.heartPts = clamp(e.target.value, 20, 2000, 150); e.target.value = R.settings.heartPts; upd(); };
   sh.querySelectorAll("[data-lv]").forEach(b => b.onclick = () => { R.settings.level = b.dataset.lv; sh.querySelectorAll("[data-lv]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); upd(); });
-  sh.querySelectorAll("input[data-s]:not([data-t])").forEach(cb => cb.onchange = () => { const k = cb.dataset.s, set = new Set(R.settings.subjects); cb.checked ? set.add(k) : set.delete(k); R.settings.subjects = SUBJECT_ORDER.filter(x => set.has(x)); upd(); });
+  sh.querySelectorAll("input[data-s]:not([data-t])").forEach(cb => cb.onchange = () => { const k = cb.dataset.s, set = new Set(R.settings.subjects); cb.checked ? set.add(k) : set.delete(k); R.settings.subjects = Q_SUBJECTS().filter(x => set.has(x)); upd(); });
   sh.querySelectorAll("input[data-t]").forEach(cb => cb.onchange = () => { const k = cb.dataset.s, off = new Set(R.settings.off[k] || []); cb.checked ? off.delete(cb.dataset.t) : off.add(cb.dataset.t); R.settings.off = {...R.settings.off, [k]:[...off]}; upd(); });
   q$("#csDone").onclick = () => { sh.hidden = true; sh.innerHTML = ""; };
   count(); q$("#csDone").focus({preventScroll:true});

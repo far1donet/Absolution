@@ -146,3 +146,15 @@ body.gem-dive .viewport::after{content:"";position:absolute;inset:0;z-index:2;po
 @keyframes scoreBump{0%{transform:scale(1)}30%{transform:scale(1.35);color:#fff;text-shadow:0 0 14px var(--accent)}100%{transform:scale(1)}}
 #hScore{display:inline-block}
 @media (prefers-reduced-motion: reduce){#hScore.bump{animation:none}}
+
+/* ---------- spreads drawn as HTML: a quill's flying pages, Scipa Prime's symbols ---------- */
+.sp-html{z-index:1}
+.sp-html i{position:absolute;display:block;font-style:normal;animation:spFly 1.1s cubic-bezier(.2,.8,.3,1) both,spBob 3.6s ease-in-out 1.2s infinite alternate}
+@keyframes spFly{from{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(0deg) scale(.15)}}
+@keyframes spBob{to{translate:0 -9px}}
+.sp-page{width:46px;height:60px;margin:-30px 0 0 -23px;border-radius:2px;border-left:2px solid #e88a8a;transform:rotate(var(--r));box-shadow:0 5px 14px rgb(40 20 80 / .28);
+  background:linear-gradient(#3a2a6a,#3a2a6a) 7px 11px/78% 1.6px no-repeat,linear-gradient(#3a2a6a,#3a2a6a) 7px 20px/62% 1.6px no-repeat,linear-gradient(#3a2a6a,#3a2a6a) 7px 29px/82% 1.6px no-repeat,
+    linear-gradient(#3a2a6a,#3a2a6a) 7px 38px/54% 1.6px no-repeat,linear-gradient(#3a2a6a,#3a2a6a) 7px 47px/70% 1.6px no-repeat,repeating-linear-gradient(#fffdf4 0 8px,#bcd6f2 8px 9px)}
+.sp-sym{font:700 var(--fs,22px)/1 Georgia,"Times New Roman",serif;color:var(--c);text-shadow:0 0 12px var(--c);transform:translate(-50%,-50%) rotate(var(--r));white-space:nowrap}
+.spread.still.sp-html i{animation:spBob 3.6s ease-in-out infinite alternate}
+@media (prefers-reduced-motion:reduce){.sp-html i{animation:none!important}}
