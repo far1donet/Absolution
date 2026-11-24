@@ -237,7 +237,7 @@ let prof = Object.assign({name:"", skin:"bio", hue:HUES[0]}, store.get("oiac-me"
 const myKey = (() => { let k = null; try { k = sessionStorage.getItem("oiac-key"); } catch(e){} if (!k || k.length < 8){ k = rid() + rid(); try { sessionStorage.setItem("oiac-key", k); } catch(e){} } return k; })();
 if (!SUBJECTS[prof.skin]) prof.skin = "cs";
 if (!HUES.includes(prof.hue)) prof.hue = HUES[0];
-const skinSVG = (skin, hue) => (SUBJECTS[skin] || SUBJECTS.cs).avatar(4, hue);
+const skinSVG = (skin, hue, power) => (SUBJECTS[skin] || SUBJECTS.cs).avatar(4, hue, power || 0);
 
 /* ================= room state ================= */
 let role = null, net = null, myId = null, R = null, S = null, joined = "";
@@ -321,6 +321,7 @@ function handleAnswer(id, text){
     if (R.used.some(u => u.key === m.ans.key)) return fail(id, `said “${m.ans.label}”, but that was already given`, text);
     const tier = tierOf(p, m.ans), pts = TIER_BASE[tier].pts;
     pl.points += pts; R.used.push({key:m.ans.key, label:m.ans.label, tier, pts, by:id});
+    if (tier === "gem") pl.gems = (pl.gems || 0) + 1;                   // a One in a … transforms their skin for the rest of the game
     log(`${pl.name}: “${m.ans.label}” · ${SUBJECTS[R.q.subject].tiers[tier]} +${pts}`, tier);
     bank(pl, pts);
     if (R.used.length >= p.list.length){
@@ -387,7 +388,7 @@ function gameOver(){
 function startGame(){
   R.players = R.players.filter(p => p.connected);
   if (R.players.length < 2) return;
-  for (const p of R.players){ p.hearts = R.settings.lives; p.points = 0; p.bank = 0; p.out = false; }
+  for (const p of R.players){ p.hearts = R.settings.lives; p.points = 0; p.bank = 0; p.out = false; p.gems = 0; }
   usedIds = new Set(); R.log = []; R.ranking = null; R.round = 0; R.lap = null;
   if (!newQuestion()){ toast("No questions match the room's filter. Turn on more subjects or topics."); return; }
   log("The lesson has started. Go clockwise!", "info");
@@ -397,7 +398,7 @@ function backToLobby(){
   clearTimeout(hostTimer); turnSeq++;
   R.phase = "lobby"; R.turn = null; R.q = null; R.used = []; R.chooser = null; R.ranking = null; R.log = []; R.lap = null;
   R.players = R.players.filter(p => p.connected);
-  for (const p of R.players){ p.hearts = R.settings.lives; p.points = 0; p.bank = 0; p.out = false; }
+  for (const p of R.players){ p.hearts = R.settings.lives; p.points = 0; p.bank = 0; p.out = false; p.gems = 0; }
   push();
 }
 function onHostData(cid, m){
@@ -723,8 +724,9 @@ function renderSeats(){
     const p = bySeat.get(i);
     const turn = p && ((S.phase === "playing" && S.turn === p.id) || (S.phase === "choosing" && S.chooser === p.id));
     d.className = "seat" + (p ? "" : " empty") + (turn ? " on" : "") + (p && p.out ? " out" : "") + (p && p.id === myId ? " me" : "") + (p && !p.connected ? " gone" : "");
-    const av = d.querySelector(".st-av"), akey = p ? p.skin + p.hue : "";
-    if (av.dataset.k !== akey){ av.dataset.k = akey; av.innerHTML = p ? skinSVG(p.skin, p.hue) : ""; }
+    const av = d.querySelector(".st-av"), akey = p ? p.skin + p.hue + ":" + (p.gems || 0) : "";
+    if (av.dataset.k !== akey){ const up = av.dataset.k && p && (p.gems || 0) > 0 && !av.dataset.k.endsWith(":" + p.gems); av.dataset.k = akey; av.innerHTML = p ? skinSVG(p.skin, p.hue, p.gems) : "";
+      if (up){ av.classList.remove("evolved"); void av.offsetWidth; av.classList.add("evolved"); } }
     d.querySelector(".st-name").innerHTML = p ? `${esc(p.name)}${p.host ? ' <i title="Host">host</i>' : ""}` : "Empty seat";
     d.querySelector(".st-hp").innerHTML = p ? Array.from({length:S.settings.lives}, (_,k) => heartSVG(k < p.hearts)).join("") : "";
     d.querySelector(".st-pts").textContent = p ? `${p.points} pts` : "";

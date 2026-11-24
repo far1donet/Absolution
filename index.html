@@ -355,7 +355,7 @@ const hscene = (inner, len, h = 420) => `<svg class="hscene" width="${len}" heig
 const SUPS = {"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
 const sup = n => String(n).split("").map(c => SUPS[c] || c).join("");
 const escH = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const avatarSVG = inner => `<svg width="74" height="74" viewBox="0 0 74 74" aria-hidden="true"><g class="bob"><g transform="translate(37 37)">${inner}</g></g></svg>`;
+const avatarSVG = inner => `<svg width="74" height="74" viewBox="0 0 74 74" overflow="visible" aria-hidden="true"><g class="bob"><g transform="translate(37 37)">${inner}</g></g></svg>`;
 function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 </script>
 <script src="subjects/cs.js"></script>
@@ -367,6 +367,7 @@ function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 <script src="subjects/geo.js"></script>
 <script src="subjects/fr.js"></script>
 <script src="subjects/gk.js"></script>
+<script src="specials.js"></script>
 <script src="explain.js"></script>
 <script src="mcq.js"></script>
 <script src="heaven.js"></script>
@@ -404,7 +405,7 @@ const sleep = ms => new Promise(r => setTimeout(r, RM ? Math.min(ms,150) : ms));
 function bezier(x1,y1,x2,y2){ const cx=3*x1, bx=3*(x2-x1)-cx, ax=1-cx-bx, cy=3*y1, by=3*(y2-y1)-cy, ay=1-cy-by;
   const sx=t=>((ax*t+bx)*t+cx)*t, sy=t=>((ay*t+by)*t+cy)*t, dx=t=>(3*ax*t+2*bx)*t+cx;
   return x=>{ if (x<=0) return 0; if (x>=1) return 1; let t=x; for (let i=0;i<8;i++){ const e=sx(t)-x, d=dx(t); if (Math.abs(e)<1e-5 || Math.abs(d)<1e-6) break; t-=e/d; } return sy(Math.min(1,Math.max(0,t))); }; }
-const EASE = {sink:bezier(.38,0,.16,1), move:bezier(.62,0,.3,1), soft:bezier(.4,0,.2,1)};
+const EASE = {sink:bezier(.38,0,.16,1), move:bezier(.62,0,.3,1), soft:bezier(.4,0,.2,1), dive:bezier(.55,0,.12,1), back:bezier(.3,1.45,.55,1)};
 const easeInOut = EASE.move, CAM_K = 8;
 function tween(dur, fn, ease=easeInOut){ if (RM) dur = Math.min(dur,200);
   return new Promise(res=>{ const t0=performance.now(); const step=now=>{ const k=Math.min(1,(now-t0)/dur); fn(ease(k)); if(k<1) requestAnimationFrame(step); else res(); }; requestAnimationFrame(step); }); }
@@ -554,6 +555,7 @@ function buildWorld(){
   }
   h += isV() ? `<svg class="ruler" width="58" height="${L}" aria-hidden="true">${ru}</svg>` : `<svg class="ruler" width="${L}" height="34" aria-hidden="true">${ru}</svg>`;
   if (M.extras) h += M.extras({pos, L, LEAD, PX, WMAX});
+  if (S && S.spreads) S.spreads.forEach(sp => h += spreadHTML(sp, true));      // a special form's spread stays in the world
   h += `<div id="lines"></div><div id="you"><span>YOU</span></div><div id="virus"></div>`;
   world.innerHTML = h;
   document.title = M.gemTitle;
@@ -603,7 +605,9 @@ function setBand(pts, animate){
   const b = pts===0 ? 0 : bandFor(pts);
   if (b === curBand) return false;
   curBand = b; const v=$("#virus");
-  v.innerHTML = `<div class="jelly">${M.avatar(Math.min(b, 10), BX[b].hue)}</div>`; setHue(BX[b].hue);
+  v.innerHTML = `<div class="jelly">${M.avatar(Math.min(b, 10), BX[b].hue, S && S.power || 0)}</div>`; setHue(BX[b].hue);
+  v.classList.toggle("special", !!(S && S.power));
+  if (S && S.power && M.special) v.style.setProperty("--spc", M.special.glow);
   if (animate){ v.classList.remove("mutate"); void v.offsetWidth; v.classList.add("mutate"); }
   return true;
 }
@@ -614,7 +618,7 @@ function ensureWorld(need){
   WMAX = 760 + Math.ceil((need - 760 + 280)/EXT)*EXT;
   buildWorld(); curBand = -1; setBand(S.score, false); setAvatar(avPos(S.score)); look(avPos(S.score), FR.av[AX], true);
 }
-function resetWorld(){ if (WMAX !== 760){ WMAX = 760; buildWorld(); curBand = -1; } }
+function resetWorld(){ if (WMAX !== 760){ WMAX = 760; buildWorld(); curBand = -1; } world.querySelectorAll(".spread").forEach(e => e.remove()); }
 
 /* ================= HUD ================= */
 function hud(at, score){ $("#hMeterLabel").textContent = M.meter.label; $("#hMeter").textContent = M.meter.fmt(at); $("#hScore").textContent = Math.round(score); if (M.gauge) M.gauge(at); }
@@ -733,7 +737,7 @@ function newGame(daily){
   const Pl = daily ? dailyPool() : pool(); if (!Pl.length){ titleScreen(); return; }
   flowId++;
   const set = daily ? pick(rng("oiac6"+dayStr+dailyKey()), Pl, Math.min(PER_DIVE, Pl.length)) : [];
-  S = {daily, endless:!daily, pool:Pl, queue:[], hearts:LIVES, set, i:0, score:0, results:[], id:flowId, bonus:0, bonusAsked:0, bonusUsed:new Set(),
+  S = {daily, endless:!daily, pool:Pl, queue:[], hearts:LIVES, set, i:0, score:0, results:[], id:flowId, bonus:0, bonusAsked:0, bonusUsed:new Set(), power:0, spreads:[],
        scope: daily ? dailyKey() : scopeKey(), label: daily ? `All topics (${M.noLevel || pickState.level})` : scopeLabel()};
   clearUI(); resetWorld(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.av[AX]); hud(0,0); pips();
   showPrompt();
@@ -749,7 +753,7 @@ function drawPractice(){
 const promptLabel = () => S.endless ? `Prompt ${S.i+1}` : `Prompt ${S.i+1} of ${S.set.length}`;
 async function showPrompt(){
   if (S.endless && S.i >= S.set.length) S.set.push(drawPractice());
-  if (S.endless) ensureWorld(S.score + 120);
+  if (S.endless) ensureWorld(S.score + 180);
   const id = flowId, p = S.set[S.i];
   pips(); $("#hPrompt").textContent = `${M.name} · ${S.endless ? "Practice · " : ""}${promptLabel()}`;
   ui.innerHTML = `
@@ -810,47 +814,130 @@ async function submit(timeout){
   $("#card").classList.add("out"); $("#bar").classList.add("out");
   await sleep(350); if (id!==flowId) return;
 
-  const base = S.score, startC = avC;
+  const base = S.score, startC = avC, gem = tier === "gem";
   const lines = $("#lines"); lines.classList.remove("quiet");
   lines.innerHTML = LINE_TIERS.map((t,k)=>`<div class="tline ${isV()?"":"v"}" data-t="${t}" style="--c:${TIER_BASE[t].hex};${along(pos(base+TIER_BASE[t].pts))}"><span style="${isV()?"":`top:${120+k*22}px`}">${esc(tierName(t).toUpperCase())} · ${TIER_BASE[t].pts}</span></div>`).join("")
     + `<div class="tline fw ${isV()?"":"v"}" data-t="fw" style="${along(startC + DIR*70)}"><span style="${isV()?"":"top:236px"}">${esc(M.fw)}</span></div>`;
   requestAnimationFrame(()=>lines.querySelectorAll(".tline").forEach(l=>l.classList.add("on")));
+  const v = $("#virus");
 
-  if (m.kind==="empty"){ const v=$("#virus"); v.classList.remove("hit"); void v.offsetWidth; v.classList.add("hit"); await sleep(600); }
+  if (m.kind==="empty"){ v.classList.remove("hit"); void v.offsetWidth; v.classList.add("hit"); await sleep(600); }
   else {
+    // the answer rides with the skin: the skin carries it down through the layers
     const tag = document.createElement("div"); tag.id = "tag";
     const bits = Array.from({length:12},(_,k)=>`<i style="--r:${70+(k%4)*18}px;--d:${2.2+(k%5)*.5}s;--dl:${-k*.37}s">${esc(M.particles[k % M.particles.length])}</i>`).join("");
     tag.innerHTML = `<div class="bits" style="--pc:${M.particleColor||"#5dffb0"}">${bits}</div><span class="pill">“${esc(raw)}” ${M.arrow}</span>`;
-    placeTag(tag, startC, 0, 0); world.appendChild(tag);
-    await sleep(300); if (id!==flowId) return;
-    const off = isV() ? DIR*24 : 0;
-    const endC = pts>0 ? pos(base+pts) - off : startC + DIR*70 - (isV()? off : 34);
-    const arc = isV() ? 0 : (M.arc ? Math.min(320, 70 + Math.abs(endC-startC)*.16) : 40);
+    const trail = isV() ? (M.avX ? 104 : 40) : 0, tagAt = c => c - DIR*trail;
+    placeTag(tag, tagAt(startC), 0, 0); world.appendChild(tag);
+    tag.classList.add("pop");
+    // anticipation: the skin gathers itself before it goes (much longer for One in a …)
+    v.classList.remove("charge", "charge-big", "hit"); void v.offsetWidth; v.classList.add(gem ? "charge-big" : "charge");
+    if (gem) document.body.classList.add("gem-dive");
+    await sleep(gem ? 1100 : pts>0 ? 360 : 200); if (id!==flowId) return;
+    v.classList.remove("charge", "charge-big");
+    shout(tier);
     const lineEls = [...lines.querySelectorAll(".tline")];
-    const dur = pts>0 ? 1300 + pts*30 : 700;
-    await tween(dur, k=>{
+    const hitLines = c => lineEls.forEach(l=>{ const lc = parseFloat(isV() ? l.style.top : l.style.left);
+      if ((DIR>0 ? c>=lc-2 : c<=lc+2) && !l.classList.contains("hit") && (l.dataset.t!=="fw" || pts===0)){ l.classList.add("hit"); setTimeout(()=>l.classList.remove("hit"), 500); } });
+    if (pts===0){
+      // it charges at the firewall and bounces off
+      const wall = startC + DIR*70, stop = wall - DIR*22;
+      await tween(560, k=>{ if (id!==flowId) return; const c = startC + (stop-startC)*k; setAvatar(c); placeTag(tag, tagAt(c), k*.5, 30, stop-startC); look(c, FR.sink[AX]); hitLines(c + DIR*22); }, EASE.sink);
       if (id!==flowId) return;
-      const c = startC + (endC-startC)*k; placeTag(tag, c, k, arc, endC-startC); look(c, FR.sink[AX]);
-      const lead = c + off;
-      lineEls.forEach(l=>{ const lc = parseFloat(isV() ? l.style.top : l.style.left);
-        if ((DIR>0 ? lead>=lc-2 : lead<=lc+2) && !l.classList.contains("hit") && (l.dataset.t!=="fw" || pts===0)){ l.classList.add("hit"); setTimeout(()=>l.classList.remove("hit"), 500); } });
-    }, pts>0 ? EASE.sink : EASE.soft);
-    if (id!==flowId) return;
-    if (pts===0) tag.classList.add("denied");
-    else { tag.style.setProperty("--tc", TIER_BASE[tier].hex); const ln = lineEls.find(l=>l.dataset.t===tier); if (ln) ln.classList.add("hit");
-      tag.insertAdjacentHTML("beforeend", `<i class="land-ring"></i><i class="land-ring late"></i>`);   // a shockwave where the answer lands
-      if (tier === "gem" || tier === "rootkit"){ vp.classList.remove("quake"); void vp.offsetWidth; vp.classList.add("quake"); } }
-    await sleep(420); if (id!==flowId) return;
-    look(endC, FR.land[AX]); await sleep(650);
+      tag.classList.add("denied"); v.classList.add("hit"); burstAt(v, "#7b8b95", 14);
+      await tween(700, k=>{ if (id!==flowId) return; const c = stop + (startC-stop)*k; setAvatar(c); placeTag(tag, tagAt(c), .5, 0, 1); look(c, FR.sink[AX]); }, EASE.back);
+      if (id!==flowId) return;
+      await sleep(300);
+    } else {
+      const end = avPos(base + pts), pDeep = gem ? Math.min(base + pts + 38, WMAX - 6) : base + pts, deep = pos(pDeep);
+      const arc = isV() ? 0 : (M.arc ? Math.min(320, 70 + Math.abs(deep-startC)*.16) : 40);
+      const travel = (c0, c1, p0, p1, dur, ease) => tween(dur, k=>{
+        if (id!==flowId) return;
+        const c = c0 + (c1-c0)*k, pnow = p0 + (p1-p0)*k;
+        setAvatar(c); placeTag(tag, tagAt(c), k, arc, c1-c0); look(c, FR.sink[AX]); hitLines(c);
+        hud(pnow, Math.round(Math.min(base + pts, pnow))); setBand(pnow, true);
+      }, ease);
+      // One in a …: a long plunge past its line, deeper into the next layer, then it floats back up to where it belongs
+      await travel(startC, gem ? deep : end, base, pDeep, gem ? 4200 : 1250 + pts*24, gem ? EASE.dive : EASE.sink);
+      if (id!==flowId) return;
+      if (gem){ await sleep(260); if (id!==flowId) return; await travel(deep, end, pDeep, base + pts, 1500, EASE.back); if (id!==flowId) return; }
+      tag.style.setProperty("--tc", TIER_BASE[tier].hex); const ln = lineEls.find(l=>l.dataset.t===tier); if (ln) ln.classList.add("hit");
+      tag.classList.add("landed"); tag.insertAdjacentHTML("beforeend", `<i class="land-ring"></i><i class="land-ring late"></i>`);
+      v.classList.remove("land"); void v.offsetWidth; v.classList.add("land");
+      burstAt(v, TIER_BASE[tier].hex, gem ? 70 : tier === "rootkit" ? 36 : 18 + pts/5);
+      if (gem || tier === "rootkit"){ vp.classList.remove("quake"); void vp.offsetWidth; vp.classList.add("quake"); }
+      if (gem){ await evolve(id, base + pts); if (id!==flowId) return; }
+      await sleep(380); if (id!==flowId) return;
+      look(end, FR.land[AX]); await sleep(520);
+    }
   }
+  document.body.classList.remove("gem-dive");
   if (id!==flowId) return;
   showReveal();
+}
+
+/* a burst of sparks from the skin (drawn by life.js on the particle layer) */
+function burstAt(el, hex, n){ if (!window.Life || !Life.burst || !el) return; const r = el.getBoundingClientRect(); Life.burst(r.left + r.width/2, r.top + r.height/2, hex, n); }
+
+/* One in a …: the skin transforms into its special form and its power spreads into the world */
+async function evolve(id, at){
+  S.power = (S.power || 0) + 1;
+  const v = $("#virus"), sp = M.special || {name:"Ascended", line:"Something special happened."};
+  const flash = document.createElement("div"); flash.className = "evo-flash"; flash.style.setProperty("--c", (sp.spread && sp.spread.c && [].concat(sp.spread.c)[0]) || "#c98bff");
+  document.body.appendChild(flash); setTimeout(() => flash.remove(), 1600);
+  v.classList.add("evolving");
+  await sleep(520); if (id!==flowId) return;
+  curBand = -1; setBand(at, false);                       // redraw the skin in its new form
+  v.classList.remove("evolving"); v.classList.add("evolved");
+  setTimeout(() => v.classList.remove("evolved"), 1200);
+  burstAt(v, "#ffffff", 50);
+  const patch = {p:at, n:S.power};
+  S.spreads.push(patch);
+  const lines = $("#lines"); if (lines) lines.insertAdjacentHTML("beforebegin", spreadHTML(patch, false));
+  const banner = document.createElement("div"); banner.className = "evo-banner"; banner.setAttribute("role", "status");
+  banner.innerHTML = `<small>One in a ${esc(M.gemWord)}!</small><b>${esc(sp.name)}${S.power > 1 ? ` <i>· level ${S.power}</i>` : ""}</b><span>${esc(sp.line)}</span>`;
+  document.body.appendChild(banner); setTimeout(() => { banner.classList.add("bye"); setTimeout(() => banner.remove(), 600); }, 2400);
+  await sleep(1700);
+}
+/* the special form's power spreading through the world around where it landed */
+function spreadHTML(sp, still){
+  const cfg = (M.special && M.special.spread) || {kind:"veins", c:"#c98bff"}, cols = [].concat(cfg.c), r = srand(7919 + Math.round(sp.p*13) + sp.n*101);
+  const W = isV() ? 400 : 760, Hh = isV() ? 760 : 420, ox = isV() ? (M.avX ? 200 : 272) : 380, oy = isV() ? 380 : 299;
+  const grow = (k, d = 0) => still ? "" : ` style="animation-delay:${(d + k*.07).toFixed(2)}s"`;
+  let g = "", n = 0;
+  const path = (d, col, w, k, extra = "") => `<path class="sp-grow" pathLength="1" d="${d}" stroke="${col}" stroke-width="${w}" fill="none" stroke-linecap="round"${grow(k)}${extra}/>`;
+  const walk = (x, y, ang, len, steps, jag) => { let d = `M${f1(x)} ${f1(y)}`; for (let i=0; i<steps; i++){ ang += (r()-.5)*jag; x += Math.cos(ang)*len/steps; y += Math.sin(ang)*len/steps; d += ` L${f1(x)} ${f1(y)}`; } return {d, x, y, ang}; };
+  const kind = cfg.kind;
+  if (kind === "veins" || kind === "cracks" || kind === "arcs"){
+    const arms = kind === "arcs" ? 9 : 8, jag = kind === "arcs" ? 2.2 : kind === "cracks" ? .5 : .9, steps = kind === "arcs" ? 12 : 9;
+    for (let i=0; i<arms; i++){
+      const a = i/arms*6.283 + r()*.5, col = cols[i % cols.length], main = walk(ox, oy, a, 150 + r()*160, steps, jag);
+      g += path(main.d, col, kind === "veins" ? 4 : 3, n++);
+      for (let j=0; j<2; j++){ const b = walk(ox + (main.x-ox)*(.4+r()*.4), oy + (main.y-oy)*(.4+r()*.4), a + (r()-.5)*2, 60 + r()*90, steps-3, jag); g += path(b.d, col, kind === "veins" ? 2.2 : 1.6, n++); }
+    }
+    if (kind === "veins" && cfg.glitch) for (let i=0; i<26; i++){ const x = ox + (r()-.5)*W*.9, y = oy + (r()-.5)*Hh*.8; g += `<rect class="sp-pop blink" x="${f1(x)}" y="${f1(y)}" width="${f1(4+r()*14)}" height="${f1(3+r()*8)}" fill="${cols[i%cols.length]}" opacity=".7"${grow(i*.5, .3)}/>`; }
+  } else if (kind === "rings"){
+    for (let i=0; i<5; i++) g += `<circle class="sp-ring" cx="${ox}" cy="${oy}" r="${40 + i*34}" fill="none" stroke="${cols[i%cols.length]}" stroke-width="${3 - i*.4}" stroke-dasharray="${8 + i*4} ${6 + i*3}"${grow(i*2)}/>`;
+    for (let i=0; i<12; i++){ const a = i/12*6.283; g += path(`M${f1(ox + Math.cos(a)*30)} ${f1(oy + Math.sin(a)*30)} Q${f1(ox + Math.cos(a+.6)*120)} ${f1(oy + Math.sin(a+.6)*120)} ${f1(ox + Math.cos(a+1.1)*210)} ${f1(oy + Math.sin(a+1.1)*210)}`, cols[i%cols.length], 2, n++); }
+  } else if (kind === "rays"){
+    for (let i=0; i<16; i++){ const a = i/16*6.283 + r()*.2, L = 160 + r()*200; g += path(`M${ox} ${oy} L${f1(ox + Math.cos(a)*L)} ${f1(oy + Math.sin(a)*L)}`, cols[i%cols.length], 6 - (i%3)*1.5, n++, ` opacity=".55"`); }
+    for (let i=0; i<18; i++){ const x = ox + (r()-.5)*W*.85, y = oy + (r()-.5)*Hh*.7; g += `<circle class="sp-pop" cx="${f1(x)}" cy="${f1(y)}" r="${f1(4+r()*6)}" fill="${cols[0]}" stroke="#fff6c8" stroke-width="1.5"${grow(i*.6, .4)}/>`; }
+  } else if (kind === "tentacles"){
+    for (let i=0; i<6; i++){ const side = i%2 ? 1 : -1, x0 = ox + side*(40 + r()*140), y0 = isV() ? oy + 260 : Hh, h = 180 + r()*150;
+      const d = `M${f1(x0)} ${f1(y0)} C${f1(x0 + side*40)} ${f1(y0 - h*.4)} ${f1(x0 - side*70)} ${f1(y0 - h*.7)} ${f1(x0 - side*20)} ${f1(y0 - h)}`;
+      g += path(d, cols[i%cols.length], 14 - i, n++); g += path(d, "rgb(255 200 230 / .5)", 3, n++, ` stroke-dasharray=".03 .05"`); }
+  } else if (kind === "ribbons"){
+    for (let i=0; i<12; i++){ const a = i/12*6.283, L = 220 + r()*120; let d = `M${ox} ${oy}`; for (let k=1; k<=8; k++){ const t = k/8, w = Math.sin(k*1.4 + i)*26*t; d += ` L${f1(ox + Math.cos(a)*L*t - Math.sin(a)*w)} ${f1(oy + Math.sin(a)*L*t + Math.cos(a)*w)}`; } g += path(d, cols[i%cols.length], 5, n++); }
+  }
+  const st = isV() ? `top:${f1(pos(sp.p) - oy)}px;left:0;right:0;height:${Hh}px` : `left:${f1(pos(sp.p) - ox)}px;bottom:0;width:${W}px;height:${Hh}px`;
+  return `<svg class="spread${still ? " still" : ""}" style="${st}" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none" aria-hidden="true">${g}</svg>`;
 }
 
 function showReveal(){
   $("#lines").classList.add("quiet");
   const r = S.results[S.i], p = r.p, t = r.tier, c = TIER_BASE[t].hex;
-  const from = S.score; S.score += r.pts; hud(from, S.score); pips();
+  const from = S.score; S.score += r.pts; hud(S.score, S.score); pips();
+  if (r.pts){ const sc = $("#hScore"); sc.classList.remove("bump"); void sc.offsetWidth; sc.classList.add("bump"); }
   const rows = p.list.map(a=>({a, s:share(p,a), t:tierOf(p,a)})).sort((x,y)=>(x.a.gem-y.a.gem) || (y.s-x.s));
   const max = Math.max(...rows.map(x=>x.s));
   const last = S.endless ? S.hearts <= 0 : S.i === S.set.length-1;
@@ -931,19 +1018,14 @@ async function showBonus(){
 }
 
 async function descend(){
-  const id = flowId, r = S.results[S.i];
+  const id = flowId;
   const go = $("#go"); if (go) go.disabled = true;
   document.querySelectorAll(".reveal,.dock").forEach(e=>e.classList.add("leave")); await sleep(230); if (id!==flowId) return;
   ui.innerHTML = "";
-  const tg = $("#tag"); if (tg){ tg.style.transition="opacity .5s"; tg.style.opacity="0"; setTimeout(()=>tg.remove(),500); }
+  const tg = $("#tag"); if (tg){ tg.classList.add("gone"); setTimeout(()=>tg.remove(), 500); }
   $("#lines").querySelectorAll(".tline").forEach(l=>l.classList.remove("on"));
-  const from = S.score - r.pts, to = S.score;
-  shout(r.tier);
-  if (r.pts > 0){
-    const c0 = avPos(from), c1 = avPos(to);
-    await tween(900 + r.pts*16, k=>{ if (id!==flowId) return; const c = c0+(c1-c0)*k, pnow = from + (to-from)*k; setAvatar(c); look(c, FR.av[AX]); hud(pnow, S.score); setBand(pnow, true); }, EASE.move);
-    if (id!==flowId) return;
-  } else look(avC, FR.av[AX]);
+  look(avC, FR.av[AX]);                                   // the skin already travelled with its answer
+  await sleep(380); if (id!==flowId) return;
   $("#lines").innerHTML = "";
   S.i++;
   if (S.endless ? S.hearts <= 0 : S.i >= S.set.length) report(); else showPrompt();

@@ -1,0 +1,133 @@
+/* Special forms: hitting a "One in a …" transforms the skin for the rest of the dive, and its power spreads through the world.
+   Each subject gets a form that fits its theme. A second "One in a …" makes it stronger still (power 2, 3…).
+   SUBJECTS[k].avatar(level, hue, power) draws the special form whenever power > 0. */
+(function(){
+"use strict";
+const uid = () => "s" + Math.random().toString(36).slice(2, 8);
+const orbit = (R, ry, dur, begin, inner) => `<g><animateMotion dur="${dur}s" begin="-${begin}s" repeatCount="indefinite" path="M${R} 0 A${R} ${ry} 0 1 1 -${R} 0 A${R} ${ry} 0 1 1 ${R} 0"/>${inner}</g>`;
+const glow = (id, col, r, op = .55) => `<defs><radialGradient id="${id}"><stop offset="0" stop-color="${col}" stop-opacity="${op}"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient></defs><circle class="av-core" r="${r}" fill="url(#${id})"/>`;
+const star = (x, y, r, col, d) => `<path class="blink" style="animation-delay:-${d}s;animation-duration:1.3s" d="M${x} ${y - r} L${f1(x + r * .28)} ${f1(y - r * .28)} L${x + r} ${y} L${f1(x + r * .28)} ${f1(y + r * .28)} L${x} ${y + r} L${f1(x - r * .28)} ${f1(y + r * .28)} L${x - r} ${y} L${f1(x - r * .28)} ${f1(y - r * .28)}z" fill="${col}"/>`;
+
+const FORMS = {
+  /* Computer Science: a mega virus. Bigger, barbed, one evil eye and teeth, minions orbiting, red code veins */
+  cs(level, hue, power){
+    const n = 15 + power * 2, rr = 19 + power * 1.6, len = 13 + power * 1.5;
+    let spikes = "";
+    for (let i = 0; i < n; i++){ const a = i / n * Math.PI * 2, c = Math.cos(a), si = Math.sin(a), L = len * (i % 2 ? .78 : 1.12);
+      const bx = c * rr, by = si * rr, tx = c * (rr + L), ty = si * (rr + L), px = -si * 4.4, py = c * 4.4;
+      spikes += `<path d="M${f1(bx - px * .55)} ${f1(by - py * .55)} L${f1(tx)} ${f1(ty)} L${f1(bx + px * .55)} ${f1(by + py * .55)}z" fill="#5a0a14" stroke="#ff2a4a" stroke-width="1.3"/>`
+        + `<path class="av-tip" style="animation-delay:-${(i * .11).toFixed(2)}s" d="M${f1(tx)} ${f1(ty)} l${f1(px)} ${f1(py)} l${f1(c * 7)} ${f1(si * 7)}z" fill="#ff5a6e"/>`; }
+    const mini = `<g class="vspin" style="animation-duration:3s">${[0,1,2,3,4,5].map(k => { const a = k * 1.047; return `<line x2="${f1(Math.cos(a) * 7)}" y2="${f1(Math.sin(a) * 7)}" stroke="#ff2a4a" stroke-width="1.6"/>`; }).join("")}<circle r="4" fill="#3a0610" stroke="#ff5a6e" stroke-width="1.4"/></g>`;
+    const R = f1(rr + len + 14);
+    return avatarSVG(glow(uid(), "#ff2a4a", f1(rr + len + 16))
+      + `<g class="vspin" style="animation-duration:10s">${spikes}</g><circle r="${f1(rr)}" fill="#14030a" stroke="#ff2a4a" stroke-width="3"/>`
+      + [0,1,2,3,4].map(k => { const a = k * 1.26; return `<path class="blink" style="animation-delay:-${k * .3}s" d="M${f1(Math.cos(a) * rr * .95)} ${f1(Math.sin(a) * rr * .95)} q${f1(-Math.cos(a + 1) * 8)} ${f1(-Math.sin(a + 1) * 8)} ${f1(-Math.cos(a) * rr * .45)} ${f1(-Math.sin(a) * rr * .45)}" stroke="#ff2a4a" stroke-width="1.4" fill="none"/>`; }).join("")
+      + `<path d="M-15 -12 l11 5 M15 -12 l-11 5" stroke="#ff2a4a" stroke-width="2.6" stroke-linecap="round"/><path d="M-12 -4 q12 -11 24 0 q-12 10 -24 0z" fill="#ffd23a"/><g class="av-blink"><ellipse cy="-4" rx="2.4" ry="6" fill="#14030a"/></g>`
+      + `<path d="M-11 6 q11 10 22 0 q-11 4 -22 0z" fill="#3a0008"/><path d="M-9 7 l2 3.4 l2 -3 l2 3.4 l2 -3.4 l2 3.4 l2 -3.4 l2 3 l2 -3" stroke="#fff" stroke-width="1.2" fill="none"/>`
+      + Array.from({length: 1 + power}, (_, k) => orbit(R, R, (2.6 + k * .7).toFixed(1), (k * 1.1).toFixed(1), mini)).join(""));
+  },
+  /* Biology: a superbug. A monstrous bacteriophage with angry eyes, twitching tail fibres and clones */
+  bio(level, hue, power){
+    const sc = (1 + (power - 1) * .08).toFixed(2);
+    const hex = Array.from({length: 6}, (_, i) => { const a = i / 6 * 6.283 + .52; return `${f1(Math.cos(a) * 17)},${f1(-14 + Math.sin(a) * 17)}`; }).join(" ");
+    const legs = [-1, 1].map(sd => [0, 1, 2].map(k => `<path class="swt" style="animation-delay:-${(k * .35 + (sd > 0 ? .2 : 0)).toFixed(2)}s;animation-duration:.9s" d="M${sd * (3 + k * 3)} 27 L${sd * (16 + k * 6)} ${30 + k * 3} L${sd * (20 + k * 7)} ${44 + k * 2}" stroke="#ff4fd8" stroke-width="2.2" fill="none" stroke-linecap="round"/>`).join("")).join("");
+    const clone = `<g transform="scale(.32)"><polygon points="${hex}" fill="#24062a" stroke="#ff4fd8" stroke-width="5"/><rect x="-4" y="4" width="8" height="18" fill="#5a1a5a"/></g>`;
+    return avatarSVG(glow(uid(), "#ff4fd8", 46, .45) + `<g transform="scale(${sc})">` + legs
+      + `<polygon points="${hex}" fill="#24062a" stroke="#ff4fd8" stroke-width="3"/><path class="blink" d="M-7 -16 q4 -6 7 0 t7 0 M-7 -10 q4 -6 7 0 t7 0" stroke="#7affd8" stroke-width="1.6" fill="none"/>`
+      + `<path d="M-12 -24 l8 4 M12 -24 l-8 4" stroke="#ff4fd8" stroke-width="2.4" stroke-linecap="round"/><g class="av-blink"><ellipse cx="-6" cy="-19" rx="3.2" ry="2.4" fill="#ffe14a"/><ellipse cx="6" cy="-19" rx="3.2" ry="2.4" fill="#ffe14a"/><circle cx="-6" cy="-19" r="1.3" fill="#14030a"/><circle cx="6" cy="-19" r="1.3" fill="#14030a"/></g>`
+      + `<rect x="-9" y="3" width="18" height="4" rx="1" fill="#ff4fd8"/><rect x="-5" y="7" width="10" height="17" rx="2" fill="#5a1a5a" stroke="#ff4fd8" stroke-width="1.6"/><path d="M-5 12 h10 M-5 16 h10 M-5 20 h10" stroke="#ff4fd8" stroke-width="1"/><rect x="-12" y="24" width="24" height="4" rx="2" fill="#ff4fd8"/></g>`
+      + Array.from({length: 1 + power}, (_, k) => orbit(48, 30, (3.2 + k * .8).toFixed(1), (k * 1.4).toFixed(1), clone)).join(""));
+  },
+  /* Chemistry: a quantum core. A glowing nucleus, four fast orbits and crackling arcs */
+  chem(level, hue, power){
+    const nuc = [[0,0,"#ff5a6e"],[5,-3,"#9fb8ff"],[-5,-2,"#ff5a6e"],[2,5,"#9fb8ff"],[-3,5,"#ff5a6e"],[4,2,"#ff5a6e"],[-1,-6,"#9fb8ff"]].map(([x,y,c]) => `<circle cx="${x}" cy="${y}" r="4.4" fill="${c}" stroke="#fff" stroke-width=".8"/>`).join("");
+    const orbs = [0, 45, 90, 135].map((a, k) => `<g transform="rotate(${a})"><ellipse rx="32" ry="10" fill="none" stroke="#9ff0ff" stroke-width="1.6" opacity=".8"/><circle r="3.4" fill="#fff"><animateMotion dur="${(.8 + k * .22).toFixed(2)}s" begin="-${(k * .3).toFixed(1)}s" repeatCount="indefinite" path="M32 0 A32 10 0 1 1 -32 0 A32 10 0 1 1 32 0"/></circle></g>`).join("");
+    const arcs = [0, 1, 2, 3, 4].map(k => { const a = k * 1.26 + .3; let d = "M0 0", x = 0, y = 0; for (let i = 1; i <= 4; i++){ x = Math.cos(a) * i * 9 + (i % 2 ? 4 : -4) * Math.sin(a); y = Math.sin(a) * i * 9 - (i % 2 ? 4 : -4) * Math.cos(a); d += ` L${f1(x)} ${f1(y)}`; }
+      return `<path class="blink" style="animation-delay:-${(k * .13).toFixed(2)}s;animation-duration:.42s" d="${d}" stroke="#e8fbff" stroke-width="1.6" fill="none"/>`; }).join("");
+    return avatarSVG(glow(uid(), "#7af0ff", 46) + `<circle class="spin" style="animation-duration:5s" r="${38 + power * 2}" fill="none" stroke="#9ff0ff" stroke-width="2" stroke-dasharray="6 5"/>` + arcs + orbs + `<g class="av-core">${nuc}</g>`);
+  },
+  /* Physics: a railgun. Charging coils, a hover base and a crackling energy orb at the muzzle */
+  phys(level, hue, power){
+    const coils = Array.from({length: 5}, (_, k) => `<rect class="blink" style="animation-delay:-${(k * .14).toFixed(2)}s;animation-duration:.8s" x="${6 + k * 9}" y="-11" width="4" height="22" rx="1.5" fill="#7ad8ff"/>`).join("");
+    return avatarSVG(glow(uid(), "#7ad8ff", 44, .4) + `<g transform="translate(0 12)"><ellipse class="av-beam" cy="13" rx="24" ry="5" fill="#7ad8ff"/><ellipse cy="9" rx="20" ry="6" fill="#1a2a3a" stroke="#7ad8ff" stroke-width="2"/>`
+      + `<g transform="rotate(-38)"><g class="av-recoil"><rect x="-8" y="-8" width="${58 + power * 3}" height="16" rx="5" fill="#1e2a3a" stroke="#7ad8ff" stroke-width="2"/><rect x="-6" y="-8" width="${54 + power * 3}" height="3" fill="#c8f0ff"/><rect x="-6" y="5" width="${54 + power * 3}" height="3" fill="#c8f0ff"/>${coils}</g>`
+      + `<circle class="pulse" cx="${57 + power * 3}" cy="0" r="12" fill="#7ad8ff" opacity=".35"/><circle class="av-core" cx="${57 + power * 3}" cy="0" r="6" fill="#e8fbff"/><path class="blink" style="animation-duration:.35s" d="M${63 + power * 3} 0 l6 -5 l4 6 l6 -5" stroke="#e8fbff" stroke-width="1.6" fill="none"/></g>`
+      + `<circle r="9" fill="#2a3a4a" stroke="#7ad8ff" stroke-width="2"/><circle r="3.4" fill="#e8fbff"/></g>`);
+  },
+  /* Business: a golden tycoon. A crowned gold coin with orbiting coins and sparkles */
+  biz(level, hue, power){
+    const gid = uid();
+    const coin = `<circle r="7" fill="#e8b830" stroke="#fff4c8" stroke-width="1.4"/><text y="3" text-anchor="middle" font-family="Chakra Petch,sans-serif" font-weight="700" font-size="8" fill="#7a4f08">$</text>`;
+    return avatarSVG(glow(uid(), "#ffd85a", 48, .5)
+      + `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".5" stop-color="#e8b830"/><stop offset="1" stop-color="#a8701a"/></linearGradient></defs>`
+      + `<g class="av-coin"><circle r="${22 + power}" fill="url(#${gid})" stroke="#fff4c8" stroke-width="3"/><circle r="${16 + power}" fill="none" stroke="#a8701a" stroke-width="1.6"/><text y="9" text-anchor="middle" font-family="Chakra Petch,sans-serif" font-weight="700" font-size="26" fill="#6a3f06">$</text></g>`
+      + `<path d="M-15 -${21 + power} L-17 -${38 + power} L-8 -${29 + power} L0 -${42 + power} L8 -${29 + power} L17 -${38 + power} L15 -${21 + power}z" fill="#ffd23a" stroke="#fff4c8" stroke-width="1.6"/><circle cx="0" cy="-${30 + power}" r="2.6" fill="#ff3a5a"/><circle cx="-9" cy="-${27 + power}" r="2" fill="#3a8aff"/><circle cx="9" cy="-${27 + power}" r="2" fill="#3a8aff"/>`
+      + star(26, -20, 5, "#fff6c8", .2) + star(-27, 14, 4, "#fff6c8", .7) + star(22, 22, 3.4, "#fff6c8", 1.1)
+      + Array.from({length: 2 + power}, (_, k) => orbit(40, 16, (2.4 + k * .5).toFixed(1), (k * .9).toFixed(1), coin)).join(""));
+  },
+  /* History: a time lord. A cloaked figure with an hourglass staff inside a spinning clock portal */
+  hist(level, hue, power){
+    const ticks = Array.from({length: 12}, (_, k) => { const a = k / 12 * 6.283; return `<line x1="${f1(Math.cos(a) * 30)}" y1="${f1(Math.sin(a) * 30)}" x2="${f1(Math.cos(a) * 35)}" y2="${f1(Math.sin(a) * 35)}" stroke="#e8d8ff" stroke-width="${k % 3 ? 1.4 : 2.6}"/>`; }).join("");
+    return avatarSVG(glow(uid(), "#b07aff", 54, .7) + `<g transform="scale(${(1.3 + power * .05).toFixed(2)})">`
+      + `<g class="spin" style="animation-duration:16s"><circle r="35" fill="none" stroke="#b07aff" stroke-width="2.4" stroke-dasharray="2 4"/>${ticks}</g>`
+      + `<g class="spin" style="animation-duration:2.4s"><circle r="27" fill="none"/><line x2="0" y2="-26" stroke="#e8d8ff" stroke-width="2" opacity=".7"/></g><g class="spin" style="animation-duration:14s"><circle r="27" fill="none"/><line x2="17" y2="0" stroke="#e8d8ff" stroke-width="3" opacity=".7"/></g>`
+      + `<path class="sw" d="M0 -16 L-18 25 L18 25z" fill="#6a3aca" stroke="#d8b8ff" stroke-width="1.8"/><circle cy="-22" r="8" fill="#2a1450" stroke="#b07aff" stroke-width="2"/><circle cx="-3" cy="-22" r="1.6" fill="#ffe14a" class="blink"/><circle cx="3" cy="-22" r="1.6" fill="#ffe14a" class="blink"/>`
+      + `<path d="M0 -14 v22 M0 -6 l-12 6 M0 -6 l14 -4" stroke="#e8d8ff" stroke-width="3.4" stroke-linecap="round" fill="none"/>`
+      + `<line x1="15" y1="-14" x2="15" y2="26" stroke="#ffd25a" stroke-width="2.4"/><g class="pulse"><path d="M10 -24 h10 l-5 6z M10 -12 h10 l-5 -6z" fill="#ffd25a"/><circle cx="15" cy="-18" r="1.4" fill="#fff"/></g></g>`);
+  },
+  /* Geography: the kraken flagship. A black-sailed galleon with a glowing skull flag, tentacles curling round the hull */
+  geo(level, hue, power){
+    const masts = [-20, 0, 20], sails = masts.map((x, k) => { const h = k === 1 ? 40 : 30; return `<path d="M${x} 6 V${-h - 4}" stroke="#2e1a0b" stroke-width="2.6"/><path d="M${x - 1} ${-h} q14 ${h / 2} 0 ${h - 2} l-3 -6 l2 -5 l-3 -6z" fill="#1a1a24" stroke="#5affb0" stroke-width="1.4"/>`; }).join("");
+    const tent = (x, sd, d) => `<path class="sw" style="animation-delay:-${d}s;animation-duration:2.6s" d="M${x} 30 q${sd * 14} -8 ${sd * 12} -24 q-2 -10 ${sd * -6} -8" stroke="#8a2a6a" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+    return avatarSVG(glow(uid(), "#5affb0", 46, .35)
+      + `<g class="av-waves"><path d="M-46 28 q6 -5 12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0" stroke="#5affb0" stroke-width="2" fill="none" opacity=".7"/></g>`
+      + `<g class="av-rock">${sails}<g class="av-flag"><path d="M0 -44 h-17 v12 h17z" fill="#0a0a10" stroke="#5affb0" stroke-width="1"/><circle cx="-8.5" cy="-39" r="3" fill="#5affb0" class="blink"/></g>`
+      + `<path d="M-42 6 H42 L32 26 H-32 Z" fill="#2a1a2a" stroke="#5affb0" stroke-width="2"/><path d="M-40 11 H40" stroke="#5affb0" stroke-width="1.4"/>`
+      + [-24, -8, 8, 24].map((x, k) => `<circle cx="${x}" cy="17" r="2.4" fill="#5affb0" class="blink" style="animation-delay:-${k * .3}s"/>`).join("")
+      + tent(-34, -1, 0) + tent(34, 1, .6) + (power > 1 ? tent(-10, -1, 1.1) + tent(12, 1, 1.5) : "") + `</g>`);
+  },
+  /* French: the baguette royale. A golden baguette with a crown, a tricolour sash and a grand moustache */
+  fr(level, hue, power){
+    const gid = uid();
+    const rays = Array.from({length: 12}, (_, k) => `<path d="M0 0 L${f1(Math.cos(k * .524) * 44)} ${f1(Math.sin(k * .524) * 44)} L${f1(Math.cos(k * .524 + .12) * 44)} ${f1(Math.sin(k * .524 + .12) * 44)}z" fill="#ffe58a" opacity=".22"/>`).join("");
+    return avatarSVG(`<g class="spin" style="animation-duration:14s">${rays}</g>` + glow(uid(), "#ffd25a", 40, .45)
+      + `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b8780e"/><stop offset=".5" stop-color="#ffe58a"/><stop offset="1" stop-color="#b8780e"/></linearGradient></defs>`
+      + `<path d="M-19 37 V-6 q0 -20 19 -20 q19 0 19 20 V37z" fill="url(#${gid})" stroke="#fff4c8" stroke-width="2"/><path d="M-11 -12 q11 -6 20 0 M-13 24 q13 -6 26 0" stroke="#fff6c8" stroke-width="3" fill="none" stroke-linecap="round"/>`
+      + `<path d="M-19 8 L19 26 L19 33 L-19 15z" fill="#0055a4"/><path d="M-19 15 L19 33 L19 37 L-19 22z" fill="#fff"/><path d="M-19 22 L19 37 L-19 29z" fill="#ef4135"/>`
+      + `<path d="M-15 -22 L-17 -38 L-8 -30 L0 -42 L8 -30 L17 -38 L15 -22z" fill="#ffd23a" stroke="#fff4c8" stroke-width="1.6"/><circle cy="-31" r="2.6" fill="#ef4135"/><circle cx="-9" cy="-28" r="1.8" fill="#0055a4"/><circle cx="9" cy="-28" r="1.8" fill="#0055a4"/>`
+      + `<g class="av-blink"><circle cx="-7" cy="-8" r="4" fill="#fff"/><circle cx="7" cy="-8" r="4" fill="#fff"/><circle cx="-6.4" cy="-7.6" r="2" fill="#1a1a1a"/><circle cx="7.6" cy="-7.6" r="2" fill="#1a1a1a"/><circle cx="-5.6" cy="-8.8" r=".8" fill="#fff"/><circle cx="8.4" cy="-8.8" r=".8" fill="#fff"/></g>`
+      + `<path class="av-stache" d="M0 1 q-8 -4 -15 4 q-6 -3 -5 -8 q-3 9 6 11 q8 0 14 -4 q6 4 14 4 q9 -2 6 -11 q1 5 -5 8 q-7 -8 -15 -4z" fill="#3a2414"/><ellipse cx="0" cy="10" rx="4" ry="4.4" fill="#5a1a10"/>`
+      + star(-28, -18, 4.4, "#fff6c8", .3) + star(28, -6, 3.6, "#fff6c8", .9) + star(-26, 20, 3.2, "#fff6c8", 1.4));
+  },
+  /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
+  gk(level, hue, power){
+    const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
+    const escort = `<g transform="scale(.36)"><path d="M-12 0 a12 12 0 0 1 24 0z" fill="#9ff5c8" opacity=".7"/><ellipse cy="4" rx="26" ry="8" fill="#8a94a4" stroke="#e8f0ff" stroke-width="2"/></g>`;
+    return avatarSVG(`<path class="av-beam" d="M-18 14 L-40 70 H40 L18 14Z" fill="#9ff5c8"/>` + glow(uid(), "#9ff5c8", 50, .35)
+      + `<g class="av-hover"><ellipse cy="6" rx="42" ry="12" fill="#5a6474" stroke="#e8f0ff" stroke-width="2"/><ellipse cy="2" rx="30" ry="6" fill="#8a94a4"/>${lights}`
+      + `<ellipse cy="-5" rx="22" ry="6" fill="#6a7484" stroke="#e8f0ff" stroke-width="1.4"/><path d="M-15 -6 a15 15 0 0 1 30 0z" fill="#9ff5c8" opacity=".55" stroke="#e8fbff" stroke-width="1.4"/>`
+      + `<ellipse cx="-4" cy="-11" rx="3" ry="4" fill="#7aff9a"/><ellipse cx="5" cy="-10" rx="3" ry="4" fill="#7aff9a"/><circle cx="-4" cy="-12" r="1" fill="#0a1a10"/><circle cx="5" cy="-11" r="1" fill="#0a1a10"/></g>`
+      + Array.from({length: 1 + power}, (_, k) => orbit(56, 20, (3 + k * .8).toFixed(1), (k * 1.5).toFixed(1), escort)).join(""));
+  },
+};
+
+/* how each form is introduced, glows, trails and spreads */
+const SPECIAL = {
+  cs:  {name:"MEGA VIRUS", line:"It's spreading through the whole system.", glow:"#ff2a4a", trail:"#ff2a4a", sky:{kind:"bit", c:["255 42 74", "255 120 140", "120 0 20"], n:72}, spread:{kind:"veins", c:["#ff2a4a", "#a0001a"], glitch:true}},
+  bio: {name:"SUPERBUG", line:"Antibiotic resistant. The infection is spreading.", glow:"#ff4fd8", trail:"#ff4fd8", sky:{kind:"cell", c:["255 79 216", "190 40 90"], n:34}, spread:{kind:"veins", c:["#d0206a", "#ff4fd8"]}},
+  chem:{name:"QUANTUM CORE", line:"Pure energy. Matter itself is crackling.", glow:"#7af0ff", trail:"#c8f8ff", sky:{kind:"jitter", c:["200 250 255", "255 255 255", "122 240 255"], n:90}, spread:{kind:"arcs", c:["#9ff0ff", "#ffffff"]}},
+  phys:{name:"RAILGUN", line:"Electromagnetic launch. Nothing out-ranges you now.", glow:"#7ad8ff", trail:"#7ad8ff", sky:{kind:"wind", c:["122 216 255", "232 251 255"], n:48}, spread:{kind:"cracks", c:["#ffd25a", "#7ad8ff"]}},
+  biz: {name:"GOLDEN TYCOON", line:"You're printing money now.", glow:"#ffd85a", trail:"#ffd85a", sky:{kind:"glint", c:["255 216 90", "255 246 200"], n:64}, spread:{kind:"rays", c:["#ffd85a", "#fff2a8"]}},
+  hist:{name:"TIME LORD", line:"You control time itself.", glow:"#b07aff", trail:"#c9a3ff", sky:{kind:"glint", c:["201 163 255", "255 214 160"], n:50}, spread:{kind:"rings", c:["#b07aff", "#e8d8ff", "#ffd25a"]}},
+  geo: {name:"KRAKEN FLAGSHIP", line:"The kraken sails with you now.", glow:"#5affb0", trail:"#5affb0", sky:{kind:"spray", c:["90 255 176", "200 242 255"], n:54}, spread:{kind:"tentacles", c:["#8a2a6a", "#5a1a4a"]}},
+  fr:  {name:"BAGUETTE ROYALE", line:"Vive la baguette ! The crown is yours.", glow:"#ffd25a", trail:"#ffe58a", sky:{kind:"petal", c:["0 85 164", "255 255 255", "239 65 53"], n:46}, spread:{kind:"ribbons", c:["#0055a4", "#ffffff", "#ef4135"]}},
+  gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
+};
+
+for (const k of Object.keys(FORMS)){
+  const S = SUBJECTS[k]; if (!S) continue;
+  const base = S.avatar;
+  S.avatar = (level, hue, power) => power > 0 ? FORMS[k](level, hue, Math.min(power, 4)) : base(level, hue);
+  S.special = SPECIAL[k];
+}
+})();

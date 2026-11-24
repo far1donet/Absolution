@@ -41,14 +41,14 @@ const STYLE = {
 };
 function Sky(canvas){
   const ctx = canvas.getContext("2d");
-  let W = 0, H = 0, dpr = 1, parts = [], st = null, key = "", camPrev = null, camVel = 0, t = 0;
+  let W = 0, H = 0, dpr = 1, parts = [], fx = [], st = null, key = "", camPrev = null, camVel = 0, t = 0;
   function resize(){
     const r = canvas.getBoundingClientRect(); dpr = Math.min(2, window.devicePixelRatio || 1);
     W = Math.max(1, r.width); H = Math.max(1, r.height); canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
   }
   function make(p){
     const k = st.kind; p.x = R() * W; p.y = R() * H; p.d = .3 + R() * 1.1; p.ph = R() * 6.283; p.rot = R() * 6.283;
-    p.vx = 0; p.vy = 0; p.r = 1 + R() * 2;
+    p.vx = 0; p.vy = 0; p.r = 1 + R() * 2; p.c = Array.isArray(st.c) ? st.c[Math.floor(R() * st.c.length)] : st.c;
     if (k === "bit"){ p.r = 1.2 + R() * 1.8; p.vy = -(6 + R() * 10) * p.d; }
     else if (k === "cell"){ p.r = (4 + R() * 7) * p.d; p.vx = (R() - .5) * 10; p.vy = (R() - .5) * 10; }
     else if (k === "jitter"){ p.r = .8 + R() * 1.6; }
@@ -91,7 +91,7 @@ function Sky(canvas){
       // twinkle
       const tw = .5 + .5 * Math.sin(t * (k === "star" ? 1.8 : 2.6) + p.ph);
       const a = k === "star" ? .25 + .65 * tw * Math.min(1, p.d) : k === "cell" ? .16 + .1 * tw : k === "wind" ? .12 + .14 * tw : k === "glint" ? .15 + .75 * tw * tw : k === "firefly" ? .1 + .8 * tw * tw : k === "ember" ? .35 + .5 * tw : .2 + .45 * tw;
-      ctx.fillStyle = ctx.strokeStyle = `rgb(${st.c} / ${a.toFixed(3)})`;
+      ctx.fillStyle = ctx.strokeStyle = `rgb(${p.c} / ${a.toFixed(3)})`;
       // speed lines on fast camera moves
       const trail = p.d > .55 ? clamp(speed * p.d * .016, 0, 46) : 0;
       if (trail > 4){ ctx.globalAlpha = .55;
@@ -105,24 +105,47 @@ function Sky(canvas){
       else if (k === "glint"){ const r = p.r * (.6 + .6 * tw); ctx.beginPath(); ctx.moveTo(p.x, p.y - r * 2); ctx.lineTo(p.x + r * .4, p.y); ctx.lineTo(p.x, p.y + r * 2); ctx.lineTo(p.x - r * .4, p.y); ctx.closePath(); ctx.fill();
         ctx.beginPath(); ctx.moveTo(p.x - r * 2, p.y); ctx.lineTo(p.x, p.y + r * .4); ctx.lineTo(p.x + r * 2, p.y); ctx.lineTo(p.x, p.y - r * .4); ctx.closePath(); ctx.fill(); }
       else if (k === "petal"){ ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r, p.r * .45, p.rot, 0, 6.283); ctx.fill(); }
-      else if (k === "firefly" || k === "ember"){ ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 2.6, 0, 6.283); ctx.fillStyle = `rgb(${st.c} / ${(a * .18).toFixed(3)})`; ctx.fill();
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fillStyle = `rgb(${st.c} / ${a.toFixed(3)})`; ctx.fill(); }
+      else if (k === "firefly" || k === "ember"){ ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 2.6, 0, 6.283); ctx.fillStyle = `rgb(${p.c} / ${(a * .18).toFixed(3)})`; ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fillStyle = `rgb(${p.c} / ${a.toFixed(3)})`; ctx.fill(); }
       else { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); }
+    }
+    // sparks: bursts and trails, which stay put in the world as the camera moves
+    for (let i = fx.length - 1; i >= 0; i--){
+      const f = fx[i]; f.life -= dt; if (f.life <= 0){ fx.splice(i, 1); continue; }
+      const drag = Math.exp(-dt * f.drag); f.vx *= drag; f.vy *= drag; f.vy += f.g * dt;
+      f.x += f.vx * dt; f.y += f.vy * dt; if (horizontal) f.x -= dc; else f.y -= dc;
+      const a = Math.min(1, f.life / f.max * 1.6), sp = Math.hypot(f.vx, f.vy), L = Math.min(26, sp * .045);
+      ctx.strokeStyle = ctx.fillStyle = `rgb(${f.c} / ${(a * .9).toFixed(3)})`;
+      if (L > 1.5){ ctx.lineWidth = f.r; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x - f.vx / sp * L, f.y - f.vy / sp * L); ctx.stroke(); }
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r * (.6 + a * .6), 0, 6.283); ctx.fill();
+      ctx.fillStyle = `rgb(${f.c} / ${(a * .16).toFixed(3)})`; ctx.beginPath(); ctx.arc(f.x, f.y, f.r * 3.2, 0, 6.283); ctx.fill();
     }
     ctx.globalCompositeOperation = "source-over";
   }
+  /* sparks: n of them from (x, y); spread is their speed */
+  function emit(x, y, c, n, o = {}){
+    if (fx.length > 420) return;
+    for (let i = 0; i < n; i++){
+      const a = o.dir != null ? o.dir + (R() - .5) * (o.cone || 1) : R() * 6.283, sp = (o.speed || 260) * (.3 + R() * .9);
+      const life = (o.life || .9) * (.6 + R() * .6);
+      fx.push({x:x + (R() - .5) * (o.jitter || 6), y:y + (R() - .5) * (o.jitter || 6), vx:Math.cos(a) * sp, vy:Math.sin(a) * sp, life, max:life, r:(o.size || 2.2) * (.6 + R() * .8), c, drag:o.drag || 3.2, g:o.g || 0});
+    }
+  }
   function clear(){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); }
   addEventListener("resize", () => { if (st) { const s = st, k = key; key = ""; setStyle(s, k); } });
-  return {setStyle, step, clear, reset(){ camPrev = null; camVel = 0; }};
+  return {setStyle, step, clear, emit, reset(){ camPrev = null; camVel = 0; fx.length = 0; }};
 }
-window.Life = {Jelly, Sky, STYLE, reduce};
+const rgb = hex => { const h = String(hex).replace("#", ""), n = parseInt(h.length === 3 ? h.split("").map(x => x + x).join("") : h, 16); return `${n >> 16 & 255} ${n >> 8 & 255} ${n & 255}`; };
+window.Life = {Jelly, Sky, STYLE, reduce, rgb};
 
 /* ---------- the main game's world ---------- */
 const vpEl = document.getElementById("vp");
 const amb = document.createElement("canvas"); amb.id = "amb"; amb.className = "amb"; amb.setAttribute("aria-hidden", "true");
 vpEl.appendChild(amb);
 const sky = Sky(amb), body = Jelly();
-let last = 0, worldKey = "";
+let last = 0, worldKey = "", prevAv = null;
+/* a burst of sparks at a point on screen (the engine calls this when an answer lands or a skin transforms) */
+Life.burst = (x, y, hex, n) => { if (reduce.matches) return; const vr = vpEl.getBoundingClientRect(); sky.emit(x - vr.left, y - vr.top, rgb(hex), Math.round(n), {speed: 200 + n * 5, life: 1.1, size: n > 40 ? 2.8 : 2.2}); };
 function frame(now){
   requestAnimationFrame(frame);
   if (document.hidden){ last = 0; return; }
@@ -130,11 +153,24 @@ function frame(now){
   const covered = document.body.classList.contains("in-heaven") || document.body.classList.contains("in-class");
   if (reduce.matches || covered || typeof M === "undefined" || !M){ if (worldKey){ sky.clear(); worldKey = ""; } return; }
   const horizontal = AX === "right";
-  const k = M.key + (horizontal ? ":h" : ":v");
-  if (k !== worldKey){ worldKey = k; sky.reset(); body.reset(); sky.setStyle(M.ambient || STYLE[M.key] || STYLE.hist, k); }
+  const power = typeof S !== "undefined" && S && S.power ? 1 : 0;           // a transformed skin brings its own atmosphere
+  const k = M.key + (horizontal ? ":h" : ":v") + (power ? ":p" : "");
+  if (k !== worldKey){ const same = worldKey.split(":")[0] === M.key; worldKey = k; if (!same){ sky.reset(); body.reset(); }
+    sky.setStyle(power && M.special && M.special.sky ? M.special.sky : (M.ambient || STYLE[M.key] || STYLE.hist), k); }
   sky.step(dt, cam, horizontal);
   const j = document.querySelector("#virus .jelly");
   if (j) j.style.transform = body.step(dt, avC, horizontal);
+  // a glowing trail behind the skin while it travels
+  if (prevAv !== null){
+    const speed = Math.abs(avC - prevAv) / dt;
+    if (speed > 220 && speed < 20000){
+      const v = document.getElementById("virus"), r = v && v.getBoundingClientRect(), vr = vpEl.getBoundingClientRect();
+      if (r && r.width){ const dir = Math.sign(avC - prevAv), back = horizontal ? (dir > 0 ? Math.PI : 0) : (dir > 0 ? -Math.PI / 2 : Math.PI / 2);
+        const col = power && M.special && M.special.trail ? M.special.trail : (M.particleColor || "#9fe0ff");
+        sky.emit(r.left + r.width / 2 - vr.left, r.top + r.height / 2 - vr.top, rgb(col), Math.min(6, Math.ceil(speed * dt / 14)), {dir: back, cone: 1.1, speed: 60 + speed * .05, life: .7, size: power ? 2.6 : 1.8, jitter: 18, drag: 2}); }
+    }
+  }
+  prevAv = avC;
 }
 requestAnimationFrame(frame);
 })();
