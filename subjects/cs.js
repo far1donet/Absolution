@@ -704,8 +704,8 @@ function wallSVG(i, H, side){
 function virusGlyph(level, hue){
   const n=8+level, rr=12+level*.6, len=8+level*.45; let s="";
   for(let i=0;i<n;i++){ const a=i/n*Math.PI*2, c=Math.cos(a), si=Math.sin(a);
-    s+=`<line x1="${f1(c*rr)}" y1="${f1(si*rr)}" x2="${f1(c*(rr+len))}" y2="${f1(si*(rr+len))}" stroke="hsl(${hue} 85% 64%)" stroke-width="2.4" stroke-linecap="round"/><circle cx="${f1(c*(rr+len))}" cy="${f1(si*(rr+len))}" r="2.8" fill="hsl(${hue} 95% 72%)"/>`; }
-  s+=`<circle r="${rr}" fill="hsl(${hue} 55% 13%)" stroke="hsl(${hue} 90% 64%)" stroke-width="2.4"/>`;
+    s+=`<line x1="${f1(c*rr)}" y1="${f1(si*rr)}" x2="${f1(c*(rr+len))}" y2="${f1(si*(rr+len))}" stroke="hsl(${hue} 85% 64%)" stroke-width="2.4" stroke-linecap="round"/><circle class="av-tip" style="animation-delay:-${(i*.17).toFixed(2)}s" cx="${f1(c*(rr+len))}" cy="${f1(si*(rr+len))}" r="2.8" fill="hsl(${hue} 95% 72%)"/>`; }
+  s+=`<circle class="av-core" r="${rr}" fill="hsl(${hue} 55% 13%)" stroke="hsl(${hue} 90% 64%)" stroke-width="2.4"/>`;
   const k=4+Math.floor(level/2); for(let i=0;i<k;i++){ const a=i/k*Math.PI*2+level; s+=`<circle cx="${f1(Math.cos(a)*rr*.5)}" cy="${f1(Math.sin(a)*rr*.5)}" r="2.6" fill="hsl(${hue} 95% 72%)"/>`; }
   return avatarSVG(`<g class="vspin">${s}</g>`);
 }

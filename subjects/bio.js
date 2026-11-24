@@ -460,9 +460,9 @@ function wall(i, len, side){
 function avatar(level, hue){
   const n=6+level, r=13+level*.5; let s="";
   for (let i=0; i<n; i++){ const a=i/n*6.283, c=Math.cos(a), si=Math.sin(a);
-    s+=`<line x1="${f1(c*r)}" y1="${f1(si*r)}" x2="${f1(c*(r+9))}" y2="${f1(si*(r+9))}" stroke="hsl(${hue} 80% 65%)" stroke-width="2.2"/><circle cx="${f1(c*(r+10))}" cy="${f1(si*(r+10))}" r="3.4" fill="hsl(${hue} 95% 72%)"/>`; }
+    s+=`<line x1="${f1(c*r)}" y1="${f1(si*r)}" x2="${f1(c*(r+9))}" y2="${f1(si*(r+9))}" stroke="hsl(${hue} 80% 65%)" stroke-width="2.2"/><circle class="av-tip" style="animation-delay:-${(i*.2).toFixed(2)}s" cx="${f1(c*(r+10))}" cy="${f1(si*(r+10))}" r="3.4" fill="hsl(${hue} 95% 72%)"/>`; }
   const hex = Array.from({length:6},(_,i)=>{ const a=i/6*6.283+.52; return `${f1(Math.cos(a)*r)},${f1(Math.sin(a)*r)}`; }).join(" ");
-  s+=`<polygon points="${hex}" fill="hsl(${hue} 55% 16%)" stroke="hsl(${hue} 90% 66%)" stroke-width="2.4"/><path d="M${f1(-r*.5)} 0 q${f1(r*.25)} ${f1(-r*.5)} ${f1(r*.5)} 0 t${f1(r*.5)} 0" stroke="hsl(${(hue+60)%360} 90% 70%)" stroke-width="2.2" fill="none"/>`;
+  s+=`<polygon class="av-core" points="${hex}" fill="hsl(${hue} 55% 16%)" stroke="hsl(${hue} 90% 66%)" stroke-width="2.4"/><path d="M${f1(-r*.5)} 0 q${f1(r*.25)} ${f1(-r*.5)} ${f1(r*.5)} 0 t${f1(r*.5)} 0" stroke="hsl(${(hue+60)%360} 90% 70%)" stroke-width="2.2" fill="none"/>`;
   return avatarSVG(`<g class="vspin">${s}</g>`);
 }
 const UMs = p => Math.round(p*10).toLocaleString();

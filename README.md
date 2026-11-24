@@ -20,6 +20,8 @@ Pick a subject and switch between **SL** and **HL** (French ab initio is SL only
 
 **Go to heaven:** a third mode for every subject. Satan drags you into his dungeon and locks you in a cage; you escape by writing full answers to exam-style questions (Define, Outline, Explain, Calculate…) on the topics you tick. Answers are marked against a markscheme (`heaven.js`, banks in `qbank/<subject>.js`): each marking point is awarded when its key wording appears, with spelling slips forgiven. Full marks (or within one mark on 4+ mark questions) climbs a floor, zero marks gets you dragged back down, and questions you miss come back later. Climb through the dungeon, lava pits, catacombs, the surface, the sky and the clouds to the gates of heaven, where God is waiting: "nice one son! you tryna come in or what?" There are 512 questions, at least two for every topic in all nine subjects.
 
+**Motion:** every world is animated (`life.js`, `life.css`). Each skin has its own moving parts (pulsing virus spikes, orbiting electrons, a recoiling cannon, a flipping coin, a walking time traveller, a rocking ship, a blinking baguette, a hovering UFO) and squashes, stretches and leans with its speed, then wobbles to a stop. Themed particles drift through each world and streak past as speed lines on fast moves, the scenery sways, swims and flies, and the camera follows on a smooth spring. It all turns off when the device asks for reduced motion.
+
 **Bonus questions:** every correct answer unlocks a multiple-choice bonus written with IB command terms (`mcq.js`), with a markscheme-style explanation.
 **Explanations:** tap any accepted answer to see why it counts (`explain.js`).
 **Auto-correction:** small spelling mistakes are forgiven and shown as "Auto-corrected to …".

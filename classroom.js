@@ -597,6 +597,7 @@ function enterRoom(){
   const j = q$("#crJoin"); if (j) j.remove();
   document.body.classList.add("in-class");
   const el = document.createElement("div"); el.className = "cr"; el.id = "cr";
+  setTimeout(() => chalkDust(el), 0);
   el.innerHTML = `
     <header class="cr-top">
       <button class="cr-btn" id="crLeave">Leave</button>
@@ -808,6 +809,16 @@ function openSettings(){
   sh.querySelectorAll("input[data-t]").forEach(cb => cb.onchange = () => { const k = cb.dataset.s, off = new Set(R.settings.off[k] || []); cb.checked ? off.delete(cb.dataset.t) : off.add(cb.dataset.t); R.settings.off = {...R.settings.off, [k]:[...off]}; upd(); });
   q$("#csDone").onclick = () => { sh.hidden = true; sh.innerHTML = ""; };
   count(); q$("#csDone").focus({preventScroll:true});
+}
+
+/* chalk dust drifting through the classroom light */
+function chalkDust(room){
+  if (!window.Life || !room.isConnected) return;
+  const cv = document.createElement("canvas"); cv.className = "cr-dust"; cv.setAttribute("aria-hidden", "true"); room.prepend(cv);
+  const dust = Life.Sky(cv); dust.setStyle({kind:"dust", c:"255 244 220", n:28}, "cr"); let last = 0;
+  const f = now => { if (!cv.isConnected) return; requestAnimationFrame(f); if (document.hidden || Life.reduce.matches){ last = 0; return; }
+    const dt = last ? Math.min(.05, (now - last) / 1000) : 1 / 60; last = now; dust.step(dt, 0, false); };
+  requestAnimationFrame(f);
 }
 
 /* ---------- entry points ---------- */

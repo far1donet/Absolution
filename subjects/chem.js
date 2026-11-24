@@ -274,8 +274,8 @@ function wall(i, len, side){
   return vwall(s, len, side);
 }
 function avatar(level, hue){
-  const rr=9+level*.4; let s=`<circle r="${rr}" fill="hsl(${hue} 70% 45%)" stroke="hsl(${hue} 95% 75%)" stroke-width="2"/>`;
-  [0,60,120].forEach((a,k)=>{ s+=`<g transform="rotate(${a})"><ellipse rx="${f1(rr+15)}" ry="${f1(7+level*.3)}" fill="none" stroke="hsl(${hue} 90% 70%)" stroke-width="1.6"/><circle cx="${f1(rr+15)}" cy="0" r="3.2" fill="#e9fbff"/></g>`; });
+  const rr=9+level*.4; let s=`<circle class="av-core" r="${rr}" fill="hsl(${hue} 70% 45%)" stroke="hsl(${hue} 95% 75%)" stroke-width="2"/>`;
+  [0,60,120].forEach((a,k)=>{ const rx=f1(rr+15), ry=f1(7+level*.3); s+=`<g transform="rotate(${a})"><ellipse rx="${rx}" ry="${ry}" fill="none" stroke="hsl(${hue} 90% 70%)" stroke-width="1.6"/><circle r="3.2" fill="#e9fbff"><animateMotion dur="${(1.3+k*.4).toFixed(1)}s" begin="-${k*.5}s" repeatCount="indefinite" path="M${rx} 0 A${rx} ${ry} 0 1 1 -${rx} 0 A${rx} ${ry} 0 1 1 ${rx} 0"/></circle></g>`; });
   return avatarSVG(`<g class="vspin">${s}</g>`);
 }
 const ex = p => -1 - Math.round(p*17/700);

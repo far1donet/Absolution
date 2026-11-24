@@ -50,7 +50,7 @@ const LH = 520, TOP = 10, PAD = 700;          // PAD: bedrock below the cage so 
 const FLOORS = ["The cage","The dungeon","The lava pits","The catacombs","Under the earth","The surface","The sky","Above the clouds","The stairway","The pearly light","The gates of heaven"];
 const floorY = i => (TOP - i) * LH + LH - 64;
 const q$ = s => document.querySelector(s);
-let H = null, hv = null, camY = 0;
+let H = null, hv = null, camY = 0, camT = 0, camV = 0, sky = null, jelly = null, skyKey = "";
 
 const at = (x, y, inner) => `<svg x="${x}%" y="${y}" overflow="visible">${inner}</svg>`;
 function scene(i){
@@ -58,7 +58,7 @@ function scene(i){
   const rep = (n, fn) => { for (let k=0; k<n; k++) s += fn(k); };
   const bricks = (c1, c2) => { let b = ""; for (let y=0; y<LH-60; y+=26) for (let x=((y/26)%2)*-30; x<1600; x+=60) b += `<rect x="${x}" y="${y}" width="58" height="24" rx="3" fill="${r() < .5 ? c1 : c2}"/>`; return `<svg width="100%" height="${LH}" overflow="hidden">${b}</svg>`; };
   const torch = x => at(x, 150, `<rect x="-4" y="0" width="8" height="40" fill="#5a3a1a"/><path d="M0 -34 q16 18 0 34 q-16 -16 0 -34z" fill="#ffb03a" class="hv-flame"/><path d="M0 -20 q8 10 0 20 q-8 -10 0 -20z" fill="#fff2a8"/><circle cx="0" cy="-10" r="60" fill="#ff9a3a" opacity=".12"/>`);
-  const chain = x => at(x, 0, Array.from({length:7}, (_,k)=>`<ellipse cx="0" cy="${10+k*18}" rx="6" ry="10" fill="none" stroke="#7a7f88" stroke-width="3"/>`).join("") + `<path d="M-10 136 h20 v14 h-20z" fill="#5a5f68"/>`);
+  const chain = x => at(x, 0, `<g class="swt" style="animation-delay:-${f1(r()*3)}s">` + Array.from({length:7}, (_,k)=>`<ellipse cx="0" cy="${10+k*18}" rx="6" ry="10" fill="none" stroke="#7a7f88" stroke-width="3"/>`).join("") + `<path d="M-10 136 h20 v14 h-20z" fill="#5a5f68"/></g>`);
   switch(i){
     case 0: s += bricks("#2a1214","#321618") + torch(14) + torch(86) + chain(28) + chain(72)
       + `<rect x="0" y="${LH-64}" width="100%" height="64" fill="#1a0a0a"/><rect x="0" y="${LH-64}" width="100%" height="5" fill="#5a2020"/>`
@@ -82,18 +82,18 @@ function scene(i){
       + Array.from({length:40},()=>`<circle cx="${f1(r()*100)}%" cy="${f1(r()*(LH-180))}" r="${f1(.6+r()*1.4)}" fill="#fff" opacity="${f1(.4+r()*.6)}"/>`).join("")
       + at(84, 70, `<circle r="26" fill="#fff6d8"/><circle cx="10" cy="-6" r="24" fill="#0e1636"/>`)
       + at(14, LH-64, `<rect x="-60" y="-110" width="120" height="110" fill="#5a4a3a"/><path d="M-70 -110 l70 -40 l70 40z" fill="#7a3a2a"/><rect x="-12" y="-46" width="24" height="46" fill="#2a1a10"/>${[-40,24].map(x=>`<rect x="${x}" y="-90" width="16" height="16" fill="#ffd27a"/>`).join("")}<text x="0" y="-118" text-anchor="middle" font-family="Chakra Petch,sans-serif" font-size="11" font-weight="700" fill="#ffd27a">SCHOOL</text>`)
-      + [70,92].map(x=>at(x, LH-64, `<rect x="-5" y="-60" width="10" height="60" fill="#2a1a0c"/><circle cx="0" cy="-80" r="34" fill="#1a3a24"/>`)).join("")
+      + [70,92].map(x=>at(x, LH-64, `<g class="sw" style="animation-delay:-${f1(r()*4)}s"><rect x="-5" y="-60" width="10" height="60" fill="#2a1a0c"/><circle cx="0" cy="-80" r="34" fill="#1a3a24"/></g>`)).join("")
       + `<rect x="0" y="${LH-64}" width="100%" height="64" fill="#2a4a1e"/><rect x="0" y="${LH-64}" width="100%" height="6" fill="#4a7a34"/>`
       + at(32, LH-62, `<ellipse rx="44" ry="10" fill="#1a0806"/><ellipse rx="36" ry="6" fill="#ff5a14" class="hv-glow" opacity=".0" id="hvHole"/>`); break;
     case 6: s += `<rect width="100%" height="${LH}" fill="url(#hvDawn)"/><defs><linearGradient id="hvDawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a7ad0"/><stop offset="1" stop-color="#f2a87a"/></linearGradient></defs>`
-      + Array.from({length:5},()=>at(f1(r()*90), f1(40+r()*300), `<path d="M0 0 q6 -6 12 0 q6 -6 12 0" stroke="#2a2a3a" stroke-width="2.5" fill="none"/>`)).join("")
-      + at(76, 120, `<path d="M-40 0 h70 l14 -6 h8 l-8 10 h-84z" fill="#f2f4f8"/><path d="M-6 0 l-16 14 h10 l20 -14z" fill="#c8ccd4"/>`)
+      + Array.from({length:5},()=>at(f1(r()*90), f1(40+r()*300), `<path class="fly" style="animation-delay:-${f1(r()*9)}s" d="M0 0 q6 -6 12 0 q6 -6 12 0" stroke="#2a2a3a" stroke-width="2.5" fill="none"/>`)).join("")
+      + at(76, 120, `<g class="fly"><path d="M-40 0 h70 l14 -6 h8 l-8 10 h-84z" fill="#f2f4f8"/><path d="M-6 0 l-16 14 h10 l20 -14z" fill="#c8ccd4"/></g>`)
       + at(50, LH-64, `<ellipse rx="70" ry="18" fill="#fff" opacity=".9"/><ellipse cx="-30" cy="-8" rx="34" ry="16" fill="#fff"/><ellipse cx="26" cy="-10" rx="38" ry="18" fill="#fff"/>`); break;
     case 7: s += `<rect width="100%" height="${LH}" fill="#7ab8f0"/>` + at(50, LH+60, `${["#ff5a5a","#ffa23a","#ffe14a","#5ad85a","#4aa8ff","#8a6aff"].map((c,k)=>`<circle r="${300-k*16}" fill="none" stroke="${c}" stroke-width="16" opacity=".55"/>`).join("")}`)
-      + Array.from({length:7},()=>at(f1(r()*100), f1(30+r()*(LH-140)), `<ellipse rx="${f1(50+r()*40)}" ry="18" fill="#fff" opacity=".85"/><ellipse cx="24" cy="-10" rx="30" ry="16" fill="#fff"/>`)).join("")
+      + Array.from({length:7},()=>at(f1(r()*100), f1(30+r()*(LH-140)), `<g class="dx" style="animation-delay:-${f1(r()*16)}s"><ellipse rx="${f1(50+r()*40)}" ry="18" fill="#fff" opacity=".85"/><ellipse cx="24" cy="-10" rx="30" ry="16" fill="#fff"/></g>`)).join("")
       + `<rect x="0" y="${LH-64}" width="100%" height="64" fill="#fff" opacity=".9"/>` + Array.from({length:14},(_,k)=>`<circle cx="${k*7.5}%" cy="${LH-64}" r="22" fill="#fff"/>`).join(""); break;
     case 8: s += `<rect width="100%" height="${LH}" fill="url(#hvPastel)"/><defs><linearGradient id="hvPastel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe6c8"/><stop offset="1" stop-color="#b8d8ff"/></linearGradient></defs>`
-      + [18,82].map((x,k)=>at(x, 140 + k*90, `<circle cx="0" cy="0" r="14" fill="#ffd8b8"/><path d="M-12 -14 q12 -12 24 0" fill="#ffe58a"/><ellipse cx="0" cy="-22" rx="12" ry="3" fill="none" stroke="#ffd25a" stroke-width="3"/><path d="M-14 4 q-26 -14 -30 6 q14 8 30 0z M14 4 q26 -14 30 6 q-14 8 -30 0z" fill="#fff"/><ellipse cx="0" cy="22" rx="10" ry="14" fill="#fff"/>`)).join("")
+      + [18,82].map((x,k)=>at(x, 140 + k*90, `<g class="fl" style="animation-delay:-${k*1.6}s"><circle cx="0" cy="0" r="14" fill="#ffd8b8"/><path d="M-12 -14 q12 -12 24 0" fill="#ffe58a"/><ellipse cx="0" cy="-22" rx="12" ry="3" fill="none" stroke="#ffd25a" stroke-width="3"/><path d="M-14 4 q-26 -14 -30 6 q14 8 30 0z M14 4 q26 -14 30 6 q-14 8 -30 0z" fill="#fff"/><ellipse cx="0" cy="22" rx="10" ry="14" fill="#fff"/></g>`)).join("")
       + at(70, 330, `<path d="M0 0 q20 -40 0 -80" stroke="#d8a84a" stroke-width="6" fill="none"/>${[0,1,2,3,4].map(k=>`<path d="M2 ${-8-k*14} l${14-k*2} 0" stroke="#e8c87a" stroke-width="1.5"/>`).join("")}`)
       + `<rect x="0" y="${LH-64}" width="100%" height="64" fill="#fff"/>` + Array.from({length:14},(_,k)=>`<circle cx="${k*7.5}%" cy="${LH-64}" r="22" fill="#fff"/>`).join(""); break;
     case 9: s += `<rect width="100%" height="${LH}" fill="#fff6dc"/>` + at(50, LH, Array.from({length:14},(_,k)=>`<path d="M0 0 L${f1(Math.cos(Math.PI + k*Math.PI/13)*900)} ${f1(Math.sin(Math.PI + k*Math.PI/13)*900)} L${f1(Math.cos(Math.PI + (k+.5)*Math.PI/13)*900)} ${f1(Math.sin(Math.PI + (k+.5)*Math.PI/13)*900)}z" fill="#ffe08a" opacity=".35"/>`).join(""))
@@ -107,7 +107,7 @@ function scene(i){
 
 /* ================= the cast ================= */
 const SATAN = `<svg viewBox="0 0 120 160" width="120" height="160" aria-hidden="true">
-  <path d="M84 120 q34 -6 26 -40 q-4 -14 6 -20" stroke="#b0141e" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M116 60 l-8 -10 l14 0z" fill="#b0141e"/>
+  <g class="hv-tail"><path d="M84 120 q34 -6 26 -40 q-4 -14 6 -20" stroke="#b0141e" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M116 60 l-8 -10 l14 0z" fill="#b0141e"/></g>
   <path d="M26 70 q-24 -20 -22 -46 q14 16 30 22z M94 70 q24 -20 22 -46 q-14 16 -30 22z" fill="#6a0a12"/>
   <rect x="40" y="118" width="12" height="34" rx="5" fill="#9a101a"/><rect x="68" y="118" width="12" height="34" rx="5" fill="#9a101a"/><path d="M36 150 h20 v8 h-20z M64 150 h20 v8 h-20z" fill="#1a0808"/>
   <path d="M34 72 q26 -10 52 0 l6 54 q-32 10 -64 0z" fill="#c8141e"/><path d="M60 74 v50" stroke="#9a101a" stroke-width="2"/>
@@ -118,7 +118,7 @@ const SATAN = `<svg viewBox="0 0 120 160" width="120" height="160" aria-hidden="
   <g class="hv-fork"><path d="M20 30 v120" stroke="#3a3a42" stroke-width="5"/><path d="M8 34 v-16 M20 30 v-20 M32 34 v-16 M8 34 q12 10 24 0" stroke="#3a3a42" stroke-width="5" fill="none" stroke-linecap="round"/></g>
   <circle cx="24" cy="92" r="8" fill="#d81e28"/><path d="M34 80 q-10 6 -10 12" stroke="#c8141e" stroke-width="9" fill="none" stroke-linecap="round"/></svg>`;
 const GOD = `<svg viewBox="0 0 150 200" width="150" height="200" aria-hidden="true">
-  <circle cx="75" cy="60" r="70" fill="#fff8d8" opacity=".55"/><ellipse cx="75" cy="12" rx="30" ry="7" fill="none" stroke="#ffcf3a" stroke-width="6"/>
+  <circle cx="75" cy="60" r="70" fill="#fff8d8" opacity=".55"/><ellipse class="hv-halo" cx="75" cy="12" rx="30" ry="7" fill="none" stroke="#ffcf3a" stroke-width="6"/>
   <path d="M38 96 q-26 10 -30 34 q8 6 16 0 q6 -16 22 -22z M112 96 q26 10 30 34 q-8 6 -16 0 q-6 -16 -22 -22z" fill="#fffdf6" stroke="#e8d8a8" stroke-width="2"/>
   <circle cx="14" cy="134" r="9" fill="#f2c8a0"/><circle cx="136" cy="134" r="9" fill="#f2c8a0"/>
   <path d="M40 92 q35 -14 70 0 l14 104 h-98z" fill="#fffdf6" stroke="#e8d8a8" stroke-width="2"/><path d="M75 96 v100" stroke="#ffcf3a" stroke-width="5"/><path d="M28 192 h94" stroke="#ffcf3a" stroke-width="5"/>
@@ -142,7 +142,7 @@ function build(){
   const el = document.createElement("div"); el.id = "hv"; el.className = "hv"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Go to heaven");
   const levels = FLOORS.map((n, i) => `<div class="hv-lvl" style="top:${(TOP - i) * LH}px;height:${LH}px">${scene(i)}<div class="hv-name"${i === TOP ? " hidden" : ""}><small>${i === 0 ? "Locked in" : i === TOP ? "The finish" : `Floor ${i}`}</small>${n}</div></div>`).join("");
   el.innerHTML = `
-    <div class="hv-view" id="hvView"><div class="hv-world" id="hvWorld" style="height:${(TOP + 1) * LH + PAD}px">${levels}
+    <div class="hv-view" id="hvView"><canvas class="hv-sky" id="hvSky" aria-hidden="true"></canvas><div class="hv-world" id="hvWorld" style="height:${(TOP + 1) * LH + PAD}px">${levels}
       <div class="hv-bedrock" style="top:${(TOP + 1) * LH}px;height:${PAD}px"></div>
       <div class="hv-ladder" style="top:${floorY(5)}px;height:${floorY(0) - floorY(5)}px"></div>
       <div class="hv-stair" style="top:${floorY(TOP)}px;height:${floorY(5) - floorY(TOP)}px"></div>
@@ -167,10 +167,37 @@ function build(){
 const actor = id => q$("#" + id);
 const SIZE = {hvYou:[74,74], hvSatan:[120,160], hvGod:[150,200], hvCage:[140,180]};
 function put(id, xPct, footY){ const el = actor(id), [w,h] = SIZE[id]; el.style.left = xPct + "%"; el.style.transform = `translate(${-w/2}px, ${(footY - h).toFixed(1)}px)`; el._x = xPct; el._y = footY; }
-function setYou(level){ const you = actor("hvYou"); you.innerHTML = M.avatar(Math.max(0, Math.min(10, Math.round(level))), M.bands[2].hue); }
+function setYou(level){ const you = actor("hvYou"); you.innerHTML = `<div class="jelly">${M.avatar(Math.max(0, Math.min(10, Math.round(level))), M.bands[2].hue)}</div>`; }
 function viewH(){ const v = q$("#hvView"), p = q$("#hvPanel"); const vh = v.clientHeight, ph = p && !p.hidden ? p.offsetHeight : 0; return {vh, free: Math.max(220, vh - ph)}; }
 function camFor(footY){ const {vh, free} = viewH(); const world = (TOP + 1) * LH + PAD; const feet = Math.min(free - 24, Math.max(330, free * .75)); return Math.max(0, Math.min(world - vh, footY - feet)); }
-function setCam(y){ camY = y; q$("#hvWorld").style.transform = `translate3d(0, ${(-y).toFixed(1)}px, 0)`; }
+/* the camera chases its target on a critically damped spring, so every move eases in and out */
+function applyCam(){ const w = q$("#hvWorld"); if (w) w.style.transform = `translate3d(0, ${(-camY).toFixed(1)}px, 0)`; }
+let camTV = 0, camTT = 0, camRef = 0;
+function setCam(y, instant){
+  const now = performance.now(), gap = (now - camTT) / 1000;
+  if (gap >= .008){                                                    // how fast the target moves, so the camera keeps up
+    camTV = gap < .1 ? Math.max(-6000, Math.min(6000, camTV + ((y - camRef) / gap - camTV) * .5)) : 0;
+    camTT = now; camRef = y; }
+  camT = y;
+  if (instant || Life.reduce.matches){ camY = y; camV = 0; camTV = 0; applyCam(); }
+}
+function skyFor(lvl){ const S = Life.STYLE; return lvl <= 3 ? ["ember", S.ember] : lvl === 4 ? ["dirt", S.dirt] : lvl === 5 ? ["firefly", S.firefly] : lvl <= 7 ? ["air", S.air] : ["gold", S.gold]; }
+function loop(id){
+  let last = 0;
+  const f = now => {
+    if (!H || H.id !== id) return; requestAnimationFrame(f);
+    if (document.hidden){ last = 0; return; }
+    const dt = last ? Math.min(.034, (now - last) / 1000) : 1 / 60; last = now;
+    if (Life.reduce.matches){ if (camY !== camT){ camY = camT; applyCam(); } return; }
+    if (now - camTT > 80) camTV *= Math.exp(-dt * 12);
+    const w = 7.2; camV += (w * w * (camT - camY) + 2 * w * (camTV - camV)) * dt; camY += camV * dt; applyCam();
+    const you = actor("hvYou"), j = you && you.querySelector(".jelly"); if (j && you._y != null) j.style.transform = jelly.step(dt, you._y, false);
+    const lvl = Math.max(0, Math.min(TOP, TOP - Math.floor((camY + innerHeight * .4) / LH))), [k, st] = skyFor(lvl);
+    if (k !== skyKey){ skyKey = k; sky.setStyle(st, k); }
+    sky.step(dt, camY, false);
+  };
+  requestAnimationFrame(f);
+}
 async function glideCam(to, dur = 700){ const from = camY; await tween(dur, k => setCam(from + (to - from) * k), EASE.soft); }
 function say(text, who, ms){
   const b = q$("#hvBubble"), el = actor(who); if (!b || !el) return Promise.resolve();
@@ -193,11 +220,12 @@ window.goHeaven = async function(){
   const need = Math.min(10, pool.length);
   H = {id: flowId, pool, queue: pick(rng(String(Math.random())), pool, pool.length), need, passes:0, level:0, earned:0, avail:0, answered:0, full:0, t0:Date.now(), cur:null, out:false, skip:false};
   q$("#hvLeave").onclick = leaveHeaven;
+  sky = Life.Sky(q$("#hvSky")); jelly = Life.Jelly(); camY = camT = camV = 0; skyKey = ""; loop(H.id);
   addEventListener("resize", onResize);
   prog();
   await intro();
 };
-function onResize(){ if (H) setCam(camFor(floorY(H.level))); }
+function onResize(){ if (H) setCam(camFor(floorY(H.level)), true); }
 function leaveHeaven(){
   if (H) H.id = -1; H = null; removeEventListener("resize", onResize);
   const el = q$("#hv"); if (el) el.remove(); document.body.classList.remove("in-heaven");
@@ -209,10 +237,10 @@ async function intro(){
   const id = H.id; const skip = q$("#hvSkip");
   const finish = () => { if (!alive(id) || H.introDone) return; H.introDone = true;
     skip.hidden = true; hush(); setYou(0); put("hvYou", 50, floorY(0)); put("hvCage", 50, floorY(0) + 6); actor("hvCage").classList.add("shut");
-    put("hvSatan", 20, floorY(0)); actor("hvSatan").classList.add("idle"); setCam(camFor(floorY(0))); ask(); };
+    put("hvSatan", 20, floorY(0)); actor("hvSatan").classList.add("idle"); setCam(camFor(floorY(0)), H.skip); ask(); };
   skip.onclick = () => { H.skip = true; finish(); };
   setYou(5); put("hvYou", 50, floorY(5)); put("hvGod", 24, floorY(TOP)); put("hvCage", 50, floorY(0) - 420); put("hvSatan", 32, floorY(5) + 170);
-  actor("hvSatan").style.opacity = "0"; setCam(camFor(floorY(5)));
+  actor("hvSatan").style.opacity = "0"; setCam(camFor(floorY(5)), true);
   const step = async ms => { await sleep(ms); return alive(id) && !H.skip; };
   if (!await step(700)) return;
   const hole = document.getElementById("hvHole"); if (hole) hole.setAttribute("opacity", ".9");

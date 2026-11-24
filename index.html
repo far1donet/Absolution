@@ -323,6 +323,7 @@ details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:
 <link rel="stylesheet" href="classroom.css">
 <link rel="stylesheet" href="themes.css">
 <link rel="stylesheet" href="heaven.css">
+<link rel="stylesheet" href="life.css">
 </head>
 <body>
 <div class="viewport" id="vp"><div id="world"></div></div>
@@ -563,15 +564,25 @@ let cam = 0, camT = 0, camRAF = 0, camLast = 0, focusC = 0, focusFrac = .5, curB
 const vsz = () => isV() ? vp.clientHeight : vp.clientWidth;
 const clampCam = v => Math.max(0, Math.min(L - vsz(), v));
 function applyCam(){ world.style.transform = isV() ? `translate3d(0,${(-cam).toFixed(2)}px,0)` : `translate3d(${(-cam).toFixed(2)}px,0,0)`; }
+// a critically damped spring: the camera eases in as well as out, so starts and stops are never abrupt
+// It also tracks how fast its target is moving, so on long fast moves it keeps up instead of trailing behind.
+let camV = 0, camTV = 0, camTT = 0, camRef = 0;
 function camStep(t){
-  const dt = camLast ? Math.min(.05, (t - camLast)/1000) : 1/60; camLast = t;
-  cam += (camT - cam) * (1 - Math.exp(-dt*CAM_K));
-  if (Math.abs(camT - cam) < .3){ cam = camT; applyCam(); camRAF = 0; camLast = 0; return; }
+  const dt = camLast ? Math.min(.034, (t - camLast)/1000) : 1/60; camLast = t;
+  if (performance.now() - camTT > 80) camTV *= Math.exp(-dt*12);       // the target has stopped moving
+  const w = CAM_K * .95 * (1 + Math.min(1.4, Math.abs(camT - cam) / vsz()));   // stiffer when far away, gentle on arrival
+  camV += (w*w*(camT - cam) + 2*w*(camTV - camV)) * dt; cam += camV * dt;
+  if (Math.abs(camT - cam) < .3 && Math.abs(camV) < 6 && Math.abs(camTV) < 6){ cam = camT; camV = 0; applyCam(); camRAF = 0; camLast = 0; return; }
   applyCam(); camRAF = requestAnimationFrame(camStep);
 }
 // the camera eases towards its target like a spring; instant jumps only on resets and resizes
-function look(c, frac, instant){ focusC = c; if (frac!=null) focusFrac = frac; camT = clampCam(c - vsz()*focusFrac);
-  if (instant || RM){ if (camRAF){ cancelAnimationFrame(camRAF); camRAF = 0; camLast = 0; } cam = camT; applyCam(); return; }
+function look(c, frac, instant){ focusC = c; if (frac!=null) focusFrac = frac;
+  const nt = clampCam(c - vsz()*focusFrac), now = performance.now(), gap = (now - camTT)/1000;
+  if (gap >= .008){                                                     // several calls in one frame aren't a speed
+    camTV = gap < .1 ? Math.max(-6000, Math.min(6000, camTV + ((nt - camRef)/gap - camTV) * .5)) : 0;
+    camTT = now; camRef = nt; }
+  camT = nt;
+  if (instant || RM){ if (camRAF){ cancelAnimationFrame(camRAF); camRAF = 0; camLast = 0; } cam = camT; camV = 0; camTV = 0; applyCam(); return; }
   if (!camRAF) camRAF = requestAnimationFrame(camStep); }
 addEventListener("resize", () => look(focusC, focusFrac, true));
 function setAvatar(c){ const v=$("#virus"), you=$("#you"); avC = c;
@@ -592,7 +603,7 @@ function setBand(pts, animate){
   const b = pts===0 ? 0 : bandFor(pts);
   if (b === curBand) return false;
   curBand = b; const v=$("#virus");
-  v.innerHTML = M.avatar(Math.min(b, 10), BX[b].hue); setHue(BX[b].hue);
+  v.innerHTML = `<div class="jelly">${M.avatar(Math.min(b, 10), BX[b].hue)}</div>`; setHue(BX[b].hue);
   if (animate){ v.classList.remove("mutate"); void v.offsetWidth; v.classList.add("mutate"); }
   return true;
 }
@@ -826,7 +837,9 @@ async function submit(timeout){
     }, pts>0 ? EASE.sink : EASE.soft);
     if (id!==flowId) return;
     if (pts===0) tag.classList.add("denied");
-    else { tag.style.setProperty("--tc", TIER_BASE[tier].hex); const ln = lineEls.find(l=>l.dataset.t===tier); if (ln) ln.classList.add("hit"); }
+    else { tag.style.setProperty("--tc", TIER_BASE[tier].hex); const ln = lineEls.find(l=>l.dataset.t===tier); if (ln) ln.classList.add("hit");
+      tag.insertAdjacentHTML("beforeend", `<i class="land-ring"></i><i class="land-ring late"></i>`);   // a shockwave where the answer lands
+      if (tier === "gem" || tier === "rootkit"){ vp.classList.remove("quake"); void vp.offsetWidth; vp.classList.add("quake"); } }
     await sleep(420); if (id!==flowId) return;
     look(endC, FR.land[AX]); await sleep(650);
   }
@@ -971,6 +984,7 @@ $("#mRestart").onclick = () => { $("#menu").hidden=true; if (S) newGame(S.daily)
 setMode(store.get("oiac-mode") || "cs");
 titleScreen();
 </script>
+<script src="life.js"></script>
 <script src="vendor/peerjs.min.js"></script>
 <script src="classroom.js"></script>
 </body>

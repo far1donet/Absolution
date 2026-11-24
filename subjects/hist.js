@@ -273,7 +273,7 @@ function scene(i, len){
 function avatar(level, hue){
   const c = `hsl(${hue} 90% 70%)`;
   const s = `<circle cx="16" cy="-6" r="${f1(7+level*.3)}" fill="hsl(${hue} 90% 60% / .35)" stroke="${c}" class="blink"/>
-    <circle cx="0" cy="-22" r="7" fill="${c}"/><path d="M0 -15 v20 M0 -8 l-11 8 M0 -8 l13 2 M0 5 l-9 17 M0 5 l9 17" stroke="${c}" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <circle cx="0" cy="-22" r="7" fill="${c}"/><g stroke="${c}" stroke-width="4" stroke-linecap="round" fill="none"><path d="M0 -15 v20"/><path class="av-armL" d="M0 -8 l-11 8"/><path class="av-armR" d="M0 -8 l13 2"/><path class="av-legL" d="M0 5 l-9 17"/><path class="av-legR" d="M0 5 l9 17"/></g>
     <path d="M-8 -26 q8 -10 16 0" stroke="#fff" stroke-width="2" fill="none"/>`;
   return avatarSVG(s);
 }

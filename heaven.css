@@ -76,10 +76,10 @@
   padding:8px 18px;border-radius:12px;font:700 18px var(--f-display);animation:hvToast 2.2s ease both;pointer-events:none;white-space:nowrap}
 .hv-toast small{display:block;font:600 10px var(--f-mono);letter-spacing:.2em;color:#ffd27a;text-transform:uppercase}
 @keyframes hvToast{0%{opacity:0;transform:translate(-50%,-10px)}12%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,0)}}
-.hv-you.grabbed > svg{animation:hvShake .18s linear infinite}
-.hv-you.climb > svg{animation:hvClimb .45s ease-in-out infinite}
-.hv-you.nope > svg{animation:hit .5s}
-.hv-you.cheer > svg{animation:mutate .9s}
+.hv-you.grabbed .jelly > svg{animation:hvShake .18s linear infinite}
+.hv-you.climb .jelly > svg{animation:hvClimb .45s ease-in-out infinite}
+.hv-you.nope .jelly > svg{animation:hit .5s}
+.hv-you.cheer .jelly > svg{animation:mutate .9s}
 .hv-you.enter{transition:opacity 1.3s ease,filter 1.3s ease;opacity:0;filter:brightness(3) drop-shadow(0 0 30px #fff)}
 .hv-satan.idle > svg,.hv-god.wave > svg{animation:bob 2.2s ease-in-out infinite}
 .hv-flame{animation:hvFlicker .28s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
@@ -97,6 +97,17 @@ body.in-heaven .fr-gauge{display:none}
 .btn.heaven-btn{background:linear-gradient(180deg,#fff3c4,#e8b830);color:#3a2606;border-color:#ffe58a;box-shadow:0 0 18px rgb(255 214 100 / .35)}
 .btn.heaven-btn:disabled{opacity:.45;box-shadow:none}
 @media (prefers-reduced-motion: reduce){
-  .hv-you > svg,.hv-satan > svg,.hv-god > svg,.hv-flame,.hv-glow,.hv-toast,.hv-bubble,.hv-panel,.hv-cage{animation:none!important}
+  .hv-you .jelly > svg,.hv-satan > svg,.hv-god > svg,.hv-flame,.hv-glow,.hv-toast,.hv-bubble,.hv-panel,.hv-cage{animation:none!important}
   .hv-gate,.hv-cage .hv-door,.hv-you.enter{transition-duration:.15s}
 }
+
+/* life in the tower */
+.hv-sky{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.hv-tail{animation:hvTail 1.6s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:0 100%}
+@keyframes hvTail{from{transform:rotate(-8deg)}to{transform:rotate(10deg)}}
+.hv-fork{animation:hvFork 2.2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes hvFork{from{transform:rotate(-4deg)}to{transform:rotate(5deg)}}
+.hv-halo{animation:hvHalo 2.4s ease-in-out infinite}
+@keyframes hvHalo{50%{stroke:#fff4b0;stroke-width:8px}}
+.hv-actor{transition:filter .3s}
+@media (prefers-reduced-motion: reduce){.hv-sky{display:none}.hv-tail,.hv-fork,.hv-halo{animation:none!important}}

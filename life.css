@@ -1,0 +1,93 @@
+/* Life: motion that makes every world, skin and screen feel alive. All of it stops with "reduce motion". */
+
+/* the ambient particle layer over the world */
+.amb{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+
+/* the avatar's springy body (shaped every frame by life.js) */
+.jelly{width:74px;height:74px;transform-origin:50% 62%;will-change:transform}
+.jelly svg{display:block;overflow:visible}
+#virus{transition:filter .4s ease}
+
+/* ---------- parts of the skins that move on their own ---------- */
+.av-tip{animation:avTip 1.5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes avTip{50%{transform:scale(1.55)}}
+.av-core{animation:avCore 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes avCore{50%{transform:scale(1.08)}}
+.av-wheel{animation:spin 6s linear infinite;transform-box:fill-box;transform-origin:center}
+.av-recoil{animation:avRecoil 2.6s cubic-bezier(.3,0,.3,1) infinite}
+@keyframes avRecoil{0%,70%,100%{transform:translateX(0)}76%{transform:translateX(-4px)}}
+.av-smoke{animation:avSmoke 2.6s ease-out infinite;transform-box:fill-box;transform-origin:center;opacity:0}
+@keyframes avSmoke{0%,72%{opacity:0;transform:translate(0,0) scale(.4)}78%{opacity:.8}100%{opacity:0;transform:translate(14px,-8px) scale(1.8)}}
+.av-coin{animation:avCoin 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes avCoin{0%,60%,100%{transform:scaleX(1)}70%{transform:scaleX(.08)}80%{transform:scaleX(-1)}90%{transform:scaleX(.08)}}
+.av-legL,.av-armR{animation:avSwingA .9s ease-in-out infinite alternate;transform-box:fill-box}
+.av-legR,.av-armL{animation:avSwingB .9s ease-in-out infinite alternate;transform-box:fill-box}
+.av-legL{transform-origin:100% 0}.av-legR{transform-origin:0 0}.av-armL{transform-origin:100% 0}.av-armR{transform-origin:0 0}
+@keyframes avSwingA{from{transform:rotate(-16deg)}to{transform:rotate(16deg)}}
+@keyframes avSwingB{from{transform:rotate(16deg)}to{transform:rotate(-16deg)}}
+.av-rock{animation:avRock 3.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes avRock{0%,100%{transform:rotate(-5deg) translateY(0)}50%{transform:rotate(5deg) translateY(2px)}}
+.av-waves{animation:avWaves 1.6s linear infinite}
+@keyframes avWaves{to{transform:translateX(-12px)}}
+.av-flag{animation:avFlag .8s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:100% 50%}
+@keyframes avFlag{to{transform:skewY(-8deg) scaleX(.86)}}
+.av-blink{animation:avBlink 4.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes avBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.av-stache{animation:avStache 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes avStache{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}50%{transform:rotate(4deg) translateY(-.5px)}75%{transform:rotate(-2deg)}}
+.av-hover{animation:avHover 2.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes avHover{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(-3px)}}
+.av-beam{animation:avBeam 1.3s ease-in-out infinite alternate}
+@keyframes avBeam{from{opacity:.15}to{opacity:.45}}
+
+/* ---------- scenery that moves ---------- */
+.sw{animation:sceneSway 4.2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes sceneSway{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+.swt{animation:sceneSwayTop 3.6s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 0}
+@keyframes sceneSwayTop{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+.fl{animation:sceneFloat 3.8s ease-in-out infinite;transform-box:fill-box}
+@keyframes sceneFloat{50%{transform:translateY(-9px)}}
+.dx{animation:sceneDrift 16s ease-in-out infinite alternate;transform-box:fill-box}
+@keyframes sceneDrift{from{transform:translateX(-26px)}to{transform:translateX(26px)}}
+.swim{animation:sceneSwim 7s ease-in-out infinite alternate;transform-box:fill-box}
+@keyframes sceneSwim{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
+.flap{animation:sceneFlap .5s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+@keyframes sceneFlap{to{transform:scaleY(.4)}}
+.fly{animation:sceneFly 9s ease-in-out infinite alternate;transform-box:fill-box}
+@keyframes sceneFly{from{transform:translate(-30px,6px)}to{transform:translate(30px,-6px)}}
+.pulse{animation:scenePulse 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes scenePulse{50%{transform:scale(1.06)}}
+.spin{animation:spin 30s linear infinite;transform-box:fill-box;transform-origin:center}
+.wave{animation:sceneWave 2.4s ease-in-out infinite alternate;transform-box:fill-box}
+@keyframes sceneWave{from{transform:translateX(-10px)}to{transform:translateX(10px)}}
+.flut{animation:sceneFlut .7s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:0 50%}
+@keyframes sceneFlut{to{transform:skewY(6deg) scaleX(.9)}}
+
+/* ---------- skins idle everywhere: subject picker, classroom seats, join form ---------- */
+.subj .ic .bob,.st-av .bob,.cj-av .bob,.ch-ic .bob,.cs-ic .bob{animation:bob 3s ease-in-out infinite;transform-origin:37px 37px}
+.subj:nth-child(3n+2) .ic .bob,.seat:nth-child(3n+2) .st-av .bob,.cj-skin:nth-child(3n+2) .bob{animation-delay:-1s}
+.subj:nth-child(3n+3) .ic .bob,.seat:nth-child(3n+3) .st-av .bob,.cj-skin:nth-child(3n+3) .bob{animation-delay:-2s}
+.subj{transition:transform .25s cubic-bezier(.3,1.5,.5,1),border-color .2s,background .2s}
+.subj:hover{transform:translateY(-2px)}
+.subj[aria-pressed="true"] .ic svg{animation:pickPop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pickPop{from{transform:scale(.6)}}
+.seat.on .st-av{animation:seatHop 1.1s ease-in-out infinite}
+@keyframes seatHop{0%,100%{transform:translateY(0) scale(1,1)}40%{transform:translateY(-7px) scale(.96,1.05)}55%{transform:translateY(0) scale(1.06,.94)}}
+
+@media (prefers-reduced-motion: reduce){
+  .amb{display:none}
+  [class*="av-"],.sw,.swt,.fl,.dx,.swim,.flap,.fly,.pulse,.spin,.wave,.flut,.subj .ic .bob,.st-av .bob,.cj-av .bob,.ch-ic .bob,.cs-ic .bob,.seat.on .st-av,.subj[aria-pressed="true"] .ic svg{animation:none!important}
+  .av-smoke{opacity:0}
+}
+.sweep{animation:sceneSweep 4.6s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:0 50%}
+@keyframes sceneSweep{from{transform:rotate(-14deg)}to{transform:rotate(10deg)}}
+@media (prefers-reduced-motion: reduce){.sweep{animation:none!important}}
+
+/* the answer lands with a shockwave; the rarest answers shake the screen */
+.land-ring{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid var(--tc,#fff);pointer-events:none;animation:landRing .75s cubic-bezier(.2,.7,.3,1) forwards}
+.land-ring.late{animation-delay:.12s;opacity:0}
+@keyframes landRing{0%{transform:scale(.3);opacity:1}100%{transform:scale(6.5);opacity:0}}
+.viewport.quake{animation:quake .45s cubic-bezier(.36,.07,.19,.97)}
+@keyframes quake{15%{transform:translate(-6px,3px)}30%{transform:translate(5px,-4px)}45%{transform:translate(-4px,2px)}60%{transform:translate(3px,-2px)}80%{transform:translate(-1px,1px)}}
+.cr-dust{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+@media (prefers-reduced-motion: reduce){.land-ring,.viewport.quake{animation:none!important}.land-ring{display:none}.cr-dust{display:none}}

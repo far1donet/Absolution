@@ -367,7 +367,7 @@ function wall(i, len, side){
 }
 function avatar(level, hue){
   const r = 16 + level*.5;
-  const s = `<circle r="${f1(r)}" fill="#e0ad2a" stroke="#ffe58a" stroke-width="3"/><circle r="${f1(r-6)}" fill="none" stroke="#b9861a" stroke-width="1.5"/><text y="7" text-anchor="middle" font-family="Chakra Petch,sans-serif" font-weight="700" font-size="${f1(18+level*.4)}" fill="#7a4f08">$</text>
+  const s = `<g class="av-coin"><circle r="${f1(r)}" fill="#e0ad2a" stroke="#ffe58a" stroke-width="3"/><circle r="${f1(r-6)}" fill="none" stroke="#b9861a" stroke-width="1.5"/><text y="7" text-anchor="middle" font-family="Chakra Petch,sans-serif" font-weight="700" font-size="${f1(18+level*.4)}" fill="#7a4f08">$</text></g>
     <path d="M${f1(r-2)} ${f1(-r+2)} l3 -8 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3z" fill="#fff6c8" class="blink"/>`;
   return avatarSVG(s);
 }

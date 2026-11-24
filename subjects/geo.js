@@ -548,57 +548,57 @@ function scene(i, len){
   // the sea, with its swell
   let d = `M0 ${SEA}`; for (let x=0; x<=len; x+=60) d += ` Q${x+30} ${SEA-7} ${x+60} ${SEA}`;
   s += `<path d="${d} V420 H0Z" fill="${water}"/>`;
-  each(90, x=>{ s += `<path d="M${f1(x)} ${f1(SEA+20+r()*70)} q12 -6 24 0" stroke="rgb(255 255 255 / .22)" stroke-width="2" fill="none"/>`; }, 20);
+  each(90, x=>{ s += `<path class="wave" style="animation-delay:-${f1(r()*2.4)}s" d="M${f1(x)} ${f1(SEA+20+r()*70)} q12 -6 24 0" stroke="rgb(255 255 255 / .22)" stroke-width="2" fill="none"/>`; }, 20);
   switch(i){
     case 0: // harbour: pier, warehouses, lighthouse, barrels
       s += `<rect x="0" y="${SEA-60}" width="${len*.55}" height="60" fill="#4a3424"/><rect x="0" y="${SEA-64}" width="${len*.55}" height="6" fill="#6a4a30"/>`;
       each(70, x=>{ s+=`<rect x="${x}" y="${SEA-4}" width="8" height="40" fill="#3a2414"/>`; }, 20);
       [[40,120],[150,90],[260,130]].forEach(([x,h])=>{ if (x < len*.5) s+=`<rect x="${x}" y="${SEA-60-h}" width="90" height="${h}" fill="#5a4636"/><path d="M${x-6} ${SEA-60-h} l51 -34 l51 34z" fill="#7a3a2a"/><rect x="${x+34}" y="${SEA-104}" width="22" height="44" fill="#2a1a10"/><rect x="${x+12}" y="${SEA-48-h}" width="16" height="14" fill="#ffd27a"/>`; });
       s += `<rect x="${len-150}" y="${SEA-210}" width="34" height="210" fill="#e8e2d0"/><rect x="${len-150}" y="${SEA-170}" width="34" height="22" fill="#c0392b"/><rect x="${len-150}" y="${SEA-110}" width="34" height="22" fill="#c0392b"/>`
-        + `<rect x="${len-156}" y="${SEA-230}" width="46" height="22" fill="#2a2a2a"/><circle cx="${len-133}" cy="${SEA-219}" r="8" fill="#ffe58a" class="blink"/><path d="M${len-126} ${SEA-219} l140 -30 v60z" fill="#ffe58a" opacity=".12"/>`;
+        + `<rect x="${len-156}" y="${SEA-230}" width="46" height="22" fill="#2a2a2a"/><circle cx="${len-133}" cy="${SEA-219}" r="8" fill="#ffe58a" class="blink"/><path class="sweep" d="M${len-126} ${SEA-219} l140 -30 v60z" fill="#ffe58a" opacity=".16"/>`;
       break;
     case 1: // coral islets, palm trees, turtles, gulls
       each(260, x=>{ s+=`<ellipse cx="${x+60}" cy="${SEA+2}" rx="70" ry="16" fill="#e9d3a0"/><path d="M${x+60} ${SEA-4} q-6 -60 10 -96" stroke="#7a5a2a" stroke-width="6" fill="none"/>`
-        + [0,1,2,3,4].map(k=>`<path d="M${x+70} ${SEA-100} q${-40+k*20} ${-14+Math.abs(k-2)*8} ${-60+k*30} ${18}" stroke="#3f9a4a" stroke-width="7" fill="none" stroke-linecap="round"/>`).join(""); }, 40);
+        + `<g class="sw" style="animation-delay:-${f1(r()*4)}s">` + [0,1,2,3,4].map(k=>`<path d="M${x+70} ${SEA-100} q${-40+k*20} ${-14+Math.abs(k-2)*8} ${-60+k*30} ${18}" stroke="#3f9a4a" stroke-width="7" fill="none" stroke-linecap="round"/>`).join("") + `</g>`; }, 40);
       each(140, x=>{ s+=`<path d="M${x} ${SEA+60+r()*30} q8 -20 16 0 q6 -14 12 0" fill="hsl(${330+r()*40} 70% 60%)"/><circle cx="${x+40}" cy="${SEA+90}" r="7" fill="#ff9d6e"/>`; }, 20);
-      each(300, x=>{ s+=`<ellipse cx="${x+150}" cy="${SEA+40}" rx="16" ry="10" fill="#3a7a4a"/><circle cx="${x+168}" cy="${SEA+38}" r="5" fill="#5a9a5a"/>`; }, 80);
-      each(180, x=>{ const y=f1(60+r()*120); s+=`<path d="M${x} ${y} q8 -8 16 0 q8 -8 16 0" stroke="#f2f4ff" stroke-width="2.5" fill="none"/>`; });
+      each(300, x=>{ s+=`<g class="swim" style="animation-delay:-${f1(r()*6)}s"><ellipse cx="${x+150}" cy="${SEA+40}" rx="16" ry="10" fill="#3a7a4a"/><circle cx="${x+168}" cy="${SEA+38}" r="5" fill="#5a9a5a"/></g>`; }, 80);
+      each(180, x=>{ const y=f1(60+r()*120); s+=`<path class="fly" style="animation-delay:-${f1(r()*8)}s" d="M${x} ${y} q8 -8 16 0 q8 -8 16 0" stroke="#f2f4ff" stroke-width="2.5" fill="none"/>`; });
       break;
     case 2: // whales and dolphins
-      each(420, x=>{ s+=`<path d="M${x} ${SEA+14} q60 -50 140 -6 q14 -16 26 -30 q-2 22 -10 40 q-80 30 -156 -4z" fill="#36506e"/><circle cx="${x+30}" cy="${SEA+2}" r="3" fill="#fff"/>`
-        + `<path d="M${x+40} ${SEA-20} q-8 -30 -20 -46 M${x+40} ${SEA-20} q6 -32 20 -44 M${x+40} ${SEA-20} v-50" stroke="#bfe8ff" stroke-width="3" fill="none" opacity=".8"/>`; }, 80);
-      each(300, x=>{ s+=`<path d="M${x+200} ${SEA-30} q30 -40 60 0 q-10 -6 -20 -4 q-20 -16 -40 4z" fill="#7aa4c8"/>`; }, 60);
+      each(420, x=>{ s+=`<g class="fl" style="animation-delay:-${f1(r()*3)}s"><path d="M${x} ${SEA+14} q60 -50 140 -6 q14 -16 26 -30 q-2 22 -10 40 q-80 30 -156 -4z" fill="#36506e"/><circle cx="${x+30}" cy="${SEA+2}" r="3" fill="#fff"/>`
+        + `<path class="blink" d="M${x+40} ${SEA-20} q-8 -30 -20 -46 M${x+40} ${SEA-20} q6 -32 20 -44 M${x+40} ${SEA-20} v-50" stroke="#bfe8ff" stroke-width="3" fill="none" opacity=".8"/></g>`; }, 80);
+      each(300, x=>{ s+=`<path class="fl" style="animation-delay:-${f1(r()*3)}s;animation-duration:2.2s" d="M${x+200} ${SEA-30} q30 -40 60 0 q-10 -6 -20 -4 q-20 -16 -40 4z" fill="#7aa4c8"/>`; }, 60);
       break;
     case 3: // shark fins circling
-      each(150, x=>{ const y=f1(SEA+4+r()*30); s+=`<path d="M${x} ${y} l22 -46 q10 22 20 46z" fill="#5a6a7a"/><path d="M${x-14} ${y} q30 8 64 0" stroke="rgb(255 255 255 / .35)" stroke-width="2" fill="none"/>`; }, 30);
+      each(150, x=>{ const y=f1(SEA+4+r()*30); s+=`<g class="swim" style="animation-delay:-${f1(r()*7)}s;animation-duration:${f1(5+r()*4)}s"><path d="M${x} ${y} l22 -46 q10 22 20 46z" fill="#5a6a7a"/><path d="M${x-14} ${y} q30 8 64 0" stroke="rgb(255 255 255 / .35)" stroke-width="2" fill="none"/></g>`; }, 30);
       break;
     case 4: // the storm: rain, lightning, big waves
       each(26, x=>{ s+=`<line x1="${x}" y1="${f1(r()*200)}" x2="${x-14}" y2="${f1(220+r()*80)}" stroke="rgb(190 210 240 / .35)" stroke-width="1.5"/>`; }, 4);
       each(240, x=>{ s+=`<path d="M${x} 20 l-30 90 h22 l-34 110 l70 -130 h-24 l30 -70z" fill="#fff6a8" opacity=".85" class="blink" style="animation-duration:${2+r()*2}s"/>`; }, 90);
-      each(180, x=>{ s+=`<path d="M${x-80} ${SEA+10} q50 -110 120 -60 q-30 -6 -40 20 q30 -20 50 6 q-60 10 -130 34z" fill="#1d3a5e" opacity=".9"/>`; }, 60);
+      each(180, x=>{ s+=`<path class="wave" style="animation-delay:-${f1(r()*2)}s" d="M${x-80} ${SEA+10} q50 -110 120 -60 q-30 -6 -40 20 q30 -20 50 6 q-60 10 -130 34z" fill="#1d3a5e" opacity=".9"/>`; }, 60);
       break;
     case 5: // siren rocks with a wreck
       each(230, x=>{ s+=`<path d="M${x} ${SEA+6} l20 -90 l40 -30 l30 60 l20 60z" fill="#3a3448"/><path d="M${x+60} ${SEA-100} q-14 -10 -6 -30 q14 -6 20 8 q8 24 -14 22z" fill="#d7a8ff"/><path d="M${x+52} ${SEA-80} q18 10 30 32 q-10 4 -20 -4 q-4 14 -14 18 q4 -24 4 -46z" fill="#5ad8c8"/>`; }, 40);
       s += `<path d="M${len*.6} ${SEA+10} l20 -40 h110 l-20 40z" fill="#4a3424" transform="rotate(-14 ${len*.6} ${SEA})"/><path d="M${len*.6+60} ${SEA-30} v-90" stroke="#3a2414" stroke-width="5" transform="rotate(-24 ${len*.6} ${SEA})"/>`;
       break;
     case 6: { // sea serpent humps and head
-      const y = SEA + 8; each(360, x=>{ s+=[0,1,2].map(k=>`<path d="M${x+k*70} ${y} q30 -${50-k*8} 60 0" fill="#2a8a5a" stroke="#1a5a3a" stroke-width="3"/>`).join("")
-        + `<path d="M${x+210} ${y} q20 -80 56 -90 q30 -4 36 20 q-20 -4 -30 6 q-14 20 -20 64z" fill="#2a8a5a" stroke="#1a5a3a" stroke-width="3"/><circle cx="${x+282}" cy="${y-82}" r="5" fill="#ffe14a"/><path d="M${x+298} ${y-70} l18 4 l-14 6" stroke="#ff4f6e" stroke-width="2" fill="none"/>`; }, 40); } break;
+      const y = SEA + 8; each(360, x=>{ s+=`<g class="swim" style="animation-delay:-${f1(r()*7)}s">` + [0,1,2].map(k=>`<path d="M${x+k*70} ${y} q30 -${50-k*8} 60 0" fill="#2a8a5a" stroke="#1a5a3a" stroke-width="3"/>`).join("")
+        + `<path d="M${x+210} ${y} q20 -80 56 -90 q30 -4 36 20 q-20 -4 -30 6 q-14 20 -20 64z" fill="#2a8a5a" stroke="#1a5a3a" stroke-width="3"/><circle cx="${x+282}" cy="${y-82}" r="5" fill="#ffe14a"/><path d="M${x+298} ${y-70} l18 4 l-14 6" stroke="#ff4f6e" stroke-width="2" fill="none"/></g>`; }, 40); } break;
     case 7: // ghost ships in fog
-      each(320, x=>{ s+=`<g opacity=".5"><path d="M${x} ${SEA-6} h150 l-20 30 h-110z" fill="#9fd8d0"/><path d="M${x+70} ${SEA-8} v-150" stroke="#9fd8d0" stroke-width="5"/><path d="M${x+74} ${SEA-150} q50 40 0 120z" fill="#cfeee8"/><path d="M${x+66} ${SEA-140} q-40 34 0 100z" fill="#cfeee8"/></g>`; }, 50);
-      each(200, x=>{ s+=`<ellipse cx="${x}" cy="${f1(SEA-40-r()*120)}" rx="${f1(100+r()*80)}" ry="14" fill="#cfeee8" opacity=".12"/>`; }, 0);
+      each(320, x=>{ s+=`<g opacity=".5" class="fl" style="animation-delay:-${f1(r()*3)}s;animation-duration:5s"><path d="M${x} ${SEA-6} h150 l-20 30 h-110z" fill="#9fd8d0"/><path d="M${x+70} ${SEA-8} v-150" stroke="#9fd8d0" stroke-width="5"/><path d="M${x+74} ${SEA-150} q50 40 0 120z" fill="#cfeee8"/><path d="M${x+66} ${SEA-140} q-40 34 0 100z" fill="#cfeee8"/></g>`; }, 50);
+      each(200, x=>{ s+=`<ellipse class="dx" style="animation-delay:-${f1(r()*16)}s" cx="${x}" cy="${f1(SEA-40-r()*120)}" rx="${f1(100+r()*80)}" ry="14" fill="#cfeee8" opacity=".12"/>`; }, 0);
       break;
     case 8: // kraken tentacles
-      each(150, x=>{ const h=f1(120+r()*120), c=r()<.5?-1:1; s+=`<path d="M${x} ${SEA+10} q${c*-30} ${-h/2} ${c*10} ${-h} q${c*24} -16 ${c*20} 10 q${c*-26} ${h/2} ${c*14} ${h-10}z" fill="#8a2a5a" stroke="#5a1a3a" stroke-width="3"/>`
+      each(150, x=>{ const h=f1(120+r()*120), c=r()<.5?-1:1; s+=`<path class="sw" style="animation-delay:-${f1(r()*4)}s;animation-duration:${f1(2.4+r()*2)}s" d="M${x} ${SEA+10} q${c*-30} ${-h/2} ${c*10} ${-h} q${c*24} -16 ${c*20} 10 q${c*-26} ${h/2} ${c*14} ${h-10}z" fill="#8a2a5a" stroke="#5a1a3a" stroke-width="3"/>`
         + [0.3,0.5,0.7].map(k=>`<circle cx="${f1(x+c*6)}" cy="${f1(SEA+10-h*k)}" r="4" fill="#e8a0c8"/>`).join(""); }, 30);
       s += `<circle cx="${len*.5}" cy="${SEA+60}" r="26" fill="#ffe14a" opacity=".85" class="blink"/><circle cx="${len*.5}" cy="${SEA+60}" r="10" fill="#1a0a10"/>`;
       break;
     case 9: { // dragons, then the treasure island at the edge of the map
-      each(520, x=>{ const y = f1(60+r()*80); s+=`<path d="M${x} ${y} q40 -20 80 0 q-20 -60 50 -70 q-20 40 10 70 q40 -10 60 10 q-50 0 -60 20 q-60 10 -140 -30z" fill="#a83a2a"/><circle cx="${x+150}" cy="${y-2}" r="3" fill="#ffe14a"/>`
-        + `<path d="M${x+176} ${f1(+y+4)} q40 0 70 -14 q-20 20 -60 26z" fill="#ffb03a" opacity=".85"/>`; }, 60);
+      each(520, x=>{ const y = f1(60+r()*80); s+=`<g class="fly" style="animation-delay:-${f1(r()*9)}s"><path d="M${x} ${y} q40 -20 80 0 q-20 -60 50 -70 q-20 40 10 70 q40 -10 60 10 q-50 0 -60 20 q-60 10 -140 -30z" fill="#a83a2a"/><circle cx="${x+150}" cy="${y-2}" r="3" fill="#ffe14a"/>`
+        + `<path class="blink" d="M${x+176} ${f1(+y+4)} q40 0 70 -14 q-20 20 -60 26z" fill="#ffb03a" opacity=".85"/></g>`; }, 60);
       const X = (700-600)*14;
       s += `<ellipse cx="${X}" cy="${SEA+4}" rx="190" ry="34" fill="#e9c87a"/><path d="M${X-120} ${SEA-6} q60 -70 160 -60 q50 10 70 60z" fill="#4a8a3a"/>`
-        + `<path d="M${X+40} ${SEA-20} q-6 -70 14 -110" stroke="#7a5a2a" stroke-width="7" fill="none"/>` + [0,1,2,3].map(k=>`<path d="M${X+56} ${SEA-130} q${-50+k*30} -10 ${-70+k*44} 20" stroke="#3f9a4a" stroke-width="8" fill="none" stroke-linecap="round"/>`).join("")
+        + `<path d="M${X+40} ${SEA-20} q-6 -70 14 -110" stroke="#7a5a2a" stroke-width="7" fill="none"/>` + `<g class="sw">` + [0,1,2,3].map(k=>`<path d="M${X+56} ${SEA-130} q${-50+k*30} -10 ${-70+k*44} 20" stroke="#3f9a4a" stroke-width="8" fill="none" stroke-linecap="round"/>`).join("") + `</g>`
         + `<path d="M${X-40} ${SEA-28} l30 30 M${X-10} ${SEA-28} l-30 30" stroke="#c0392b" stroke-width="7" stroke-linecap="round"/>`
         + `<rect x="${X+70}" y="${SEA-30}" width="46" height="30" rx="4" fill="#8a5a2a" stroke="#ffd27a" stroke-width="2"/><path d="M${X+70} ${SEA-30} q23 -22 46 0" fill="#a8703a" stroke="#ffd27a" stroke-width="2"/><circle cx="${X+93}" cy="${SEA-34}" r="6" fill="#ffe58a" class="blink"/>`;
     } break;
@@ -611,10 +611,10 @@ function avatar(level, hue){
   const sails = masts.map((x,k)=>{ const h = k === Math.floor(masts.length/2) ? 34 : 26;
     return `<path d="M${x} 8 V${-h-4}" stroke="#3a210f" stroke-width="2.5"/><path d="M${x-1} ${-h} q${13} ${h/2} 0 ${h-2} z" fill="${sailC}" stroke="${trim}" stroke-width="1.5"/>`; }).join("");
   const top = Math.min(...masts.map((x,k)=> k === Math.floor(masts.length/2) ? -38 : -30)), mx = masts[Math.floor(masts.length/2)];
-  const s = `<path d="M-34 24 q6 -5 12 0 t12 0 t12 0 t12 0 t12 0 t12 0" stroke="#9fe0ff" stroke-width="2" fill="none" opacity=".8"/>${sails}
-    <path d="M${mx} ${top} h-15 v10 h15z" fill="#111"/><circle cx="${mx-7.5}" cy="${top+4}" r="2.4" fill="#fff"/><path d="M${mx-10} ${top+8} l5 -2 M${mx-5} ${top+8} l-5 -2" stroke="#fff" stroke-width="1"/>
+  const s = `<g class="av-waves"><path d="M-40 24 q6 -5 12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0" stroke="#9fe0ff" stroke-width="2" fill="none" opacity=".8"/></g><g class="av-rock">${sails}
+    <g class="av-flag"><path d="M${mx} ${top} h-15 v10 h15z" fill="#111"/><circle cx="${mx-7.5}" cy="${top+4}" r="2.4" fill="#fff"/><path d="M${mx-10} ${top+8} l5 -2 M${mx-5} ${top+8} l-5 -2" stroke="#fff" stroke-width="1"/></g>
     <path d="M-30 8 H30 L23 22 H-23 Z" fill="#6a3f1f" stroke="#2e1a0b" stroke-width="2"/><path d="M-28 12 H28" stroke="${trim}" stroke-width="1.5"/>
-    <circle cx="-12" cy="16" r="2.2" fill="#ffd27a"/><circle cx="0" cy="16" r="2.2" fill="#ffd27a"/><circle cx="12" cy="16" r="2.2" fill="#ffd27a"/>`;
+    <circle cx="-12" cy="16" r="2.2" fill="#ffd27a" class="blink"/><circle cx="0" cy="16" r="2.2" fill="#ffd27a"/><circle cx="12" cy="16" r="2.2" fill="#ffd27a" class="blink" style="animation-delay:-.8s"/></g>`;
   return avatarSVG(s);
 }
 function entity(t, c){

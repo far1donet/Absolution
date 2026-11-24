@@ -366,7 +366,7 @@ function wall(i, n, side){
       s+=`<path d="M10 ${y+120} q20 -26 40 0 q-20 -8 -40 0z" fill="#e8b25a"/><path d="M62 ${y+120} q20 -26 40 0 q-20 -8 -40 0z" fill="#e8b25a"/>`; }); break;
     case 1: rep(220, y=>{ s+=`<circle cx="40" cy="${y+150}" r="20" fill="none" stroke="#2a2a2a" stroke-width="4"/><circle cx="96" cy="${y+150}" r="20" fill="none" stroke="#2a2a2a" stroke-width="4"/><path d="M40 ${y+150} l22 -30 h26 l8 30 M62 ${y+120} l-6 -12 h12" stroke="#c0392b" stroke-width="4" fill="none"/><rect x="60" y="${y+128}" width="30" height="14" rx="3" fill="#d9963e"/>`
       + `<ellipse cx="60" cy="${y+40}" rx="22" ry="16" fill="#f2f2f2"/><circle cx="82" cy="${y+28}" r="10" fill="#f2f2f2"/><circle cx="42" cy="${y+30}" r="9" fill="#f2f2f2"/><rect x="48" y="${y+52}" width="5" height="24" fill="#f2f2f2"/><rect x="68" y="${y+52}" width="5" height="24" fill="#f2f2f2"/><circle cx="85" cy="${y+26}" r="2" fill="#111"/>`; }); break;
-    case 2: rep(200, y=>{ for (let k=0;k<6;k++) s+=`<rect x="${k*20}" y="${y}" width="20" height="34" fill="${k%2?"#c0392b":"#f4efe2"}"/>`; s+=`<path d="M0 ${y+34} q10 12 20 0 q10 12 20 0 q10 12 20 0 q10 12 20 0 q10 12 20 0 q10 12 20 0" fill="#c0392b"/>`
+    case 2: rep(200, y=>{ for (let k=0;k<6;k++) s+=`<rect x="${k*20}" y="${y}" width="20" height="34" fill="${k%2?"#c0392b":"#f4efe2"}"/>`; s+=`<path class="flut" style="transform-origin:50% 0" d="M0 ${y+34} q10 12 20 0 q10 12 20 0 q10 12 20 0 q10 12 20 0 q10 12 20 0 q10 12 20 0" fill="#c0392b"/>`
       + `<rect x="14" y="${y+60}" width="92" height="66" fill="#1a1a1a" stroke="#8a6a3a" stroke-width="4"/><text x="60" y="${y+84}" text-anchor="middle" font-family="Caveat,cursive" font-size="20" fill="#f4efe2">Menu</text><path d="M26 ${y+96} h68 M26 ${y+110} h50" stroke="#f4efe2" stroke-width="2" opacity=".6"/>`
       + `<rect x="0" y="${y+150}" width="120" height="4" fill="#d9c27a"/><rect x="50" y="${y+154}" width="6" height="30" fill="#2a2a2a"/>`; }); break;
     case 3: s+=`<rect width="120" height="${n}" fill="#d8ccb0" opacity=".16"/>`; rep(170, y=>{ s+=`<rect x="22" y="${y}" width="76" height="110" fill="#2a3a4a"/><rect x="26" y="${y+4}" width="32" height="102" fill="#9fc0d8" opacity=".35"/><rect x="62" y="${y+4}" width="32" height="102" fill="#9fc0d8" opacity=".35"/>`
@@ -375,8 +375,8 @@ function wall(i, n, side){
       + Array.from({length:6},(_,k)=>`<circle cx="${14+k*18}" cy="${y+106}" r="5" fill="hsl(${r()*360} 70% 60%)"/>`).join(""); }); break;
     case 4: rep(150, y=>{ s+=`<path d="M0 ${y+120} L60 ${y+40} L120 ${y+120}z" fill="#6a7a90"/><path d="M0 ${y+120} L60 ${y+40} L120 ${y+120}" stroke="#9aaac0" stroke-width="3" fill="none"/>`
       + `<rect x="${f1(70+r()*20)}" y="${y+28}" width="14" height="40" fill="#b86a4a"/><rect x="${f1(30+r()*10)}" y="${y+76}" width="18" height="22" fill="#ffe08a" opacity=".85"/>`
-      + `<ellipse cx="${f1(20+r()*80)}" cy="${y+18}" rx="8" ry="6" fill="#8a8a9a"/><circle cx="${f1(26+r()*80)}" cy="${y+14}" r="4" fill="#8a8a9a"/>`; }); break;
-    case 5: rep(180, y=>{ s+=`<rect x="54" y="${y+60}" width="12" height="110" fill="#8a7a5a"/>`+[0,1,2,3].map(k=>`<circle cx="${f1(30+r()*60)}" cy="${f1(y+20+r()*70)}" r="${f1(22+r()*10)}" fill="hsl(${110+r()*30} 40% ${28+r()*12}%)"/>`).join("")
+      + `<g class="fl" style="animation-delay:-${f1(r()*3)}s;animation-duration:1.6s"><ellipse cx="${f1(20+r()*80)}" cy="${y+18}" rx="8" ry="6" fill="#8a8a9a"/><circle cx="${f1(26+r()*80)}" cy="${y+14}" r="4" fill="#8a8a9a"/></g>`; }); break;
+    case 5: rep(180, y=>{ s+=`<rect x="54" y="${y+60}" width="12" height="110" fill="#8a7a5a"/>`+[0,1,2,3].map(k=>`<circle class="pulse" style="animation-delay:-${f1(r()*3)}s;animation-duration:${f1(3+r()*2)}s" cx="${f1(30+r()*60)}" cy="${f1(y+20+r()*70)}" r="${f1(22+r()*10)}" fill="hsl(${110+r()*30} 40% ${28+r()*12}%)"/>`).join("")
       + `<rect x="6" y="${y+150}" width="40" height="24" fill="#2a5a3a"/><path d="M6 ${y+150} l20 -10 l20 10" fill="#2a5a3a"/>`; }); break;
     case 6: { s+=`<rect width="120" height="${n}" fill="#e8dcc0" opacity=".08"/>`; const top = 40, base = n - 30;
       s+=`<rect x="${side==="l"?10:0}" y="${top}" width="110" height="${base-top}" fill="#e2d6b8"/><path d="M${side==="l"?120:0} ${base} V${top+220} q0 -160 ${side==="l"?-60:60} -170" fill="none" stroke="#c9b98f" stroke-width="10"/>`
@@ -386,9 +386,9 @@ function wall(i, n, side){
       + [0,1,2].map(k=>`<path d="M${30+k*24} ${y+330} v-90 q10 -26 20 0 v90z" fill="#3a3a5a"/>`).join("") + `<circle cx="60" cy="${y+130}" r="30" fill="#3a4a8a" stroke="#d8ccb0" stroke-width="4"/>`
       + Array.from({length:8},(_,k)=>`<path d="M60 ${y+130} l${f1(Math.cos(k*Math.PI/4)*28)} ${f1(Math.sin(k*Math.PI/4)*28)}" stroke="#d8ccb0" stroke-width="2"/>`).join("")
       + `<path d="M30 ${y+40} v-40 l8 -16 l8 16 v40 M74 ${y+40} v-40 l8 -16 l8 16 v40" fill="#a8996e"/>`; }); break;
-    case 8: rep(230, y=>{ s+=`<ellipse cx="${f1(30+r()*60)}" cy="${y+40}" rx="56" ry="18" fill="#fff" opacity=".35"/><ellipse cx="${f1(40+r()*40)}" cy="${y+34}" rx="34" ry="16" fill="#fff" opacity=".4"/>`
-      + (r()<.5 ? `<path d="M60 ${y+110} a30 34 0 1 1 0.1 0z" fill="hsl(${r()*360} 70% 60%)" stroke="#fff" stroke-width="2"/><path d="M48 ${y+140} l6 26 h12 l6 -26" stroke="#5a3a1a" stroke-width="2" fill="none"/><rect x="52" y="${y+164}" width="16" height="12" fill="#8a5a2a"/>`
-        : `<path d="M${f1(10+r()*40)} ${y+140} q10 -6 20 0 q10 -6 20 0" stroke="#2a2a3a" stroke-width="3" fill="none"/>`); }); break;
+    case 8: rep(230, y=>{ s+=`<g class="dx" style="animation-delay:-${f1(r()*16)}s"><ellipse cx="${f1(30+r()*60)}" cy="${y+40}" rx="56" ry="18" fill="#fff" opacity=".35"/><ellipse cx="${f1(40+r()*40)}" cy="${y+34}" rx="34" ry="16" fill="#fff" opacity=".4"/></g>`
+      + (r()<.5 ? `<g class="fl" style="animation-delay:-${f1(r()*3)}s;animation-duration:4.5s"><path d="M60 ${y+110} a30 34 0 1 1 0.1 0z" fill="hsl(${r()*360} 70% 60%)" stroke="#fff" stroke-width="2"/><path d="M48 ${y+140} l6 26 h12 l6 -26" stroke="#5a3a1a" stroke-width="2" fill="none"/><rect x="52" y="${y+164}" width="16" height="12" fill="#8a5a2a"/></g>`
+        : `<path class="fly" style="animation-delay:-${f1(r()*8)}s" d="M${f1(10+r()*40)} ${y+140} q10 -6 20 0 q10 -6 20 0" stroke="#2a2a3a" stroke-width="3" fill="none"/>`); }); break;
     case 9: rep(36, y=>{ s+=`<circle cx="${f1(r()*120)}" cy="${f1(y+r()*24)}" r="${f1(.8+r()*1.6)}" fill="#fff" class="${r()<.35?"blink":""}" style="animation-delay:${f1(r()*2)}s"/>`; });
       if (side==="r") s+=`<circle cx="70" cy="140" r="30" fill="#fff6d8"/><circle cx="82" cy="132" r="28" fill="#141030" opacity=".9"/>`; break;
   }
@@ -401,8 +401,8 @@ function avatar(level, hue){
     <path d="M-10 -14 q10 -6 18 0 M-12 24 q12 -6 24 0" stroke="#f3cf8a" stroke-width="3" fill="none" stroke-linecap="round"/>
     <ellipse cx="0" cy="-22" rx="16" ry="6" fill="#1d2440"/><path d="M-12 -24 q12 -14 26 -2" fill="#1d2440"/><path d="M1 -31 v-5" stroke="#1d2440" stroke-width="3" stroke-linecap="round"/>
     ${level >= 4 ? `<circle cx="10" cy="-23" r="3" fill="#fff"/><circle cx="8" cy="-23" r="1.2" fill="#0055a4"/><circle cx="12" cy="-23" r="1.2" fill="#ef4135"/>` : ""}
-    <circle cx="-6" cy="-6" r="3.6" fill="#fff"/><circle cx="6" cy="-6" r="3.6" fill="#fff"/><circle cx="-5.4" cy="-5.6" r="1.8" fill="#1a1a1a"/><circle cx="6.6" cy="-5.6" r="1.8" fill="#1a1a1a"/>
-    <path d="M0 2 q-6 -3 -13 4 q6 -1 13 -1 q7 0 13 1 q-7 -7 -13 -4z" fill="#3a2414"/>${mouth}`;
+    <g class="av-blink"><circle cx="-6" cy="-6" r="3.6" fill="#fff"/><circle cx="6" cy="-6" r="3.6" fill="#fff"/><circle cx="-5.4" cy="-5.6" r="1.8" fill="#1a1a1a"/><circle cx="6.6" cy="-5.6" r="1.8" fill="#1a1a1a"/></g>
+    <path class="av-stache" d="M0 2 q-6 -3 -13 4 q6 -1 13 -1 q7 0 13 1 q-7 -7 -13 -4z" fill="#3a2414"/>${mouth}`;
   return avatarSVG(s);
 }
 /* how excited the baguette is: louder for rarer answers */
