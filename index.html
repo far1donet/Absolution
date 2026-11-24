@@ -322,6 +322,7 @@ details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:
 </style>
 <link rel="stylesheet" href="classroom.css">
 <link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="heaven.css">
 </head>
 <body>
 <div class="viewport" id="vp"><div id="world"></div></div>
@@ -367,6 +368,16 @@ function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 <script src="subjects/gk.js"></script>
 <script src="explain.js"></script>
 <script src="mcq.js"></script>
+<script src="heaven.js"></script>
+<script src="qbank/cs.js"></script>
+<script src="qbank/bio.js"></script>
+<script src="qbank/chem.js"></script>
+<script src="qbank/phys.js"></script>
+<script src="qbank/biz.js"></script>
+<script src="qbank/hist.js"></script>
+<script src="qbank/geo.js"></script>
+<script src="qbank/fr.js"></script>
+<script src="qbank/gk.js"></script>
 <script>
 /* ================= ranks ================= */
 const TIER_BASE = {
@@ -671,6 +682,7 @@ function renderPicker(focusSel){
   const el = $("#picker"); if (!el) return;
   const sel = new Set(pickState.sel), n = pool().length;
   const done = store.get("oiac6-day-"+dayStr+"-"+dailyKey()), best = store.get("oiac6-best-"+dailyKey());
+  const hn = typeof heavenPool === "function" ? heavenPool().length : 0;
   el.innerHTML = `
     <div class="pick-top">
       <div><h2 class="pick-title">Choose what to revise</h2>
@@ -681,8 +693,9 @@ function renderPicker(focusSel){
     <div class="row">
       <button class="btn" id="daily">${done?"Replay today's dive":"Today's dive"} ${M.arrow}</button>
       <button class="btn ghost" id="practice" ${n?"":"disabled"}>Practice · endless</button>
+      <button class="btn heaven-btn" id="heaven" ${hn?"":"disabled"}>Go to heaven</button>
     </div>
-    <p class="small"><b>Today's dive:</b> ${PER_DIVE} prompts from all of ${esc(M.name)} (${esc(M.noLevel || pickState.level)}), the same for everyone today, up to ${PER_DIVE*100} points.${done?` Your best today: <b>${done.score}</b> pts, reached ${esc(done.layer)}.`:""}<br><b>Practice:</b> endless prompts from the topics you tick below. You have ${LIVES} hearts, and a wrong answer or running out of time costs one. Go as far as you can.${best?` Your best: <b>${best.score}</b> pts over ${best.prompts} prompts.`:""}</p>
+    <p class="small"><b>Today's dive:</b> ${PER_DIVE} prompts from all of ${esc(M.name)} (${esc(M.noLevel || pickState.level)}), the same for everyone today, up to ${PER_DIVE*100} points.${done?` Your best today: <b>${done.score}</b> pts, reached ${esc(done.layer)}.`:""}<br><b>Practice:</b> endless prompts from the topics you tick below. You have ${LIVES} hearts, and a wrong answer or running out of time costs one. Go as far as you can.${best?` Your best: <b>${best.score}</b> pts over ${best.prompts} prompts.`:""}<br><b>Go to heaven:</b> Satan locks you in his dungeon. Escape by writing full answers to exam-style questions on the topics you tick${hn ? ` (${hn} question${hn===1?"":"s"})` : ""}, marked against a markscheme. Full marks climbs a floor; zero marks drags you back down.</p>
     <span data-status>${statusHTML()}</span>
     <div class="row"><button class="mini" id="pAll">Select all</button><button class="mini" id="pNone">Clear</button></div>
     ${M.catalog.map(th=>`<div class="theme"><h3>${esc(th.label || `Theme ${th.code} · ${th.name}`)}</h3>${th.units.map(u=>{
@@ -693,6 +706,7 @@ function renderPicker(focusSel){
   const set = (codes, on) => { const s2=new Set(pickState.sel); codes.forEach(c=> on ? s2.add(c) : s2.delete(c)); pickState.sel=[...s2]; savePick(); };
   $("#daily").onclick = () => newGame(true);
   $("#practice").onclick = () => newGame(false);
+  $("#heaven").onclick = () => goHeaven();
   el.querySelectorAll("[data-lv]").forEach(b=> b.onclick = () => { pickState.level=b.dataset.lv; savePick(); renderPicker(`[data-lv="${b.dataset.lv}"]`); });
   $("#pAll").onclick = () => { set(Object.keys(M.topicName).filter(c=>countFor(c)>0), true); renderPicker("#pAll"); };
   $("#pNone").onclick = () => { pickState.sel=[]; savePick(); renderPicker("#pNone"); };

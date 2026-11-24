@@ -523,7 +523,7 @@ function openJoin(code){
     try { await hostRoom(); } catch(e){ msg(WHY[e] || WHY.network); busy(false); }
   };
   q$("#cjBack").onclick = () => { wrap.remove(); exitToTitle(); };
-  setTimeout(() => (code ? q$("#cjName") : q$("#cjName")).focus({preventScroll:true}), 50);
+  setTimeout(() => { if (!wrap.contains(document.activeElement)) q$("#cjName").focus({preventScroll:true}); }, 50);   // don't steal focus from a field already in use
 }
 
 async function hostRoom(){
