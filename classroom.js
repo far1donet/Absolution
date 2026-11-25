@@ -284,7 +284,8 @@ function cleanInfo(m){
   const name = String(m && m.name || "").replace(/\s+/g, " ").trim().slice(0, 16);
   if (!name) return null;
   const skin = SUBJECTS[m.skin] ? m.skin : "cs", hue = HUES.includes(+m.hue) ? +m.hue : HUES[0];
-  return {name, skin, hue};
+  // the host has the last word on nicknames: anything rude is shown as "Student"
+  return {name: window.NameCheck && NameCheck.problem(name) ? "Student" : name, skin, hue};
 }
 function newQuestion(subj, topic){
   let cand = poolFor(R.settings, subj, topic).filter(([,p]) => !usedIds.has(p.id));
@@ -477,6 +478,8 @@ const WHY = {
 };
 
 function openJoin(code){
+  // signed-in players start with their account's name and skin
+  const A = window.Account && Account.profile; if (A && !prof.name){ prof.name = String(A.display_name || A.username).slice(0, 16); if (SUBJECTS[A.skin]) prof.skin = A.skin; }
   flowId++; clearUI(); document.body.classList.add("in-class");
   const host = q$("#crJoin"); if (host) host.remove();
   const wrap = document.createElement("div"); wrap.className = "overlay cr-join"; wrap.id = "crJoin";
@@ -510,7 +513,9 @@ function openJoin(code){
   const readProf = () => { prof = {name:q$("#cjName").value.replace(/\s+/g," ").trim().slice(0,16), skin:(q$('input[name="cjSkin"]:checked')||{}).value || "cs", hue:+((q$('input[name="cjHue"]:checked')||{}).value || HUES[0])}; store.set("oiac-me", prof); return prof; };
   wrap.querySelectorAll('input[name="cjHue"]').forEach(r => r.onchange = () => { const h = +r.value; wrap.querySelectorAll(".cj-skin").forEach(l => { const k = l.querySelector("input").value; l.querySelector(".cj-av").innerHTML = skinSVG(k, h); }); });
   const busy = b => { q$("#cjJoin").disabled = b; q$("#cjHost").disabled = b; };
-  const need = () => { if (!readProf().name){ msg("Enter a nickname first."); q$("#cjName").focus(); return false; } return true; };
+  const need = () => { if (!readProf().name){ msg("Enter a nickname first."); q$("#cjName").focus(); return false; }
+    const ok = window.NameCheck ? NameCheck.displayName(prof.name) : {ok:true}; if (!ok.ok){ msg("Nickname: " + ok.reason); q$("#cjName").focus(); return false; }
+    return true; };
   q$("#cjCode").oninput = e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); };
   q$("#cjCode").onkeydown = e => { if (e.key === "Enter") q$("#cjJoin").click(); };
   q$("#cjJoin").onclick = async () => {

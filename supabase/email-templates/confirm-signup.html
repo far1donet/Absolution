@@ -1,0 +1,11 @@
+<!-- Paste into Supabase → Authentication → Emails → Templates. Keep {{ .Token }}: it becomes the 6-digit code. -->
+<div style="margin:0;padding:24px 12px;background:#0b1424;font-family:Arial,Helvetica,sans-serif">
+  <div style="max-width:440px;margin:0 auto;background:#121c2a;border:1px solid #22323d;border-radius:14px;padding:28px 24px;color:#e3edf2">
+    <p style="margin:0 0 4px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#ff4fa0;font-weight:bold">One in a Computer</p>
+    <h1 style="margin:0 0 12px;font-size:24px;color:#ffffff">Your sign-up code</h1>
+    <p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#c8d6e0">Type this code in the game to confirm your email. Then you'll choose a password and make your character.</p>
+    <p style="margin:0 0 20px;text-align:center"><span style="display:inline-block;padding:14px 22px;border-radius:10px;background:#0b1424;border:2px solid #4fb8ff;font-family:'Courier New',monospace;font-size:34px;letter-spacing:10px;font-weight:bold;color:#ffffff">{{ .Token }}</span></p>
+    <p style="margin:0 0 8px;font-size:13px;line-height:1.5;color:#8fa3b0">The code works for 10 minutes. Never share it with anyone.</p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:#8fa3b0">If you didn't ask for this, you can ignore this email: nothing changes until the code is used.</p>
+  </div>
+</div>

@@ -228,7 +228,16 @@ window.goHeaven = async function(){
   await intro();
 };
 function onResize(){ if (H) setCam(camFor(floorY(H.level)), true); }
+// Go to heaven runs are saved like dives (account.js): escaped or not, once at least one question was answered
+function saveHeaven(escaped){
+  if (!H || H.saved || !H.answered || !window.Account) return;
+  H.saved = true;
+  Account.save({subject:M.key, mode:"heaven", level:M.noLevel ? null : pickState.level, score:H.earned, prompts:H.answered, gems:0, finished:escaped,
+    reached:(escaped ? "The gates of heaven" : FLOORS[Math.min(H.level, TOP)]), answers:[],
+    extra:{escaped, secs:Math.round((Date.now() - H.t0) / 1000), earned:H.earned, avail:H.avail, full:H.full, floor:H.level}});
+}
 function leaveHeaven(){
+  saveHeaven(false);
   if (H) H.id = -1; H = null; removeEventListener("resize", onResize);
   const el = q$("#hv"); if (el) el.remove(); document.body.classList.remove("in-heaven");
   titleScreen();
@@ -376,6 +385,7 @@ async function finale(){
   };
 }
 function results(){
+  saveHeaven(true);
   const panel = q$("#hvPanel"), secs = Math.round((Date.now() - H.t0) / 1000), pct = H.avail ? Math.round(H.earned / H.avail * 100) : 0;
   const key = "oiac-heaven-" + M.key, best = store.get(key);
   const better = !best || secs < best.secs; if (better) store.set(key, {secs, pct});

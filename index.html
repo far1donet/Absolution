@@ -325,6 +325,7 @@ details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:
 <link rel="stylesheet" href="heaven.css">
 <link rel="stylesheet" href="life.css">
 <link rel="stylesheet" href="calc.css">
+<link rel="stylesheet" href="account.css">
 </head>
 <body>
 <div class="viewport" id="vp"><div id="world"></div></div>
@@ -338,6 +339,7 @@ details.how summary{cursor:pointer;font:700 11.5px var(--f-mono);letter-spacing:
   <div class="box right"><small>SCORE</small><b id="hScore">0</b></div>
 </header>
 <div class="menu" id="menu" hidden>
+  <button id="mProfile">My profile</button>
   <button id="mClass">Join the classroom</button>
   <button id="mRestart">Restart this dive</button>
   <button id="mTitle">Back to the start</button>
@@ -360,6 +362,7 @@ const avatarSVG = inner => `<svg width="74" height="74" viewBox="0 0 74 74" over
 function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 </script>
 <script src="calc.js"></script>
+<script src="namecheck.js"></script>
 <script src="subjects/cs.js"></script>
 <script src="subjects/bio.js"></script>
 <script src="subjects/chem.js"></script>
@@ -680,11 +683,12 @@ const dailyPool = () => M.prompts.filter(inLevel);
 function scopeLabel(){ const t=activeTopics(); return t.length<=3 ? t.join(" + ") : `${t.length} topics`; }
 
 function titleScreen(){
+  saveDive(false);
   flowId++; S = null; clearUI(); resetWorld(); curBand=-1; setBand(0,false); setAvatar(avPos(0)); look(avPos(0), FR.title[AX], true); hud(0,0); pips();
   pickState = getPick();
   $("#hPrompt").textContent = "Choose a subject";
   ui.innerHTML = `<div class="overlay" id="ov"><section class="sheet" aria-labelledby="tt">
-    <div><div class="eyebrow">IB revision dive #${diveNo}</div><h1 id="tt">One in a <em>${esc(M.gemWord)}</em></h1></div>
+    <div><div class="title-row"><div class="eyebrow">IB revision dive #${diveNo}</div><span id="acSlot"></span></div><h1 id="tt">One in a <em>${esc(M.gemWord)}</em></h1></div>
     <button class="btn class-cta" id="classBtn">Join the classroom <small>Multiplayer</small></button>
     <div class="subjects" role="group" aria-label="Subject">${SUBJECT_ORDER.map(k=>{ const s=SUBJECTS[k]; return `<button class="subj" data-subj="${k}" aria-pressed="${k===M.key}" style="--sh:${s.bands[2].hue}"><span class="ic">${s.avatar(3, s.bands[2].hue)}</span><span><b>${esc(s.name)}</b><small>${esc(s.theme)}</small></span></button>`; }).join("")}</div>
     <p class="lede">${M.blurb}</p>
@@ -695,6 +699,7 @@ function titleScreen(){
     </details>
   </section></div>`;
   $("#classBtn").onclick = () => { if (window.openClassroom) window.openClassroom(); };
+  if (window.Account) Account.paintChip();
   document.querySelectorAll("[data-subj]").forEach(b=> b.onclick = async () => { const k=b.dataset.subj; if (k===M.key) return; vp.style.opacity="0"; ui.style.pointerEvents="none"; await sleep(200); setMode(k); titleScreen(); ui.style.pointerEvents=""; requestAnimationFrame(()=>{ vp.style.opacity="1"; }); const f=document.querySelector(`[data-subj="${k}"]`); if (f) f.focus({preventScroll:true}); });
   renderPicker();
 }
@@ -741,6 +746,7 @@ function renderPicker(focusSel){
 
 function newGame(daily){
   const Pl = daily ? dailyPool() : pool(); if (!Pl.length){ titleScreen(); return; }
+  saveDive(false);
   flowId++;
   const set = daily ? pick(rng("oiac6"+dayStr+dailyKey()), Pl, Math.min(PER_DIVE, Pl.length)) : [];
   S = {daily, endless:!daily, pool:Pl, queue:[], hearts:LIVES, set, i:0, score:0, results:[], id:flowId, bonus:0, bonusAsked:0, bonusUsed:new Set(), power:0, spreads:[],
@@ -1154,8 +1160,22 @@ async function descend(){
   if (S.endless ? S.hearts <= 0 : S.i >= S.set.length) report(); else showPrompt();
 }
 
+/* every dive is saved: to the account when signed in, otherwise on this device (account.js) */
+function saveDive(finished){
+  if (!S || S.saved || !window.Account) return;
+  const res = S.results.filter(Boolean); if (!res.length) return;
+  S.saved = true;
+  const where = S.score === 0 ? M.start.zone : BX[bandFor(S.score)].name;
+  Account.save({subject:M.key, mode:S.daily ? "daily" : "practice", level:M.noLevel ? null : pickState.level, scope:String(S.label || "").slice(0, 200),
+    score:S.score, prompts:res.length, gems:res.filter(r => r.tier === "gem").length, bonus:S.bonus || 0, bonus_asked:S.bonusAsked || 0,
+    reached:String(where).slice(0, 80), finished, extra:{power:S.power || 0},
+    answers:res.map(r => Object.assign({i:r.p.id, s:r.p.spec, t:r.tier, p:r.pts}, r.mcq ? {n:r.tries, d:Math.round(r.secs || 0)} : {}))});
+}
+// "Practise" on a weak topic in the report card: open that subject with just that topic ticked
+window.practiseTopics = (k, codes) => { if (!SUBJECTS[k]) return; setMode(k); const st = getPick(); st.sel = codes.slice(); store.set("oiac-pick-"+k, st); titleScreen(); };
 function report(){
   const b = bandFor(S.score), where = S.score===0 ? M.start.zone : BX[b].name, n = S.results.length;
+  saveDive(true);
   const counts = {}; S.results.forEach(r=>counts[r.tier]=(counts[r.tier]||0)+1);
   const shareText = `One in a ${M.gemWord} · ${M.name} ${S.label} · ${S.daily?"Dive #"+diveNo:`Practice · ${n} prompts`}\n${M.emoji} ${S.score} pts · ${M.meter.fmt(S.score)} · reached ${where}${S.bonusAsked ? ` · ★ ${S.bonus}/${S.bonusAsked} bonus` : ""}\n${S.results.map(r=>TIER_BASE[r.tier].sq).join("")}`;
   let newBest = false;
@@ -1183,6 +1203,7 @@ function report(){
 /* ================= menu ================= */
 $("#menuBtn").onclick = () => { const m=$("#menu"); m.hidden=!m.hidden; $("#menuBtn").setAttribute("aria-expanded", String(!m.hidden)); };
 $("#mTitle").onclick = () => { $("#menu").hidden=true; titleScreen(); };
+$("#mProfile").onclick = () => { $("#menu").hidden=true; if (window.Account) Account.open(); };
 $("#mClass").onclick = () => { $("#menu").hidden=true; if (window.openClassroom) window.openClassroom(); };
 $("#mRestart").onclick = () => { $("#menu").hidden=true; if (S) newGame(S.daily); else newGame(false); };
 
@@ -1192,5 +1213,8 @@ titleScreen();
 <script src="life.js"></script>
 <script src="vendor/peerjs.min.js"></script>
 <script src="classroom.js"></script>
+<script src="account-config.js"></script>
+<script src="profile.js"></script>
+<script src="account.js"></script>
 </body>
 </html>

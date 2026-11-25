@@ -32,6 +32,20 @@ Pick a subject and switch between **SL** and **HL** (French ab initio is SL only
 **Explanations:** tap any accepted answer to see why it counts (`explain.js`).
 **Auto-correction:** small spelling mistakes are forgiven and shown as "Auto-corrected to …".
 
+## Accounts, profiles and report cards
+
+Press **Sign in** on the title screen (or **My profile** in the menu).
+
+- **Create an account** with any email (Gmail, Outlook, Yahoo, iCloud, school…). The game emails a 6-digit code; type it in, then choose a password and confirm it, then pick a username, display name, skin and colour. After that you sign in with your email and password, with no more codes.
+- **Forgot my damn password?** emails a new code to set a new password.
+- **Everything is saved:** every daily dive, practice run (even one you leave early) and Go to heaven run. Games played as a guest stay on the device and join your account when you sign up or sign in there.
+- **Your profile** has a printable **IB-style report card**: a predicted grade (1–7) and effort grade (A–E) for every subject, a predicted IB score out of 45 (six best IB subjects plus up to 3 core points for escaping hell), handwritten comments signed by each subject's character, your rarity mix and trend, strongest topics and topics to revise next (with a *Practise* button), badges, an activity calendar, personal bests and recent games.
+- **Customise** your username, display name, motto, skin, colour, banner and favourite subject. Your skin shows its special form once you've found a *One in a …* in that subject.
+- **Names are filtered:** usernames, display names, mottos and classroom nicknames can't contain rude, hateful or sexual words, including leetspeak (`sh1t`), stretched letters, word combinations, prank names, or names pretending to be staff (`admin`, `moderator`). Innocent words that contain them (*class*, *Dickinson*, *Scunthorpe*, *therapist*) are fine. The same rules run in the page (`namecheck.js`) and in the database, so they can't be skipped.
+- **Account settings:** change your password, sign out (on this device), or delete your account and everything saved with it.
+
+Accounts use a free [Supabase](https://supabase.com) project. To switch them on, follow [`supabase/SETUP.md`](supabase/SETUP.md) (about 15 minutes), then paste the project URL and anon key into `account-config.js`. Until then the game works as before, and the report card is kept on each device.
+
 ## Join the classroom (multiplayer)
 
 Tap **Join the classroom**, pick a nickname, a skin (any subject's character) and a colour.
