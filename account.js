@@ -42,6 +42,7 @@ function friendly(e){
   if (/password/i.test(m) && /(at least|characters|weak|short)/i.test(m)) return "That password is too weak. Use at least 8 characters with letters and numbers.";
   if (/signups? not allowed|signup.*disabled/i.test(m)) return "New accounts are switched off at the moment.";
   if (/unable to validate email|invalid.*email|email.*invalid/i.test(m)) return "That doesn't look like a valid email address.";
+  if (/error sending .*email/i.test(m)) return "We couldn't send the email just now. Please try again in a few minutes.";
   if (/name_not_allowed/.test(m)) return "That isn't allowed. Please choose something else.";
   if (code === "23505" || /duplicate|unique|profiles_username_lower/i.test(m)) return "That username has just been taken. Try another.";
   return "Something went wrong. Please try again." + (m ? ` (${m.slice(0, 120)})` : "");
