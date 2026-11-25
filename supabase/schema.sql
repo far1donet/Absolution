@@ -163,3 +163,11 @@ begin
 end $fn$;
 revoke all on function public.delete_me() from public;
 grant execute on function public.delete_me() to authenticated;
+
+-- ============ 5. Exactly what the website's public key may do ============
+-- Needed when "Grant API access to new tables automatically" was left off, and a safe tightening when it was on.
+grant usage on schema public to anon, authenticated;
+revoke all on public.profiles, public.results from anon, authenticated;
+grant select, insert, update on public.profiles to authenticated;
+grant select, insert, delete on public.results to authenticated;
+grant execute on function public.name_problem(text), public.name_banned_in(text, text, text[]) to anon, authenticated;
