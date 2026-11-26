@@ -162,7 +162,30 @@ create policy "own results: read" on public.results for select to authenticated 
 create policy "own results: add" on public.results for insert to authenticated with check ((select auth.uid()) = user_id);
 create policy "own results: delete" on public.results for delete to authenticated using ((select auth.uid()) = user_id);
 
--- ============ 4. Delete my account (and everything saved with it) ============
+-- ============ 4. The honey pot: estimated marks for uploaded IAs, EEs and HL essays ============
+-- Only the marks are kept: the uploaded PDF is never stored. Rows are written by the "grade" Edge Function with the
+-- project's secret key; players can read their own rows but not add, change or delete them, so the daily limit holds.
+create table if not exists public.honey_grades (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  task text not null check (task ~ '^[a-z0-9]{2,12}$'),
+  subject text not null check (subject ~ '^[a-z]{2,8}$'),
+  level text check (level in ('SL','HL')),
+  file_name text check (char_length(file_name) <= 80),
+  status text not null default 'pending' check (status in ('pending','done')),
+  total smallint check (total between 0 and 100),
+  max smallint check (max between 1 and 100),
+  grade text check (char_length(grade) <= 2),
+  words integer check (words between 0 and 1000000),
+  criteria jsonb check (criteria is null or (jsonb_typeof(criteria) = 'array' and jsonb_array_length(criteria) <= 12)),
+  created_at timestamptz not null default now()
+);
+create index if not exists honey_grades_user_time on public.honey_grades (user_id, created_at desc);
+alter table public.honey_grades enable row level security;
+drop policy if exists "own honey grades: read" on public.honey_grades;
+create policy "own honey grades: read" on public.honey_grades for select to authenticated using ((select auth.uid()) = user_id);
+
+-- ============ 5. Delete my account (and everything saved with it) ============
 create or replace function public.delete_me() returns void
 language plpgsql security definer set search_path = '' as $fn$
 begin
@@ -172,12 +195,15 @@ end $fn$;
 revoke all on function public.delete_me() from public;
 grant execute on function public.delete_me() to authenticated;
 
--- ============ 5. Exactly what the website's public key may do ============
+-- ============ 6. Exactly what the website's public key may do ============
 -- Needed when "Grant API access to new tables automatically" was left off, and a safe tightening when it was on.
 grant usage on schema public to anon, authenticated;
-revoke all on public.profiles, public.results from anon, authenticated;
+revoke all on public.profiles, public.results, public.honey_grades from anon, authenticated;
 grant select, insert, update on public.profiles to authenticated;
 grant select, insert, delete on public.results to authenticated;
+grant select on public.honey_grades to authenticated;
+-- the grading Edge Function writes honey pot rows with the secret (service_role) key
+do $do$ begin if exists (select 1 from pg_roles where rolname = 'service_role') then grant select, insert, update, delete on public.honey_grades to service_role; end if; end $do$;
 grant execute on function public.name_problem(text), public.name_banned_in(text, text, text[]) to anon, authenticated;
 `;
 fs.writeFileSync(path.join(__dirname, "schema.sql"), sql);

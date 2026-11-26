@@ -371,7 +371,9 @@ function chipHTML(){
   return `<button class="ac-chip" id="acChip"><span class="ac-chip-ic" aria-hidden="true">👤</span><span><b>Sign in</b><small>save your report card</small></span></button>`;
 }
 window.Account = {
-  configured, open, close, save, games, chipHTML, paintChip, toast,
+  configured, open, close, save, games, chipHTML, paintChip, toast, client,
+  // the signed-in player's access token, for calling the honey pot's grading function
+  async token(){ const c = await client(); if (!c || !c.auth) return null; const r = await c.auth.getSession(); return (r && r.data && r.data.session && r.data.session.access_token) || null; },
   get user(){ return user; }, get profile(){ return profile; },
   onChange(fn){ listeners.add(fn); return () => listeners.delete(fn); },
 };
