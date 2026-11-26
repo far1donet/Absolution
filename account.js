@@ -9,7 +9,7 @@ const CODE_LEN = CFG.codeLength || 6;
 const configured = () => !!(window.__supabaseMock || (CFG.supabaseUrl && CFG.supabaseAnonKey));
 const q$ = s => document.querySelector(s);
 const st = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
-const HIST = "oiac-guest-games", PEND = "oiac-pending-games", CACHE = "oiac-games-";
+const HIST = "oiac-guest-games", PEND = "oiac-pending-games", CACHE = "oiac-games-", SYNC = "oiac-sync-", KEEP = 4000;
 const h = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cid = () => "g" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -92,7 +92,7 @@ async function flush(){
       ok(await c.from("results").upsert(mine.map(row), {onConflict:"user_id,client_id", ignoreDuplicates:true}));
       const done = new Set(mine.map(g => g.client_id));
       st.set(PEND, (st.get(PEND) || []).filter(g => !(g.owner === id && done.has(g.client_id))));
-      const cache = st.get(CACHE + id) || []; st.set(CACHE + id, [...mine.map(row), ...cache].slice(0, 800));
+      const cache = loadSync(id); cache.rows = [...mine.map(row), ...cache.rows]; saveSync(id, cache);   // shown until the server copy arrives
     }
   } catch(e){ /* kept in the queue and retried on the next save, sign-in or reconnect */ }
   finally { flushing = false; }
@@ -104,15 +104,34 @@ async function claimGuest(){
   st.set(PEND, q); st.set(HIST, []);
   toast(`${hist.length} game${hist.length === 1 ? "" : "s"} you played as a guest ${hist.length === 1 ? "was" : "were"} added to your report card.`);
 }
+/* The device keeps a copy of the player's games, and each visit downloads only the games saved since.
+   The server numbers saved games in order (id), so "everything after the highest id I have" is all that's new. */
+function loadSync(id){ const c = st.get(SYNC + id); return c && Array.isArray(c.rows) ? c : {maxId:0, rows:[]}; }
+function saveSync(id, c){
+  for (const keep of [KEEP, 1500, 400]){
+    try { localStorage.setItem(SYNC + id, JSON.stringify({maxId:c.maxId, rows:c.rows.slice(0, keep)})); return; }
+    catch(e){ /* storage full: keep fewer games on the device (the account still has them all) */ }
+  }
+}
 async function games(){
   if (!user) return (st.get(HIST) || []).slice().reverse();
-  const pend = () => (st.get(PEND) || []).filter(g => g.owner === user.id).map(row);
+  const id = user.id, cache = loadSync(id);
+  try { localStorage.removeItem(CACHE + id); } catch(e){}               // the old full-download cache
   try {
     const c = await client();
-    const data = ok(await c.from("results").select(COLS.join(",")).order("played_at", {ascending:false}).limit(2000)) || [];
-    const have = new Set(data.map(d => d.client_id)), all = [...pend().filter(g => !have.has(g.client_id)).reverse(), ...data];
-    st.set(CACHE + user.id, all.slice(0, 800)); return all;
-  } catch(e){ return [...pend().reverse(), ...(st.get(CACHE + user.id) || [])]; }
+    for (let page = 0; page < 20; page++){
+      const data = ok(await c.from("results").select("id," + COLS.join(",")).gt("id", cache.maxId).order("id", {ascending:true}).limit(500)) || [];
+      if (!data.length) break;
+      const fresh = new Set(data.map(d => d.client_id));
+      cache.rows = [...data.slice().reverse(), ...cache.rows.filter(r => !fresh.has(r.client_id))];
+      cache.maxId = data.reduce((m, d) => Math.max(m, +d.id || 0), cache.maxId);
+      if (data.length < 500) break;
+    }
+    cache.rows.sort((a, b) => new Date(b.played_at) - new Date(a.played_at));
+    saveSync(id, cache);
+  } catch(e){ /* offline or the server is asleep: show what this device already has */ }
+  const have = new Set(cache.rows.map(r => r.client_id)), pend = (st.get(PEND) || []).filter(g => g.owner === id && !have.has(g.client_id)).map(row);
+  return [...pend.reverse(), ...cache.rows];
 }
 
 /* ================= the account sheet ================= */
@@ -337,7 +356,7 @@ async function showProfile(){
     async checkUsername(u){ const c = await client(); return ok(await c.rpc("username_available", {n:u})); },
     async signOut(){ const c = await client(); try { await c.auth.signOut({scope:"local"}); } catch(e){} await setUser(null); toast("Signed out. See you soon!"); close(); },
     async deleteAccount(){ const c = await client(); ok(await c.rpc("delete_me")); try { await c.auth.signOut(); } catch(e){}
-      const id = user && user.id; if (id){ try { localStorage.removeItem(CACHE + id); } catch(e){} st.set(PEND, (st.get(PEND) || []).filter(g => g.owner !== id)); }
+      const id = user && user.id; if (id){ try { localStorage.removeItem(CACHE + id); localStorage.removeItem(SYNC + id); } catch(e){} st.set(PEND, (st.get(PEND) || []).filter(g => g.owner !== id)); }
       await setUser(null); toast("Your account and everything saved with it has been deleted."); close(); },
     changePassword(){ F.mode = "change"; vPassword(); },
   });
