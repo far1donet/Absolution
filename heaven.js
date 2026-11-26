@@ -10,11 +10,57 @@
 "use strict";
 const BANK = {};
 window.QBANK = BANK;
+// a question may end with {model:"a full-mark answer", tip:"examiner's advice"}
 window.QB = (subject, list) => {
   const arr = BANK[subject] || (BANK[subject] = []);
-  list.forEach(q => arr.push({ s:subject, id:`${subject}-${arr.length + 1}`, spec:q[0], term:q[1], marks:q[2], q:q[3],
-    pts:q.slice(4).map(p => { const parts = String(p).split("|").map(x => x.trim()); return {t:parts[0], alts:(parts.length > 1 ? parts.slice(1) : parts).filter(Boolean)}; }) }));
+  list.forEach(q => { const extra = q.length && typeof q[q.length - 1] === "object" ? q[q.length - 1] : null, pts = q.slice(4, extra ? -1 : undefined);
+    arr.push({ s:subject, id:`${subject}-${arr.length + 1}`, spec:q[0], term:q[1], marks:q[2], q:q[3], model:extra && extra.model, tip:extra && extra.tip,
+      pts:pts.map(p => { const parts = String(p).split("|").map(x => x.trim()); return {t:parts[0], alts:(parts.length > 1 ? parts.slice(1) : parts).filter(Boolean)}; }) }); });
 };
+
+/* ================= examiner's commentary =================
+   Written from the marking itself: what was credited, what's missing, what the command term asks for, whether
+   the answer is long enough for its marks, the question's own tip, and a model answer. (Paraphrased command terms,
+   in the spirit of the IB's glossary.) */
+const TERMS = {
+  define:"give the precise meaning of the word or phrase", state:"give a specific name, value or short answer, without explanation",
+  identify:"pick out or name the right thing from the possibilities", list:"give a sequence of brief answers, with no explanation",
+  outline:"give a brief account or summary", describe:"give a detailed account of what it is like or how it happens",
+  explain:"give a detailed account that includes reasons or causes", distinguish:"make the differences between them clear",
+  compare:"give the similarities between them, referring to both throughout", contrast:"give the differences between them, referring to both throughout",
+  "compare and contrast":"give similarities and differences, referring to both throughout",
+  discuss:"give a balanced review with a range of arguments and a conclusion", evaluate:"weigh strengths and limitations and reach a judgement",
+  analyse:"break it down to bring out its essential parts and how they relate", "to what extent":"weigh up the argument and reach a clear conclusion",
+  justify:"give valid reasons or evidence for your answer", suggest:"propose a reasonable answer or explanation",
+  calculate:"work out a numerical answer, showing the working", determine:"obtain the only possible answer", deduce:"reach a conclusion from the information given",
+  predict:"give an expected result", examine:"consider an argument or concept so its assumptions and links come out", interpret:"use knowledge to recognise trends and draw conclusions",
+  annotate:"add brief notes to a diagram or graph", sketch:"draw a rough diagram or graph showing the key features", draw:"draw an accurate, labelled diagram",
+  translate:"render it accurately in the other language", write:"write the requested words in the target language", apply:"use an idea or principle in the given situation",
+};
+const REASONED = new Set(["explain","discuss","evaluate","analyse","to what extent","justify","examine","compare","contrast","compare and contrast","distinguish"]);
+const sentence = t => { t = String(t).trim(); return /[.!?…)]$/.test(t) ? t : t + "."; };
+function commentary(q, text, hits, earned, gaveUp){
+  const term = String(q.term || "").toLowerCase(), words = String(text || "").trim().split(/\s+/).filter(Boolean).length;
+  const got = q.pts.filter((p, k) => hits[k]), missing = q.pts.filter((p, k) => !hits[k]), full = earned >= q.marks;
+  const lines = [];
+  if (gaveUp) lines.push(`<p class="hv-lead">Here's what a full-mark answer to this ${esc(q.marks)}-mark question needs.</p>`);
+  else if (full) lines.push(`<p class="hv-lead">Full marks: you made ${got.length} creditworthy point${got.length === 1 ? "" : "s"} and the markscheme needed ${q.marks}.</p>`);
+  else if (earned) lines.push(`<p class="hv-lead">You earned ${earned} of ${q.marks}. ${got.length === 1 ? "One point was" : `${got.length} points were`} credited; you need ${q.marks - earned} more.</p>`);
+  else lines.push(`<p class="hv-lead">None of the markscheme's points showed up in your answer${words < 4 ? ", which was very short" : ""}.</p>`);
+  if (!full && missing.length){
+    const need = Math.max(1, q.marks - earned);
+    lines.push(`<p class="hv-sub">${missing.length > need ? `Any ${need} of these would earn the missing mark${need === 1 ? "" : "s"}:` : "To get full marks, add:"}</p><ul class="hv-miss">${missing.map(p => `<li>${esc(sentence(p.t))}</li>`).join("")}</ul>`);
+  } else if (full && missing.length && !gaveUp){
+    lines.push(`<p class="hv-sub">Other points that would also have been credited:</p><ul class="hv-miss soft">${missing.slice(0, 3).map(p => `<li>${esc(sentence(p.t))}</li>`).join("")}</ul>`);
+  }
+  if (!full && TERMS[term]) lines.push(`<p class="hv-term-tip"><b>${esc(q.term)}</b> means ${TERMS[term]}.${REASONED.has(term) ? " Link every point to a reason: “because…”, “which means…”, “so…”." : term === "state" || term === "identify" || term === "list" ? " Short answers are fine, but each mark needs its own separate point." : ""}</p>`);
+  if (!full && !gaveUp && q.marks >= 3 && words > 0 && words < q.marks * 6) lines.push(`<p class="hv-term-tip">At ${words} word${words === 1 ? "" : "s"}, your answer is short for ${q.marks} marks. Aim for one developed point per mark.</p>`);
+  if (q.tip) lines.push(`<p class="hv-tip"><b>Examiner's tip:</b> ${esc(q.tip)}</p>`);
+  const model = q.model ? `<p>${esc(q.model)}</p>` : `<ul>${q.pts.slice(0, Math.max(q.marks, 1)).map(p => `<li>${esc(sentence(p.t))}</li>`).join("")}</ul>`;
+  lines.push(`<details class="hv-model" ${gaveUp || !earned ? "open" : ""}><summary>${q.model ? "Model answer" : "What a full-mark answer includes"}</summary>${model}</details>`);
+  return `<div class="hv-com"><h3>Examiner's commentary</h3>${lines.join("")}</div>`;
+}
+window.heavenCommentary = commentary;
 
 /* ================= marking ================= */
 const SUB = "₀₁₂₃₄₅₆₇₈₉", SUP = "⁰¹²³⁴⁵⁶⁷⁸⁹";
@@ -329,9 +375,10 @@ async function answer(text, gaveUp, choice){
     <p class="hv-q small"><b class="hv-term">${esc(q.term)}</b> ${q.mc ? fmtM(q.q) : esc(q.q)}</p>
     ${q.mc ? `<div class="hv-ms"><h3>Answer</h3><ul><li class="${hits[0] ? "got" : ""}"><i aria-hidden="true">${hits[0] ? "✓" : "·"}</i><span>${fmtM(q.opts[q.a])}${hits[0] ? "" : ` <small>(you chose ${fmtM(text)})</small>`}</span>${hits[0] ? "<em>+1</em>" : ""}</li></ul><p class="small">${fmtM(q.why)}</p></div>`
     : `${text.trim() ? `<details class="hv-mine"><summary>Your answer</summary><p>${esc(text.trim())}</p></details>` : ""}
+    ${commentary(q, text, hits, earned, gaveUp)}
     <div class="hv-ms"><h3>Markscheme${q.pts.length > q.marks ? ` <small>· any ${q.marks} of these, 1 mark each</small>` : ""}</h3>
       <ul>${q.pts.map((p,k) => `<li class="${hits[k] ? "got" : ""}"><i aria-hidden="true">${hits[k] ? "✓" : "·"}</i><span>${esc(p.t)}</span>${hits[k] ? `<em>+1</em>` : ""}</li>`).join("")}</ul></div>`}
-    <div class="row hv-actions"><button class="btn" id="hvNext" disabled>${H.passes >= H.need ? "Approach the gates ▲" : "Next question"}</button></div>`;
+    <div class="row hv-actions hv-sticky"><button class="btn" id="hvNext" disabled>${H.passes >= H.need ? "Approach the gates ▲" : "Next question"}</button></div>`;
   await move(from, to, pass, zero);
   if (!alive(id)) return;
   const nb = q$("#hvNext"); if (!nb) return;
