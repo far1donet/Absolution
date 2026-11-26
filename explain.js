@@ -1,121 +1,14 @@
 /* Explanations for accepted answers, written in the style of an IB markscheme: what earns the mark and why.
-   EXPLAIN[promptId][answerLabel] = explanation. Answers without one show their syllabus reference and accepted wordings.
-   Add more prompts here as they are written. */
-const EXPLAIN = {
-c01: {
-  "ALU": "The arithmetic logic unit is part of the CPU. It carries out arithmetic (add, subtract) and logical operations (AND, OR, NOT, comparisons) on data during the execute stage. Named explicitly in A1.1.1.",
-  "Control unit": "The control unit is part of the CPU. It decodes instructions and sends control signals that coordinate the ALU, registers and buses. Named explicitly in A1.1.1.",
-  "Registers": "Registers are small, very fast storage locations inside the CPU that hold the data, addresses and instructions currently being worked on. Credit 'registers' as a general answer; naming one (PC, MAR, MDR, AC, IR) is more precise.",
-  "Cache": "Cache (L1, L2 and often L3) is built into the CPU package. It holds frequently used data and instructions so the CPU doesn't have to wait for RAM. Accepted as a CPU component, though it is primary memory rather than part of the processing core.",
-  "Program counter": "The PC is a CPU register that holds the memory address of the next instruction to be fetched. It is incremented after each fetch.",
-  "Accumulator": "The accumulator (AC) is a CPU register that stores the results of ALU calculations and the intermediate values used in them.",
-  "MAR": "The memory address register is a CPU register that holds the address of the memory location to be read from or written to. Its contents are placed on the address bus.",
-  "MDR": "The memory data register is a CPU register that holds the data or instruction just read from memory, or about to be written to it. It connects to the data bus.",
-  "Core": "A core is a complete processing unit (its own CU, ALU and registers) within the CPU. Multi-core CPUs contain several, so they can process instructions in parallel.",
-  "Internal buses": "Internal buses are the pathways inside the CPU that carry data and signals between the CU, ALU and registers.",
-  "Clock": "The clock generates regular pulses that synchronise the CPU's operations. Each fetch-decode-execute step happens on clock ticks; clock speed is measured in GHz. Accepted, though the clock generator often sits outside the core.",
-  "Instruction register": "The instruction register (IR or CIR) is a CPU register that holds the instruction currently being decoded and executed. It is copied from the MDR during the fetch stage.",
-},
-c02: {
-  "Arithmetic / calculations": "The ALU performs arithmetic operations on binary data, such as addition and subtraction. This is the first of its two main jobs in A1.1.1.",
-  "Addition": "Addition is the core arithmetic operation the ALU carries out. Other arithmetic, such as subtraction using two's complement, is built on it.",
-  "Subtraction": "The ALU subtracts numbers, usually by adding the two's complement of the second number.",
-  "Logic operations": "The ALU performs Boolean logic operations such as AND, OR, NOT and XOR on binary values. This is its second main job alongside arithmetic.",
-  "Comparisons": "The ALU compares values (equal to, greater than, less than). The result is used for decisions and conditional jumps.",
-  "Multiplication / division": "The ALU can multiply and divide, typically through repeated addition or shifting, or with dedicated circuits in modern CPUs.",
-  "Stores results in the accumulator": "After a calculation, the ALU's result is placed in the accumulator so it can be used in the next operation or written back to memory.",
-  "Bit shifts": "The ALU can shift the bits of a value left or right. A left shift multiplies by 2 and a right shift divides by 2 for unsigned numbers.",
-  "Increment / decrement": "Adding or subtracting 1 is a simple ALU operation, used for counters and loops.",
-  "Sets status flags": "After an operation, the ALU sets flags in the status register, such as zero, carry, negative and overflow. Conditional jumps use these flags to decide what to do next.",
-},
-c03: {
-  "Decodes instructions": "The control unit decodes the instruction held in the instruction register: it works out the operation (opcode) and the data or address it uses (operand).",
-  "Sends control signals": "The control unit sends control signals along the control bus and inside the CPU, telling each component what to do and when.",
-  "Controls / coordinates the CPU": "The control unit directs and coordinates the operation of the processor, managing how data moves between the ALU, registers and memory.",
-  "Fetches instructions": "The control unit manages the fetch stage: it has the instruction's address sent to memory and the instruction brought back into the CPU.",
-  "Runs the fetch-decode-execute cycle": "The control unit oversees each stage of the fetch-decode-execute cycle, repeating it for every instruction.",
-  "Directs the flow of data": "The control unit decides where data goes: between registers, to and from the ALU, and over the buses to memory.",
-  "Tells the ALU what to do": "Once an instruction is decoded, the control unit signals the ALU which operation to perform (for example ADD or AND).",
-  "Syncs with the clock": "The control unit uses the clock signal to time each step, so that all components act in step with each other.",
-  "Tells memory to read or write": "The control unit sends read and write signals on the control bus so memory knows whether to supply data or store it.",
-  "Updates the program counter": "The control unit makes sure the PC is incremented after a fetch, or loaded with a new address after a jump.",
-  "Handles interrupts": "At the end of each cycle the control unit checks for interrupts. If there is one, it saves the current state and passes control to the interrupt handler.",
-},
-c04: {
-  "Program counter": "The PC holds the address of the next instruction to be fetched. It is listed in A1.1.1.",
-  "MAR": "The memory address register holds the address of the memory location currently being accessed. It is listed in A1.1.1.",
-  "MDR": "The memory data register holds data read from, or about to be written to, memory. It is listed in A1.1.1. Older textbooks call it the memory buffer register (MBR).",
-  "Accumulator": "The accumulator holds the results of ALU operations. It is listed in A1.1.1.",
-  "Instruction register": "The instruction register holds the current instruction while it is decoded and executed. It is listed in A1.1.1, sometimes as CIR.",
-  "General-purpose register": "General-purpose registers hold data the program is using right now, so the CPU doesn't need to go to RAM. Accepted as a valid CPU register beyond the five named in the syllabus.",
-  "Stack pointer": "The stack pointer holds the address of the top of the call stack. It is used for subroutine calls and returns. Valid, but beyond the IB list.",
-  "Index register": "An index register holds a value added to an address, which is used to step through arrays. Valid, but beyond the IB list.",
-  "Status register": "The status (flags) register records the results of ALU operations: zero, carry, negative and overflow flags. Conditional jumps read it. Valid, but beyond the IB list.",
-},
-c05: {
-  "Data bus": "The data bus carries data and instructions between the CPU and memory. It is bidirectional (two-way).",
-  "Address bus": "The address bus carries memory addresses from the CPU (from the MAR) to memory. It is unidirectional (one-way).",
-  "Control bus": "The control bus carries control signals such as read, write, clock and interrupt between the CPU and other components. Individual lines can go either way.",
-  "Read signal": "The read signal travels on the control bus. It tells memory to place the contents of the addressed location onto the data bus.",
-  "Write signal": "The write signal travels on the control bus. It tells memory to store the value on the data bus at the address on the address bus.",
-  "Clock signal": "The clock signal is distributed over the control bus so that components operate in time with each other.",
-  "Bus request / grant": "Bus request and bus grant are control-bus signals that let a device such as a DMA controller ask for, and be given, use of the system bus.",
-  "Interrupt signal": "An interrupt request travels on the control bus from a device to the CPU, telling it that something needs attention.",
-},
-c06: {
-  "Multi-core processor": "A multi-core processor has two or more independent cores on one chip, so it can run several instructions or threads in parallel. Named in A1.1.1.",
-  "Single-core processor": "A single-core processor has one core and processes one instruction stream at a time. Named in A1.1.1.",
-  "GPU": "A GPU is a processor with thousands of simpler cores, designed for parallel tasks such as graphics and machine learning. It often acts as a co-processor to the CPU.",
-  "CPU": "The CPU is the main general-purpose processor that runs the operating system and programs.",
-  "Co-processor": "A co-processor is a supplementary processor that takes specific work off the CPU, such as graphics, maths or encryption. Named in A1.1.1.",
-  "FPU / maths co-processor": "A floating-point unit is a co-processor specialised for arithmetic on real (floating-point) numbers.",
-  "DSP": "A digital signal processor is a co-processor optimised for processing audio, radio and other signals in real time.",
-  "Security processor": "A security processor, such as a TPM or secure enclave, handles encryption keys and secure boot apart from the main CPU.",
-  "Microcontroller": "A microcontroller is a small processor with its own memory and input/output on one chip, used in embedded systems like washing machines.",
-  "Neural processing unit": "An NPU is a co-processor designed to speed up machine-learning calculations such as matrix multiplication.",
-},
-c07: {
-  "Fetch": "In the fetch stage, the instruction at the address in the PC is copied from memory into the CPU (via the MAR and MDR into the IR), and the PC is incremented.",
-  "Decode": "In the decode stage, the control unit interprets the instruction in the IR to work out the operation and its operands.",
-  "Execute": "In the execute stage, the decoded instruction is carried out: the ALU calculates, data is loaded or stored, or the PC is changed for a jump.",
-  "Increment the PC": "During fetch, the PC is increased so it points to the next instruction in sequence.",
-  "Copy PC to MAR": "The first step of fetch: the address in the PC is copied to the MAR and sent along the address bus to memory.",
-  "Read instruction into MDR": "After a read signal, memory sends the instruction at that address along the data bus into the MDR.",
-  "Copy MDR to IR": "The instruction is copied from the MDR into the instruction register, ready to be decoded.",
-  "Store / write back": "Some descriptions add a final step: the result is written back to a register or to memory.",
-  "Send read signal": "The control unit sends a read signal on the control bus so memory returns the contents of the address in the MAR.",
-  "Check for interrupts": "At the end of each cycle, the CPU checks whether an interrupt has arrived before fetching the next instruction.",
-},
-c08: {
-  "Program counter": "The PC supplies the address of the instruction to fetch, and is then incremented.",
-  "MAR": "The PC's address is copied into the MAR, which places it on the address bus.",
-  "MDR": "The instruction returned from memory arrives in the MDR before moving to the IR.",
-  "RAM / main memory": "The instruction is fetched from main memory (RAM), where the program is stored while it runs.",
-  "Instruction register": "At the end of fetch, the instruction is copied from the MDR into the IR, ready to decode.",
-  "Address bus": "The address bus carries the instruction's address from the MAR to memory.",
-  "Data bus": "The data bus carries the instruction from memory back to the MDR.",
-  "Control unit": "The control unit coordinates the fetch, issuing the read signal and moving values between registers.",
-  "Cache": "The CPU checks cache first. If the instruction is there (a cache hit), the fetch is much faster than going to RAM.",
-  "Control bus": "The control bus carries the read signal that tells memory to send back the contents of the requested address.",
-},
-c09: {
-  "ALU does a calculation": "For arithmetic or logic instructions, the ALU performs the operation during execute.",
-  "Result stored in accumulator": "The ALU's result is placed in the accumulator (or another register) during execute.",
-  "Logic operation": "Logic instructions (AND, OR, NOT, XOR) are carried out by the ALU during execute.",
-  "Comparison": "Compare instructions are executed by the ALU, which sets status flags used by later conditional jumps.",
-  "Data loaded from memory": "A LOAD instruction executes by fetching data from memory (via the MAR and MDR) into a register.",
-  "Data written to memory": "A STORE instruction executes by writing a register's value to memory (via the MDR and MAR).",
-  "Output to a device": "An output instruction sends data to an output device during execute.",
-  "Halt": "A HALT instruction stops the cycle during execute.",
-  "PC overwritten by a jump": "A jump or branch instruction executes by loading a new address into the PC, so the next fetch comes from somewhere else.",
-},
-c10: {
-  "Incremented after each fetch": "Normally the PC increases by one instruction after each fetch, so instructions run in sequence.",
-  "Jump / branch instruction": "A jump or branch instruction replaces the PC's contents with a new address.",
-  "IF statement or loop": "Selection and iteration in high-level code compile to conditional jumps, which change the PC.",
-  "Interrupt": "When an interrupt is serviced, the PC is saved and loaded with the address of the interrupt handler.",
-  "Calling a subroutine": "A call instruction saves the return address and loads the subroutine's start address into the PC.",
-  "Reset / boot": "On reset or power-on, the PC is set to a fixed start address, usually where the boot code in ROM begins.",
-  "Returning from a subroutine": "A return instruction reloads the PC with the saved return address, often taken from the stack.",
-},
-};
+   EXPLAIN[promptId][answerLabel] = explanation. Each subject's explanations live in explain/<subject>.js
+   (EX(promptId, {answerLabel: text, ...})) and are downloaded only when that subject is opened. */
+const EXPLAIN = {};
+function EX(id, o){ EXPLAIN[id] = Object.assign(EXPLAIN[id] || {}, o); }
+const explainLoaded = {};
+function loadExplain(k){
+  const S = SUBJECTS[k];
+  if (explainLoaded[k] || !S || !S.prompts.some(p => p.ans)) return;
+  explainLoaded[k] = true;
+  const s = document.createElement("script"); s.src = "explain/" + k + ".js"; s.async = true;
+  s.onerror = () => { explainLoaded[k] = false; };
+  document.head.appendChild(s);
+}

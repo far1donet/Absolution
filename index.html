@@ -658,6 +658,7 @@ function setMode(key){
   M = SUBJECTS[key]; store.set("oiac-mode", key); WMAX = 760;
   const g = $("#gauge"); if (g) g.remove();
   if (!M.topicName){ const o={}; M.catalog.forEach(th=>th.units.forEach(u=>u.topics.forEach(([c,n])=>{ o[c]=n; }))); M.topicName=o; }
+  if (typeof loadExplain === "function") loadExplain(M.key);
   buildWorld(); curBand = -1;
 }
 const topicOf = p => p.spec.split(".").slice(0,2).join(".");
