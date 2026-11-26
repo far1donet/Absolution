@@ -81,7 +81,7 @@ EX("ch07", {
   "Calcium carbonate": "CaCO₃: Ca²⁺ and the polyatomic CO₃²⁻ ion (limestone).",
   "Potassium chloride": "KCl: K⁺ and Cl⁻ ions in a giant ionic lattice.",
   "Sodium hydroxide": "NaOH: Na⁺ and OH⁻ ions; a strong base.",
-  "Copper sulfate": "CuSO₄: Cu²⁺ and SO₄²⁻ ions.",
+  "Copper sulfate": "CuSO₄: Cu²⁺ and SO₄²⁻ ions; the hydrated form is blue.",
   "Calcium chloride": "CaCl₂: one Ca²⁺ for every two Cl⁻.",
   "Lithium fluoride": "LiF: small Li⁺ and F⁻ ions, so strong attraction and a high melting point.",
   "Ammonium nitrate": "NH₄NO₃: made of two polyatomic ions, NH₄⁺ and NO₃⁻.",
@@ -140,8 +140,8 @@ EX("ch12", {
   "Metalloids": "Elements with intermediate properties, e.g. silicon and germanium.",
   "Lanthanides": "f-block elements 57–71 (the rare earths), filling the 4f sub-level.",
   "Actinides": "f-block elements 89–103, all radioactive.",
-  "Pnictogens": "Group 15 (nitrogen family).",
-  "Chalcogens": "Group 16 (oxygen family).",
+  "Pnictogens": "Group 15, the nitrogen family: N, P, As, Sb and Bi, with five outer electrons.",
+  "Chalcogens": "Group 16, the oxygen family: O, S, Se and Te, with six outer electrons.",
 });
 EX("ch13", {
   "Atomic radius": "Decreases across a period (more protons, same shielding) and increases down a group (more shells) (S3.1).",
@@ -220,20 +220,20 @@ EX("ch18", {
 EX("ch19", {
   "Hydrochloric acid": "HCl: a strong acid, fully dissociated in water (R3.1).",
   "Sulfuric acid": "H₂SO₄: a strong diprotic acid.",
-  "Sodium hydroxide": "NaOH: a strong base (alkali).",
-  "Nitric acid": "HNO₃: a strong acid.",
+  "Sodium hydroxide": "NaOH: a strong base that fully dissociates into Na⁺ and OH⁻ ions.",
+  "Nitric acid": "HNO₃: a strong acid that fully dissociates in water.",
   "Ammonia": "NH₃: a weak base that accepts a proton to form NH₄⁺.",
   "Ethanoic acid": "CH₃COOH: a weak acid, only partly dissociated.",
   "Citric acid": "A weak organic acid found in citrus fruit.",
   "Calcium hydroxide": "Ca(OH)₂: a strong base (limewater).",
-  "Potassium hydroxide": "KOH: a strong base.",
+  "Potassium hydroxide": "KOH: a strong base that fully dissociates into K⁺ and OH⁻ ions.",
   "Carbonic acid": "H₂CO₃: a weak acid formed when CO₂ dissolves in water.",
-  "Phosphoric acid": "H₃PO₄: a weak triprotic acid.",
+  "Phosphoric acid": "H₃PO₄: a weak acid that can donate three protons (triprotic).",
   "Hydrofluoric acid": "HF: a weak acid (strong H–F bond) but highly toxic and able to etch glass.",
 });
 EX("ch20", {
   "pH": "pH = −log₁₀[H⁺]: below 7 is acidic, 7 neutral and above 7 alkaline at 25 °C (R3.1).",
-  "Neutralisation": "Acid + base → salt + water.",
+  "Neutralisation": "Acid + base → salt + water; the ionic equation is H⁺ + OH⁻ → H₂O.",
   "Indicator": "A weak acid whose conjugate base has a different colour, used to find the end point.",
   "Titration": "Adding measured volumes of one solution to another to find an unknown concentration.",
   "Brønsted–Lowry": "An acid is a proton donor and a base is a proton acceptor.",
@@ -293,7 +293,7 @@ EX("ch24", {
   "Uranium-238": "The most common uranium isotope; not readily fissile.",
   "Chlorine-35 / chlorine-37": "In about a 3:1 ratio, giving Ar(Cl) ≈ 35.5.",
   "Cobalt-60": "A gamma emitter used in radiotherapy and sterilisation.",
-  "Iodine-131": "Used to treat thyroid cancer.",
+  "Iodine-131": "A beta and gamma emitter absorbed by the thyroid, used to treat thyroid cancer.",
   "Oxygen-18": "A stable isotope used to trace reaction mechanisms and past climates.",
   "Technetium-99m": "A gamma emitter with a 6-hour half-life, the most used medical tracer.",
 });
@@ -323,7 +323,7 @@ EX("ch26", {
 EX("ch27", {
   "Sodium (yellow-orange)": "Na⁺ gives an intense yellow-orange flame (S1.3).",
   "Lithium (crimson)": "Li⁺ gives a crimson-red flame.",
-  "Potassium (lilac)": "K⁺ gives a lilac flame.",
+  "Potassium (lilac)": "K⁺ ions give a lilac (pale purple) flame.",
   "Copper (blue-green)": "Cu²⁺ gives a blue-green flame.",
   "Calcium (brick red)": "Ca²⁺ gives a brick-red (orange-red) flame.",
   "Strontium (red)": "Sr²⁺ gives a red flame, used in fireworks.",
@@ -332,7 +332,7 @@ EX("ch27", {
 });
 EX("ch28", {
   "Moles = mass ÷ molar mass": "n = m/M converts between mass and amount (S1.4).",
-  "Concentration = moles ÷ volume": "c = n/V, with V in dm³.",
+  "Concentration = moles ÷ volume": "c = n/V: concentration in mol dm⁻³, with the volume in dm³.",
   "Percentage yield": "Actual yield ÷ theoretical yield × 100.",
   "Empirical formula": "Convert masses or percentages to moles and find the simplest ratio.",
   "Limiting reactant": "Compare mole ratios to find which reactant runs out first.",
@@ -344,7 +344,7 @@ EX("ch28", {
 EX("ch29", {
   "Water (18)": "H₂O: 2(1.01) + 16.00 = 18.02 g mol⁻¹ (S1.4).",
   "Carbon dioxide (44)": "CO₂: 12.01 + 2(16.00) = 44.01 g mol⁻¹.",
-  "Carbon (12)": "C: 12.01 g mol⁻¹.",
+  "Carbon (12)": "Carbon's molar mass is 12.01 g mol⁻¹, based on the carbon-12 standard.",
   "Sodium chloride (58.5)": "NaCl: 22.99 + 35.45 = 58.44 g mol⁻¹.",
   "Oxygen gas (32)": "O₂: 2 × 16.00 = 32.00 g mol⁻¹.",
   "Glucose (180)": "C₆H₁₂O₆: 6(12.01) + 12(1.01) + 6(16.00) = 180.18 g mol⁻¹.",
@@ -380,7 +380,7 @@ EX("ch33", {
   "Sodium (Na⁺)": "Group 1 metals lose one electron (S2.1).",
   "Chloride (Cl⁻)": "Group 17 non-metals gain one electron.",
   "Hydroxide (OH⁻)": "A polyatomic ion found in bases.",
-  "Oxide (O²⁻)": "Oxygen gains two electrons.",
+  "Oxide (O²⁻)": "Oxygen (group 16) gains two electrons to form O²⁻.",
   "Magnesium (Mg²⁺)": "Group 2 metals lose two electrons.",
   "Sulfate (SO₄²⁻)": "A polyatomic ion from sulfuric acid.",
   "Nitrate (NO₃⁻)": "A polyatomic ion from nitric acid.",
@@ -393,7 +393,7 @@ EX("ch34", {
   "Carbon dioxide": "CO₂: linear with two C=O double bonds; non-polar overall.",
   "Methane": "CH₄: tetrahedral and non-polar.",
   "Ammonia": "NH₃: trigonal pyramidal and hydrogen-bonded.",
-  "Oxygen": "O₂: a double covalent bond.",
+  "Oxygen": "O₂: two oxygen atoms joined by a double covalent bond.",
   "Hydrogen chloride": "HCl: polar covalent; forms hydrochloric acid in water.",
   "Nitrogen": "N₂: a triple bond, so very unreactive.",
   "Glucose": "C₆H₁₂O₆: a covalent molecule with many –OH groups.",
@@ -403,7 +403,7 @@ EX("ch34", {
 EX("ch35", {
   "Steel": "Iron with a small amount of carbon; carbon atoms disrupt the layers, making it harder than pure iron (S2.3).",
   "Brass": "Copper and zinc: harder than copper, and corrosion-resistant.",
-  "Bronze": "Copper and tin.",
+  "Bronze": "An alloy of copper and tin, harder than pure copper.",
   "Solder": "Traditionally tin and lead (now often tin, silver and copper), with a low melting point for joining electrical components.",
   "Stainless steel": "Iron with chromium and nickel, which resists corrosion.",
   "Amalgam": "An alloy of mercury, e.g. old dental fillings.",
@@ -450,14 +450,14 @@ EX("ch39", {
 });
 EX("ch40", {
   "Methane": "CH₄: the simplest alkane (S3.2).",
-  "Ethane": "C₂H₆: an alkane.",
+  "Ethane": "C₂H₆: the second alkane, saturated, with a C–C single bond.",
   "Ethene": "C₂H₄: the simplest alkene, used to make polythene.",
-  "Propane": "C₃H₈: an alkane used in LPG.",
+  "Propane": "C₃H₈: an alkane used as a fuel in LPG.",
   "Butane": "C₄H₁₀: an alkane used in lighters.",
   "Propene": "C₃H₆: an alkene, used to make polypropene.",
-  "Pentane": "C₅H₁₂: an alkane.",
+  "Pentane": "C₅H₁₂: an alkane with three structural isomers.",
   "Hexane": "C₆H₁₄: an alkane, used as a solvent.",
-  "Octane": "C₈H₁₈: an alkane in petrol.",
+  "Octane": "C₈H₁₈: an alkane found in petrol.",
   "Cyclohexane": "C₆H₁₂: a cycloalkane, saturated despite having the formula CₙH₂ₙ.",
 });
 EX("ch41", {
@@ -570,7 +570,7 @@ EX("ch52", {
   "Weighing": "Mass measured on a balance gives moles via n = m/M (R2.1).",
   "Titration": "Measures the volume of a solution of known concentration that reacts exactly.",
   "Measuring gas volume": "Gas volume gives moles via molar volume or pV = nRT.",
-  "Concentration × volume": "n = cV for solutions.",
+  "Concentration × volume": "n = cV gives the moles of solute in a solution of known concentration.",
   "Gravimetric analysis": "Precipitating a product and weighing it to find the amount.",
   "Spectroscopy": "Absorbance is proportional to concentration (Beer–Lambert law).",
   "Back titration": "Adding excess reagent, then titrating the leftover, e.g. for insoluble bases.",
@@ -624,19 +624,19 @@ EX("ch58", {
   "Contact process": "2SO₂ + O₂ ⇌ 2SO₃, using a V₂O₅ catalyst, to make sulfuric acid.",
   "Ostwald process": "Oxidises ammonia to make nitric acid.",
   "Steam reforming": "CH₄ + H₂O ⇌ CO + 3H₂, producing hydrogen.",
-  "Making methanol": "CO + 2H₂ ⇌ CH₃OH.",
+  "Making methanol": "CO + 2H₂ ⇌ CH₃OH: an exothermic equilibrium run at high pressure.",
   "Deacon process": "4HCl + O₂ ⇌ 2Cl₂ + 2H₂O, making chlorine from hydrogen chloride.",
 });
 EX("ch59", {
   "Vinegar": "Contains ethanoic acid (R3.1).",
-  "Lemon juice": "Contains citric acid.",
+  "Lemon juice": "Acidic (about pH 2) because it contains citric acid.",
   "Stomach acid": "Hydrochloric acid, about pH 2.",
   "Baking soda": "Sodium hydrogencarbonate: a weak base.",
-  "Bleach": "Sodium chlorate(I): alkaline.",
+  "Bleach": "Contains sodium chlorate(I) (NaClO), which is alkaline.",
   "Soap": "Alkaline salts of fatty acids.",
   "Toothpaste": "Mildly alkaline, neutralising acid from bacteria.",
   "Antacid tablets": "Bases such as CaCO₃ or Mg(OH)₂ that neutralise excess stomach acid.",
-  "Cola": "Contains phosphoric acid.",
+  "Cola": "Acidic (about pH 2.5) because it contains phosphoric acid.",
   "Methanoic acid in ant stings": "Ants inject methanoic (formic) acid.",
 });
 EX("ch60", {
@@ -652,11 +652,11 @@ EX("ch61", {
   "Salt bridge": "Completes the circuit by letting ions flow, keeping the half-cells neutral (R3.2).",
   "Anode": "The negative electrode in a voltaic cell, where oxidation occurs.",
   "Cathode": "The positive electrode in a voltaic cell, where reduction occurs.",
-  "Electrolyte": "A solution containing ions.",
+  "Electrolyte": "A solution of ions in each half-cell that conducts charge.",
   "Electrodes": "Conductors where the redox reactions take place.",
   "Wire": "Carries electrons from the anode to the cathode through the external circuit.",
   "Half-cells": "Each contains a metal in a solution of its ions.",
-  "Voltmeter": "Measures the cell potential.",
+  "Voltmeter": "A high-resistance voltmeter measures the cell potential (emf).",
   "Standard hydrogen electrode": "The reference half-cell, defined as 0.00 V (HL).",
 });
 EX("ch62", {
@@ -672,7 +672,7 @@ EX("ch62", {
 EX("ch63", {
   "Addition polymerisation": "Alkene monomers join by opening their C=C bonds; nothing else is produced (R3.3).",
   "Condensation polymerisation": "Monomers join and release a small molecule such as water.",
-  "Ethene": "The monomer of polythene.",
+  "Ethene": "C₂H₄: the monomer whose C=C opens to form poly(ethene).",
   "Monomer": "A small molecule that joins with others to form a polymer.",
   "Amino acids": "Monomers of proteins, joined by condensation.",
   "Diols and dicarboxylic acids": "Monomers that form polyesters by condensation.",
@@ -681,8 +681,8 @@ EX("ch63", {
 EX("ch64", {
   "Nucleophile": "An electron-pair donor that attacks electron-deficient centres (R3.4).",
   "Electrophile": "An electron-pair acceptor that attacks electron-rich centres.",
-  "Lewis acid": "An electron-pair acceptor.",
-  "Lewis base": "An electron-pair donor.",
+  "Lewis acid": "An electron-pair acceptor, e.g. BF₃ or a metal ion in a complex.",
+  "Lewis base": "An electron-pair donor, e.g. NH₃ or a ligand.",
   "Curly arrows": "Show the movement of an electron pair in a mechanism.",
   "Carbocation": "A positively charged carbon intermediate.",
   "Heterolytic fission": "A bond breaks unevenly: one atom takes both electrons, forming ions.",
@@ -701,7 +701,7 @@ EX("ch65", {
 EX("ch66", {
   "Bromine adding to an alkene": "Br₂ is polarised by the C=C, and the δ+ Br acts as an electrophile (R3.4).",
   "Electrophilic addition": "The typical reaction of alkenes.",
-  "H⁺ ion": "A proton is an electrophile.",
+  "H⁺ ion": "H⁺ has no electrons, so it accepts an electron pair: an electrophile.",
   "Nitronium ion (NO₂⁺)": "The electrophile in the nitration of benzene.",
   "Hydrogen bromide": "HBr adds to alkenes; the δ+ H is the electrophile.",
   "Electrophilic substitution of benzene": "Benzene's delocalised electrons attack an electrophile; the ring is kept.",

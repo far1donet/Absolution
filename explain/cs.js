@@ -293,15 +293,15 @@ EX("a1203", {
 EX("a1204", {
   "Byte": "8 bits: enough to store one ASCII character (A1.2.2).",
   "Kilobyte": "1,000 bytes (10³) in SI units; 1,024 bytes is a kibibyte.",
-  "Megabyte": "1,000 kilobytes (10⁶ bytes).",
-  "Gigabyte": "1,000 megabytes (10⁹ bytes).",
-  "Terabyte": "1,000 gigabytes (10¹² bytes).",
+  "Megabyte": "1 MB = 1,000 kB = 10⁶ bytes; a typical MP3 song is a few megabytes.",
+  "Gigabyte": "1 GB = 1,000 MB = 10⁹ bytes; RAM and phone storage are measured in gigabytes.",
+  "Terabyte": "1 TB = 1,000 GB = 10¹² bytes; hard drive capacities are measured in terabytes.",
   "Bit": "A binary digit, 0 or 1: the smallest unit of data.",
   "Nibble": "4 bits, or half a byte. One hexadecimal digit represents one nibble.",
-  "Petabyte": "1,000 terabytes (10¹⁵ bytes).",
-  "Exabyte": "1,000 petabytes (10¹⁸ bytes).",
+  "Petabyte": "1 PB = 1,000 TB = 10¹⁵ bytes; data centres store petabytes.",
+  "Exabyte": "1 EB = 1,000 PB = 10¹⁸ bytes; global internet traffic is measured in exabytes.",
   "Kibibyte / mebibyte": "Binary prefixes: 1 KiB = 1,024 bytes and 1 MiB = 1,024 KiB (2¹⁰ and 2²⁰ bytes).",
-  "Zettabyte": "1,000 exabytes (10²¹ bytes).",
+  "Zettabyte": "1 ZB = 1,000 EB = 10²¹ bytes; the total data created worldwide each year is in zettabytes.",
   "Yottabyte": "1,000 zettabytes (10²⁴ bytes).",
 });
 EX("a1205", {
@@ -710,7 +710,7 @@ EX("a3203", {
 EX("a3204", {
   "Integer": "Whole numbers, e.g. a quantity or age (A3.2.2).",
   "Text / VARCHAR": "Strings of characters; VARCHAR(n) stores up to n characters.",
-  "Boolean": "TRUE or FALSE, e.g. 'paid'.",
+  "Boolean": "Stores one of two values, TRUE or FALSE, e.g. whether an order has been paid.",
   "Date / time": "Calendar dates and times, which can be sorted and compared.",
   "Float / decimal": "Numbers with fractional parts; DECIMAL stores exact values, FLOAT approximate ones.",
   "Currency": "A fixed-point numeric type for money that avoids rounding errors.",
@@ -997,7 +997,7 @@ EX("b2102", {
 });
 EX("b2103", {
   "Length": "Returns the number of characters, e.g. len(s) or s.length() (B2.1.3).",
-  "Concatenation": "Joins two strings together.",
+  "Concatenation": "Joins two strings end to end, e.g. \"Hello\" + \" world\" gives \"Hello world\".",
   "Substring / slicing": "Extracts part of a string, e.g. s[1:4] or s.substring(1, 4).",
   "Upper / lower case": "Converts the letters, e.g. s.upper() or s.toLowerCase().",
   "Find / index": "Returns the position of a character or substring.",
@@ -1167,7 +1167,7 @@ EX("b2501", {
   "Close": "Closes the file, saving buffered data and freeing the resource.",
   "Append": "Adds data to the end of a file without deleting what is there.",
   "Create": "Makes a new, empty file in storage.",
-  "Delete": "Removes a file from storage.",
+  "Delete": "Removes a file permanently from secondary storage.",
   "Seek": "Moves the read/write position to a particular place in the file.",
   "Flush": "Forces buffered data to be written to the file immediately.",
 });
