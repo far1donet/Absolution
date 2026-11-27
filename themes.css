@@ -78,3 +78,7 @@ body.in-class .fr-gauge{display:none}
 .av-rotor{animation:avRotor .14s linear infinite;transform-box:fill-box;transform-origin:center}
 @keyframes avRotor{50%{transform:scaleX(.2)}}
 @media (prefers-reduced-motion:reduce){ .av-rotor{animation:none} }
+
+/* ---------- ESS: the tree's trunk rising up the middle of the world ---------- */
+.es-trunk{position:absolute;left:50%;transform:translateX(-50%);width:min(9vw,46px);pointer-events:none;opacity:.35;
+  background:linear-gradient(90deg,#3a2614,#6a4a2a 40%,#4a3218);border-radius:20px}

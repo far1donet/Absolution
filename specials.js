@@ -127,6 +127,15 @@ const FORMS = {
       + `<g transform="scale(${f1(1.1 + power * .05)})">${base}</g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(48, 18, (2.6 + k * .5).toFixed(1), (k * .8).toFixed(1), mini)).join(""));
   },
+  /* ESS: the world tree. A golden crown full of life, roots glowing below, birds and butterflies circling */
+  ess(level, hue, power){
+    const bird = `<path d="M-6 0 q3 -4 6 0 q3 -4 6 0" stroke="#fff2a8" stroke-width="1.6" fill="none"/>`, fly = `<g><ellipse cx="-2.4" rx="2.6" ry="3.6" fill="#ff8ad5"/><ellipse cx="2.4" rx="2.6" ry="3.6" fill="#9ff5c8"/></g>`;
+    const base = SUBJECTS.ess._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    return avatarSVG(glow(uid(), "#8be08b", 54, .5)
+      + [0,1,2,3,4].map(k => `<path class="blink" style="animation-delay:-${k * .3}s" d="M0 28 q${(k - 2) * 8} 10 ${(k - 2) * 16} 22" stroke="#ffd25a" stroke-width="2" fill="none" opacity=".8"/>`).join("")
+      + `<g transform="scale(${f1(1.12 + power * .05)})">${base}</g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(46, 20, (3 + k * .6).toFixed(1), (k * 1.1).toFixed(1), k % 2 ? fly : bird)).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -182,6 +191,7 @@ const SPECIAL = {
   econ:{name:"GOLDEN BULL", line:"The invisible hand is on your side now.", glow:"#ffd25a", trail:"#3ee089", sky:{kind:"glyph", c:["255 210 90", "62 224 137", "255 246 200"], n:56, chars:["$","€","¥","£","₹","%","↑","₿"], alpha:.7}, spread:{kind:"symbols", c:["#ffd25a", "#3ee089", "#fff2a8"], chars:["$","€","¥","£","₹","%","↑","₿","▲"]}},
   psych:{name:"LUCID DREAMER", line:"You're awake inside the dream. You control it now.", glow:"#b07aff", trail:"#c9a3ff", sky:{kind:"glyph", c:["201 163 255", "255 242 168", "159 216 255"], n:56, chars:["z","☾","✦","?","!","∞","∿"], alpha:.65}, spread:{kind:"symbols", c:["#c9a3ff", "#fff2a8", "#9fd8ff"], chars:["z","Z","☾","✦","?","!","∞","∿","☯"]}},
   mathai:{name:"DRONE SWARM", line:"A whole swarm is surveying the world for you now.", glow:"#9ff5e8", trail:"#9ff5e8", sky:{kind:"glyph", c:["159 245 232", "255 210 90", "255 255 255"], n:56, chars:["σ","μ","Σ","x̄","r","χ²","%","∫","0","1"], alpha:.6}, spread:{kind:"symbols", c:["#9ff5e8", "#ffd25a", "#ffffff"], chars:["σ","μ","Σ","x̄","r","χ²","p","%","∫","≈"]}},
+  ess: {name:"WORLD TREE", line:"Its roots now reach every ecosystem on Earth.", glow:"#8be08b", trail:"#ffd25a", sky:{kind:"firefly", c:["220 255 120", "139 224 139", "255 210 90"], n:60}, spread:{kind:"symbols", c:["#8be08b", "#ffd25a", "#9fd8ff"], chars:["✿","❀","❧","❦","✦","☘","•"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

@@ -170,6 +170,36 @@ const PSY = {
   ],
 };
 
+const ESS_IA = {
+  id: "ess", kind: "ia", title: "Individual investigation", short: "IA",
+  guide: "IB Environmental systems and societies guide, first assessment 2026",
+  limit: "3,000 words", words: 3000,
+  note: "Marked out of 30 (25% of the SL grade, 20% at HL). The criterion names come from teachers' guides to the new course, and sources differ slightly, so check the full descriptors with your teacher.",
+  criteria: [
+    { id: "A", name: "Research question and inquiry", max: 4, focus: "A focused research question set in its environmental and local or global context.",
+      look: ["The research question is focused and clearly stated.",
+             "It is set in a relevant environmental context, local or global, with the issue explained."] },
+    { id: "B", name: "Strategy", max: 4, focus: "A justified strategy for the investigation, including the perspectives involved.",
+      look: ["The overall approach to answering the question is planned and justified.",
+             "Different perspectives or stakeholders connected to the issue are considered."] },
+    { id: "C", name: "Method", max: 4, focus: "Methods that suit the question, with sampling, data collection and ethical and safety issues addressed.",
+      look: ["The methods suit the research question and could be repeated.",
+             "Sampling, the amount of data, and risk, ethical and environmental issues are addressed."] },
+    { id: "D", name: "Treatment of data", max: 6, focus: "Relevant data recorded, processed and presented accurately and appropriately.",
+      look: ["The data are recorded clearly and accurately.",
+             "They are processed correctly, e.g. with statistics or diversity indices where useful.",
+             "Tables, graphs and maps present the data clearly."] },
+    { id: "E", name: "Analysis and conclusion", max: 6, focus: "Analysis that identifies trends and patterns, leading to a conclusion that answers the question.",
+      look: ["Trends, patterns and anomalies in the data are identified and explained.",
+             "The analysis uses relevant ESS knowledge and theory.",
+             "The conclusion answers the research question and is supported by the data."] },
+    { id: "F", name: "Evaluation", max: 6, focus: "The method and conclusion evaluated, with realistic improvements and links to the wider environmental issue.",
+      look: ["Strengths and weaknesses of the method are evaluated, with their effect on the conclusion.",
+             "Realistic improvements and further research are suggested.",
+             "The findings are linked back to the wider environmental issue, e.g. a possible solution."] },
+  ],
+};
+
 const HIST27 = {
   id: "hist27", kind: "ia", title: "Historical investigation (exams in 2027)", short: "IA",
   guide: "IB History guide, first assessment 2017 (final exams 2027)",
@@ -295,7 +325,7 @@ const ENG_ESSAY = {
   ],
 };
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY };
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -306,6 +336,7 @@ const SUBJECTS = {
   biz:  { name: "Business Management", ia: ["biz"], ee: true },
   econ: { name: "Economics", ia: ["econ"], ee: true },
   psych: { name: "Psychology", ia: ["psych"], ee: true },
+  ess: { name: "Environmental systems and societies", ia: ["ess"], ee: true },
   hist: { name: "History", ia: ["hist27", "hist28"], ee: true },
   geo:  { name: "Geography", ia: ["geo"], ee: true },
   math: { name: "Mathematics: analysis and approaches", ia: ["math"], ee: true },
