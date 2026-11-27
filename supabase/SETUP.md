@@ -77,10 +77,6 @@ The anon key is designed to be public: row-level security in `schema.sql` decide
 
 Open the game, press **Sign in** on the title screen, then **Create an account**. Enter your email, type the code you receive, choose a password and a username. Play a dive and open **My profile** to see it on your report card. Sign out and back in with just your email and password; use *Forgot my damn password?* to test a reset.
 
-## The honey pot (optional)
-
-To let students grade their IAs and extended essays, follow [HONEY-SETUP.md](HONEY-SETUP.md) after these steps. It needs a Claude API key, which stays in Supabase, never in the site.
-
 ## Notes
 
 - **Where data lives:** email addresses and passwords are handled by Supabase Auth (passwords are stored hashed). The game stores the profile (username, display name, motto, skin, colour, banner) and each game's subject, mode, score and per-question results. Players can delete everything from **My profile → Account → Delete account**.
