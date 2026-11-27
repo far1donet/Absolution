@@ -8,17 +8,21 @@
 .ax-down .shout,.ax-up .shout{left:68%}
 .ax-right .shout{top:auto;bottom:84px;left:0}
 .shout b{position:absolute;left:37px;bottom:82px;width:max-content;max-width:min(86vw,420px);text-align:center;padding:8px 14px;border-radius:18px;
-  background:#fffaf0;color:#c0392b;border:2.5px solid #c0392b;font:800 16px/1.15 var(--f-display);letter-spacing:.02em;box-shadow:0 8px 24px rgb(0 0 0 / .4);
+  background:#fffaf0;color:var(--shc,#c0392b);border:2.5px solid var(--shc,#c0392b);font:800 16px/1.15 var(--f-display);letter-spacing:.02em;box-shadow:0 8px 24px rgb(0 0 0 / .4);
   transform:translateX(-50%);transform-origin:50% 100%;animation:shoutIn .45s cubic-bezier(.2,1.6,.4,1) both}
-.shout b::after{content:"";position:absolute;left:50%;bottom:-11px;width:16px;height:16px;margin-left:-8px;background:inherit;border-right:2.5px solid #c0392b;border-bottom:2.5px solid #c0392b;transform:rotate(45deg)}
+.shout b::after{content:"";position:absolute;left:50%;bottom:-11px;width:16px;height:16px;margin-left:-8px;background:inherit;border-right:2.5px solid var(--shc,#c0392b);border-bottom:2.5px solid var(--shc,#c0392b);transform:rotate(45deg)}
 .shout.t-spam b{font-size:12px;font-weight:600;font-style:italic;color:#8a6a5a;border-color:#b8a898;opacity:.85}
 .shout.t-spam b::after{border-color:#b8a898}
 .shout.t-adware b{font-size:15px}
 .shout.t-trojan b{font-size:19px}
 .shout.t-rootkit b{font-size:24px;animation:shoutIn .45s cubic-bezier(.2,1.6,.4,1) both,shake .18s linear .45s infinite}
-.shout.t-gem b{font-size:25px;color:#0a2a6a;border-color:#0055a4;background:linear-gradient(90deg,#cfe0ff 0 33%,#fffaf0 33% 66%,#ffd6d2 66%);
+.shout.t-gem b{font-size:25px;color:#4a2a00;border-color:#e0a000;background:linear-gradient(90deg,#fff3c4,#ffe08a,#fff3c4);
   animation:shoutIn .45s cubic-bezier(.2,1.6,.4,1) both,shake .14s linear .45s infinite}
-.shout.t-gem b::after{border-color:#0055a4;background:#ffd6d2}
+.shout.t-gem b::after{border-color:#e0a000;background:#fff3c4}
+/* French ab initio keeps its tricolour shout; other subjects take their colour from the current layer */
+#world:not([data-world="fr"]) .shout{--shc:hsl(var(--hue) 70% 36%)}
+#world[data-world="fr"] .shout.t-gem b{color:#0a2a6a;border-color:#0055a4;background:linear-gradient(90deg,#cfe0ff 0 33%,#fffaf0 33% 66%,#ffd6d2 66%)}
+#world[data-world="fr"] .shout.t-gem b::after{border-color:#0055a4;background:#ffd6d2}
 .shout.t-blocked b{font-size:15px;color:#b8c2cc;background:#2a2f38;border-color:#5a6470}
 .shout.t-blocked b::after{border-color:#5a6470}
 .shout.bye b{transition:opacity .45s,transform .45s;opacity:0;transform:translateX(-50%) translateY(-14px)}
@@ -69,3 +73,8 @@ body.in-class .fr-gauge{display:none}
 
 /* ---------- Economics: the bull's price chart climbing up the middle of the market ---------- */
 .ec-chart{position:absolute;left:50%;transform:translateX(-50%);width:min(56vw,340px);opacity:.28;pointer-events:none;filter:drop-shadow(0 0 6px #3ee089)}
+
+/* ---------- Mathematics AI: the survey drone's spinning rotors ---------- */
+.av-rotor{animation:avRotor .14s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes avRotor{50%{transform:scaleX(.2)}}
+@media (prefers-reduced-motion:reduce){ .av-rotor{animation:none} }

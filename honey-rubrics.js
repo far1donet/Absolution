@@ -269,6 +269,9 @@ const MATH = {
   ],
 };
 
+// Mathematics AI uses the same exploration criteria as Mathematics AA
+const MATHAI = Object.assign({}, MATH, { id: "mathai", guide: "IB Mathematics: applications and interpretation guide, first assessment 2021" });
+
 const ENG_ESSAY = {
   id: "engessay", kind: "essay", title: "HL essay", short: "HL essay",
   guide: "IB Language A: language and literature guide, first assessment 2021",
@@ -292,7 +295,7 @@ const ENG_ESSAY = {
   ],
 };
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, engessay: ENG_ESSAY };
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -306,6 +309,7 @@ const SUBJECTS = {
   hist: { name: "History", ia: ["hist27", "hist28"], ee: true },
   geo:  { name: "Geography", ia: ["geo"], ee: true },
   math: { name: "Mathematics: analysis and approaches", ia: ["math"], ee: true },
+  mathai: { name: "Mathematics: applications and interpretation", ia: ["mathai"], ee: true },
   eng:  { name: "English A: language and literature", ia: ["engessay"], ee: true, iaNote: "The individual oral is spoken, so the honey pot marks your HL essay instead." },
   fr:   { name: "French ab initio", ia: [], ee: false, none: "French ab initio can't go in the honey pot: its internal assessment is a live oral with your teacher, and the IB doesn't allow an extended essay in an ab initio language." },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },
