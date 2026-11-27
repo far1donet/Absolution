@@ -282,6 +282,16 @@ const FORMS = {
       + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.8 + k * .5).toFixed(1), (k * 1.1).toFixed(1), sym(k))).join(""));
   },
+  /* Social and Cultural Anthropology: the ethnographer. The notebook glows inside a turning kinship web, with kinship symbols in orbit */
+  anth(level, hue, power){
+    const ring = Array.from({length: 10}, (_, k) => { const a = k / 10 * 6.283, x = f1(Math.cos(a) * 40), y = f1(Math.sin(a) * 40); return (k % 2 ? `<circle cx="${x}" cy="${y}" r="5" fill="none" stroke="#ffb0c8" stroke-width="2"/>` : `<path d="M${x} ${f1(y - 5)} l5 9 h-10z" fill="none" stroke="#9fd8a8" stroke-width="2"/>`); }).join("") + `<circle r="40" fill="none" stroke="#d8d0c0" stroke-width="1" stroke-dasharray="2 5"/>`;
+    const sym = k => `<text text-anchor="middle" y="5" font-size="14" font-weight="700" fill="${["#9fd8a8", "#ffb0c8", "#ffffff"][k % 3]}">${["△", "○", "◇", "="][k % 4]}</text>`;
+    const base = SUBJECTS.anth._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    return avatarSVG(glow(uid(), "#9fd8a8", 58, .55)
+      + `<g class="vspin" style="animation-duration:16s">${ring}</g>`
+      + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.8 + k * .5).toFixed(1), (k * 1.1).toFixed(1), sym(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -352,6 +362,7 @@ const SPECIAL = {
   thtr:{name:"LEADING LIGHT", line:"Your name is up in lights now.", glow:"#ffcf6a", trail:"#ff5a6e", sky:{kind:"glyph", c:["255 207 106", "255 255 255", "255 90 110"], n:56, chars:["★","✦","♦","☾"], alpha:.6}, spread:{kind:"symbols", c:["#ffcf6a", "#ffffff", "#ff5a6e", "#c8102e"], chars:["★","✦","♦","☾","●"]}},
   dance:{name:"ÉTOILE", line:"The whole world is your stage now.", glow:"#ff9ad5", trail:"#ffd25a", sky:{kind:"glyph", c:["255 154 213", "255 210 90", "255 255 255"], n:56, chars:["✦","❀","♪","◆"], alpha:.6}, spread:{kind:"symbols", c:["#ff9ad5", "#ffd25a", "#ffffff", "#c86aff"], chars:["✦","❀","♪","◆","●"]}},
   rel: {name:"THE BEACON", line:"Your light reaches every path now.", glow:"#ffd27a", trail:"#ffb03a", sky:{kind:"glyph", c:["255 210 122", "255 176 58", "255 255 255"], n:56, chars:["✦","✧","★","•"], alpha:.6}, spread:{kind:"symbols", c:["#ffd27a", "#ffb03a", "#ffffff", "#fff8d0"], chars:["✦","✧","★","•"]}},
+  anth:{name:"THE ETHNOGRAPHER", line:"Every community welcomes you back now.", glow:"#9fd8a8", trail:"#ffb0c8", sky:{kind:"glyph", c:["159 216 168", "255 176 200", "255 255 255"], n:56, chars:["△","○","◇","="], alpha:.6}, spread:{kind:"symbols", c:["#9fd8a8", "#ffb0c8", "#ffffff", "#ffd27a"], chars:["△","○","◇","=","✦"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

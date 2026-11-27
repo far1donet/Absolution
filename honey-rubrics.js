@@ -485,6 +485,7 @@ const SUBJECTS = {
   thtr: { name: "Theatre", ia: [], ee: true, none: "Theatre's tasks are presentations, performances and a production proposal whose criteria aren't published openly, so check them with your teacher. You can still mark a Theatre extended essay here." },
   dance: { name: "Dance", ia: [], ee: true, none: "Dance coursework is mostly filmed choreography and performance, and the criteria for its written dance investigation aren't published openly, so check them with your teacher. You can still mark a Dance extended essay here." },
   rel:  { name: "World religions", ia: ["rel"], ee: true },
+  anth: { name: "Social and cultural anthropology", btn: "Anthropology", ia: [], ee: true, none: "Anthropology's fieldwork tasks differ at SL and HL and their criteria aren't published openly, so check them with your teacher. You can still mark a Social and cultural anthropology extended essay here." },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },
 };
 
