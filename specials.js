@@ -212,6 +212,16 @@ const FORMS = {
       + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.8 + k * .5).toFixed(1), (k * 1.1).toFixed(1), tool(k))).join(""));
   },
+  /* Philosophy: Sophia. The gadfly glows with wisdom inside a turning ring of Greek letters, with questions in orbit */
+  phil(level, hue, power){
+    const word = "ΣΟΦΙΑ·ΛΟΓΟΣ·", ring = Array.from({length: 12}, (_, k) => { const a = k / 12 * 6.283; return `<text x="${f1(Math.cos(a) * 40)}" y="${f1(Math.sin(a) * 40 + 4)}" text-anchor="middle" font-size="11" font-family="Georgia,serif" font-weight="700" fill="#c8b8ff">${word[k]}</text>`; }).join("");
+    const sym = k => `<text text-anchor="middle" y="5" font-size="14" font-family="Georgia,serif" font-weight="700" fill="${["#ffe58a", "#c8b8ff", "#ffffff"][k % 3]}">${"?∴∞Φ"[k % 4]}</text>`;
+    const base = SUBJECTS.phil._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    return avatarSVG(glow(uid(), "#c8b8ff", 58, .55)
+      + `<g class="vspin" style="animation-duration:16s">${ring}</g>`
+      + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.8 + k * .5).toFixed(1), (k * 1.1).toFixed(1), sym(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -275,6 +285,7 @@ const SPECIAL = {
   sehs:{name:"SECOND WIND", line:"Your second wind kicks in. Nothing can catch you now.", glow:"#ff6a7a", trail:"#ffd25a", sky:{kind:"glyph", c:["255 106 122", "255 210 90", "255 255 255"], n:56, chars:["♥","⚡","✦","➚","★"], alpha:.6}, spread:{kind:"symbols", c:["#ff6a7a", "#ffd25a", "#ffffff", "#3a8ae8"], chars:["♥","⚡","✦","★","❤"]}},
   va:  {name:"CHROMA", line:"Every colour there is, at the tip of your brush.", glow:"#ff7ad9", trail:"#9ff5e8", sky:{kind:"glyph", c:["255 58 138", "58 192 255", "244 208 58", "58 224 138"], n:60, chars:["●","◆","✦","✿","▲"], alpha:.6}, spread:{kind:"symbols", c:["#e8443a", "#ff9a1a", "#f4d03a", "#3ac08a", "#3a8ae8", "#8a3ae8"], chars:["●","◆","✦","✿","▲","■"]}},
   dt:  {name:"BRIGHT SPARK", line:"Your idea is in every home on Earth now.", glow:"#ffd25a", trail:"#9fd8ff", sky:{kind:"glyph", c:["255 210 90", "159 216 255", "255 255 255"], n:56, chars:["⚙","✦","▲","●","◆"], alpha:.6}, spread:{kind:"symbols", c:["#ffd25a", "#9fd8ff", "#ffffff", "#ff8a1a"], chars:["⚙","✦","▲","●","◆","♻"]}},
+  phil:{name:"SOPHIA", line:"Wisdom itself. Socrates would still have questions.", glow:"#c8b8ff", trail:"#ffe58a", sky:{kind:"glyph", c:["200 184 255", "255 229 138", "255 255 255"], n:56, chars:["?","∴","∞","Φ","Σ"], alpha:.6}, spread:{kind:"symbols", c:["#c8b8ff", "#ffe58a", "#ffffff", "#9fd8ff"], chars:["?","∴","∞","Φ","Σ","Ω"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

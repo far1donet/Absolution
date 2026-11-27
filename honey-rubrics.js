@@ -387,6 +387,34 @@ const GLOPO = {
   ],
 };
 
+// Philosophy: a philosophical analysis of a non-philosophical stimulus
+const PHIL = {
+  id: "phil", kind: "ia", title: "Philosophical analysis", short: "IA",
+  guide: "IB Philosophy guide, first assessment 2025",
+  limit: "2,000 words", words: 2000,
+  note: "Marked out of 25 (25% of the SL grade and 20% at HL). The analysis starts from a non-philosophical stimulus, such as a film, news story, song or advert.",
+  criteria: [
+    { id: "A", name: "Identification and justification", max: 3, focus: "A clearly identified philosophical issue, with a justified link between it and the stimulus.",
+      look: ["The philosophical issue raised by the stimulus is clearly identified.",
+             "The link between the stimulus and the issue is explained and justified."] },
+    { id: "B", name: "Clarity", max: 4, focus: "A clear, logically organized analysis that uses philosophical vocabulary accurately.",
+      look: ["The analysis is clear and logically organized, so the argument is easy to follow.",
+             "Philosophical vocabulary is used accurately and appropriately."] },
+    { id: "C", name: "Knowledge and understanding", max: 4, focus: "Accurate, relevant knowledge of the philosophical arguments, concepts and perspectives behind the issue.",
+      look: ["Philosophical arguments and concepts are explained accurately.",
+             "The knowledge is relevant to the issue, not just listed."] },
+    { id: "D", name: "Analysis", max: 8, focus: "Critical analysis of the issue, exploring arguments, counter-arguments and different perspectives, supported by examples.",
+      look: ["The issue is analysed critically, not just described.",
+             "Arguments and counter-arguments are explored.",
+             "Different philosophical perspectives are compared.",
+             "Points are supported with relevant examples, including from the stimulus."] },
+    { id: "E", name: "Evaluation", max: 6, focus: "Evaluation of the arguments that leads to a clear, reasoned conclusion of your own.",
+      look: ["The strengths and weaknesses of the arguments are evaluated.",
+             "Counter-claims are considered and answered.",
+             "It reaches a clear, well-reasoned conclusion of your own."] },
+  ],
+};
+
 // Sports, exercise and health science uses the same four criteria as the sciences' scientific investigation
 const SEHS = Object.assign({}, SCI, { id: "sehs", guide: "IB Sports, exercise and health science guide, first assessment 2026",
   note: "Marked out of 24 (24% of the final grade), on the same four criteria as the sciences. Moderators stop reading at 3,000 words." });
@@ -394,7 +422,7 @@ const SEHS = Object.assign({}, SCI, { id: "sehs", guide: "IB Sports, exercise an
 // English A: Literature's HL essay uses the same four criteria as Language and Literature's
 const LIT_ESSAY = Object.assign({}, ENG_ESSAY, { id: "litessay", guide: "IB Language A: literature guide, first assessment 2021" });
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, litessay: LIT_ESSAY, sehs: SEHS, glopo: GLOPO, tokx: TOK_EXHIB, toke: TOK_ESSAY };
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, litessay: LIT_ESSAY, sehs: SEHS, glopo: GLOPO, phil: PHIL, tokx: TOK_EXHIB, toke: TOK_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -419,6 +447,7 @@ const SUBJECTS = {
   es:   { name: "Spanish ab initio", ia: [], ee: false, none: "Spanish ab initio can't go in the honey pot: its internal assessment is a live oral with your teacher, and the IB doesn't allow an extended essay in an ab initio language." },
   va:   { name: "Visual arts", ia: [], ee: true, none: "Visual arts coursework is made of artworks, screens and video, so the honey pot can't read it. You can still mark a Visual arts extended essay here." },
   dt:   { name: "Design technology", ia: [], ee: true, none: "The new design project (first assessed in 2027) isn't in the honey pot yet, because its full criteria aren't published openly, so check them with your teacher. You can still mark a Design technology extended essay here." },
+  phil: { name: "Philosophy", ia: ["phil"], ee: true },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },
 };
 
