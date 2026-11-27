@@ -201,7 +201,7 @@ const ESS_IA = {
 };
 
 const HIST27 = {
-  id: "hist27", kind: "ia", title: "Historical investigation (exams in 2027)", short: "IA",
+  id: "hist27", kind: "ia", title: "Historical investigation (exams in 2027)", short: "IA", variant: "Exams in 2027",
   guide: "IB History guide, first assessment 2017 (final exams 2027)",
   limit: "2,200 words", words: 2200,
   note: "Marked out of 25. For exams in May or November 2027.",
@@ -224,7 +224,7 @@ const HIST27 = {
 };
 
 const HIST28 = {
-  id: "hist28", kind: "ia", title: "Historical investigation (exams from 2028)", short: "IA",
+  id: "hist28", kind: "ia", title: "Historical investigation (exams from 2028)", short: "IA", variant: "Exams from 2028",
   guide: "IB History guide, first assessment 2028",
   limit: "2,200 words", words: 2200,
   note: "Marked out of 24 on the new course (first exams May 2028). There is no reflection section.",
@@ -325,7 +325,37 @@ const ENG_ESSAY = {
   ],
 };
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY };
+// Theory of Knowledge: each task is marked holistically against one question, so the statements are the level 9-10 descriptor split up
+const TOK_EXHIB = {
+  id: "tokx", kind: "tok", title: "TOK exhibition", short: "TOK exhibition", variant: "Exhibition",
+  guide: "IB Theory of Knowledge guide, first assessment 2022",
+  limit: "950 words", words: 950,
+  note: "Marked out of 10 by your teacher and worth a third of your TOK grade. Three objects with commentaries, all linked to one of the 35 IA prompts. TOK is marked holistically, so rate the exhibition as a whole.",
+  criteria: [
+    { id: "A", name: "How TOK shows up in the world around us", max: 10, focus: "Does the exhibition successfully show how TOK manifests in the world around us?",
+      look: ["It clearly identifies three objects and the specific real-world context of each.",
+             "Each object is clearly linked to your chosen IA prompt, and the links are well explained.",
+             "It strongly justifies the particular contribution each object makes to the exhibition.",
+             "Points are supported by appropriate evidence and explicit references to the IA prompt.",
+             "All three commentaries stay within 950 words and use the prompt exactly as worded."] },
+  ],
+};
+const TOK_ESSAY = {
+  id: "toke", kind: "tok", title: "TOK essay", short: "TOK essay", variant: "Essay",
+  guide: "IB Theory of Knowledge guide, first assessment 2022",
+  limit: "1,600 words", words: 1600,
+  note: "Marked out of 10 by an IB examiner and worth two thirds of your TOK grade. Your TOK and EE grades together can earn up to 3 bonus points. TOK is marked holistically, so rate the essay as a whole.",
+  criteria: [
+    { id: "A", name: "A clear, coherent and critical exploration of the title", max: 10, focus: "Does the student provide a clear, coherent and critical exploration of the essay title?",
+      look: ["It keeps a sustained focus on the prescribed title, exactly as set.",
+             "The discussion is linked effectively to areas of knowledge.",
+             "Arguments are clear, coherent and supported by specific real-life examples.",
+             "The implications of the arguments are considered.",
+             "Different points of view are identified and evaluated, with claims and counterclaims."] },
+  ],
+};
+
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, tokx: TOK_EXHIB, toke: TOK_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -337,11 +367,12 @@ const SUBJECTS = {
   econ: { name: "Economics", ia: ["econ"], ee: true },
   psych: { name: "Psychology", ia: ["psych"], ee: true },
   ess: { name: "Environmental systems and societies", ia: ["ess"], ee: true },
-  hist: { name: "History", ia: ["hist27", "hist28"], ee: true },
+  hist: { name: "History", ia: ["hist27", "hist28"], ee: true, varLabel: "Exam session" },
   geo:  { name: "Geography", ia: ["geo"], ee: true },
   math: { name: "Mathematics: analysis and approaches", ia: ["math"], ee: true },
   mathai: { name: "Mathematics: applications and interpretation", ia: ["mathai"], ee: true },
   eng:  { name: "English A: language and literature", ia: ["engessay"], ee: true, iaNote: "The individual oral is spoken, so the honey pot marks your HL essay instead." },
+  tok:  { name: "Theory of Knowledge", ia: ["tokx", "toke"], ee: false, varLabel: "TOK task", iaNote: "TOK has two tasks: the exhibition, marked by your teacher, and the essay, marked by the IB. Pick one above. There's no extended essay in TOK." },
   fr:   { name: "French ab initio", ia: [], ee: false, none: "French ab initio can't go in the honey pot: its internal assessment is a live oral with your teacher, and the IB doesn't allow an extended essay in an ab initio language." },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },
 };
@@ -353,10 +384,10 @@ const looks = (c, level) => c.look.filter(l => typeof l === "string" || !l.hl ||
 // a criterion's mark: the share of "Fully" across its statements, on the IB's scale for that criterion
 const mark = (max, ratings) => { const r = (ratings || []).filter(x => x >= 0 && x <= 3); return r.length ? Math.round(max * r.reduce((a, b) => a + b, 0) / (3 * r.length) + 1e-9) : 0; };
 
-// estimated grades from the share of marks: the IB sets the real boundaries each session
+// estimated grades from the share of marks: the IB sets the real boundaries each session (EE and TOK use letters)
 const IA_BANDS = [[0.80, "7"], [0.67, "6"], [0.55, "5"], [0.43, "4"], [0.30, "3"], [0.15, "2"], [0, "1"]];
 const EE_BANDS = [[0.80, "A"], [0.63, "B"], [0.43, "C"], [0.23, "D"], [0, "E"]];
-const grade = (kind, got, max) => { const f = max ? got / max : 0; return ((kind === "ee") ? EE_BANDS : IA_BANDS).find(b => f >= b[0] - 1e-9)[1]; };
+const grade = (kind, got, max) => { const f = max ? got / max : 0; return ((kind === "ee" || kind === "tok") ? EE_BANDS : IA_BANDS).find(b => f >= b[0] - 1e-9)[1]; };
 // each criterion: smashing it, on track, or still to work on
 const verdict = (m, max) => { const f = max ? m / max : 0; return f >= 0.8 ? "smash" : f >= 0.5 ? "track" : "work"; };
 

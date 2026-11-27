@@ -11,7 +11,7 @@ const h = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;"
 const st = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }, del(k){ try { localStorage.removeItem(k); } catch(e){} } };
 const PREF = "oiac-honey-pick", DRAFT = "oiac-honey-draft", PAST = "oiac-honey-history";
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-const ORDER = ["bio","chem","phys","cs","biz","econ","psych","ess","hist","geo","math","mathai","eng","fr","gk"];
+const ORDER = ["bio","chem","phys","cs","biz","econ","psych","ess","hist","geo","math","mathai","eng","fr","tok","gk"];
 const VERDICT = { smash: ["Smashing it", "🔥"], track: ["On track", "✓"], work: ["Still to work on", "⚒"] };
 const n0 = n => Number(n).toLocaleString();
 const size = b => b < 1048576 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1048576).toFixed(1)} MB`;
@@ -25,7 +25,7 @@ function open(){
   const saved = st.get(PREF) || {};
   const cur = (typeof M !== "undefined" && M) ? M.key : null;   // the subject open on the title screen
   const subj = ok(saved.subject) ? saved.subject : ok(cur) ? cur : "bio";
-  P = {kind: saved.kind === "ee" ? "ee" : "ia", subject: subj, level: saved.level === "HL" ? "HL" : "SL", hist: saved.hist === "hist28" ? "hist28" : "hist27",
+  P = {kind: saved.kind === "ee" ? "ee" : "ia", subject: subj, level: saved.level === "HL" ? "HL" : "SL", vars: Object.assign({}, saved.vars && typeof saved.vars === "object" ? saved.vars : {}, saved.hist ? {hist: saved.hist} : {}),
        file: null, pages: 0, words: null, scanned: false, thumb: null, reading: false, r: {}};
   const el = document.createElement("div"); el.className = "hpot"; el.id = "hp"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "The honey pot");
   el.innerHTML = `
@@ -52,13 +52,14 @@ function close(silent){
   if (!silent){ const b = q$("#honeyBtn"); if (b) b.focus({preventScroll: true}); }
 }
 const ok = k => !!(k && HY.SUBJECTS[k] && (HY.SUBJECTS[k].ia.length || HY.SUBJECTS[k].ee));
-function remember(){ st.set(PREF, {kind: P.kind, subject: P.subject, level: P.level, hist: P.hist}); }
+function remember(){ st.set(PREF, {kind: P.kind, subject: P.subject, level: P.level, vars: P.vars}); }
 // the task the picker points at: the subject's IA (or HL essay), or the EE
 function taskFor(){
   const s = HY.SUBJECTS[P.subject]; if (!s) return null;
   if (P.kind === "ee") return s.ee ? HY.TASKS.ee : null;
   if (!s.ia.length) return null;
-  return HY.TASKS[s.ia.length > 1 ? (s.ia.includes(P.hist) ? P.hist : s.ia[0]) : s.ia[0]];
+  const v = P.vars[P.subject];   // subjects with more than one task (History's two courses, TOK's exhibition and essay)
+  return HY.TASKS[s.ia.includes(v) ? v : s.ia[0]];
 }
 const level = T => T.levels ? P.level : null;
 const draftKey = T => `${T.id}|${level(T) || ""}|${P.file ? P.file.name : ""}`;
@@ -97,7 +98,7 @@ function paintPick(msg){
   const P$ = q$("#hpPanel");
   P$.querySelectorAll("[data-hkind]").forEach(b => b.onclick = () => { P.kind = b.dataset.hkind; remember(); paintPick(); });
   P$.querySelectorAll("[data-hsubj]").forEach(b => b.onclick = () => { P.subject = b.dataset.hsubj; remember(); paintPick(); const f = q$(`[data-hsubj="${P.subject}"]`); if (f) f.focus({preventScroll: true}); });
-  P$.querySelectorAll("[data-hvar]").forEach(b => b.onclick = () => { const [k, v] = b.dataset.hvar.split(":"); P[k] = v; remember(); paintPick(); });
+  P$.querySelectorAll("[data-hvar]").forEach(b => b.onclick = () => { const [k, v] = b.dataset.hvar.split(":"); if (k === "var") P.vars[P.subject] = v; else P[k] = v; remember(); paintPick(); });
   const inp = q$("#hpFile"), drop = q$("#hpDrop");
   if (inp){
     inp.onchange = () => { if (inp.files && inp.files[0]) take(inp.files[0]); };
@@ -111,7 +112,7 @@ function paintPick(msg){
 }
 function taskBox(T){
   const s = HY.SUBJECTS[P.subject], vars = [];
-  if (P.kind === "ia" && s.ia.length > 1) vars.push(`<div class="hp-seg sm" role="group" aria-label="Exam session">${s.ia.map(id => `<button data-hvar="hist:${id}" aria-pressed="${T.id === id}">${id === "hist28" ? "Exams from 2028" : "Exams in 2027"}</button>`).join("")}</div>`);
+  if (P.kind === "ia" && s.ia.length > 1) vars.push(`<div class="hp-seg sm" role="group" aria-label="${h(s.varLabel || "Exam session")}">${s.ia.map(id => `<button data-hvar="var:${id}" aria-pressed="${T.id === id}">${h(HY.TASKS[id].variant || HY.TASKS[id].title)}</button>`).join("")}</div>`);
   if (T.levels) vars.push(`<div class="hp-seg sm" role="group" aria-label="Level"><button data-hvar="level:SL" aria-pressed="${P.level === "SL"}">SL</button><button data-hvar="level:HL" aria-pressed="${P.level === "HL"}">HL</button></div>`);
   const max = T.criteria.reduce((a, c) => a + c.max, 0);
   return `<div class="hp-task">
@@ -125,7 +126,7 @@ function taskBox(T){
 function fileNotes(T){
   const out = []; if (!P.file || P.reading) return out;
   if (P.scanned) out.push({text: "This PDF looks like scanned pages, so its words couldn't be counted. You can still mark it."});
-  else if (T.words && P.words > T.words) out.push({warn: true, text: `About ${n0(P.words)} words in the main text: over the ${n0(T.words)}-word limit. Moderators stop reading at the limit, so only mark what comes before it.`});
+  else if (T.words && P.words > T.words) out.push({warn: true, text: `About ${n0(P.words)} words in the main text: over the ${n0(T.words)}-word limit. ${T.kind === "ia" ? "Moderators" : "Examiners"} stop reading at the limit, so only mark what comes before it.`});
   if (T.pages && P.pages > T.pages) out.push({warn: true, text: `${P.pages} pages: the guide suggests 12–20 pages.`});
   return out;
 }
@@ -259,7 +260,7 @@ function show(T, r){
       <i class="hp-bar"><i style="width:${Math.round(100 * c.mark / c.max)}%"></i></i></span><span class="hp-cm">${c.mark}<small>/${c.max}</small></span>
       <span class="hp-v">${VERDICT[c.verdict][1]} ${VERDICT[c.verdict][0]}</span>
       ${c.verdict !== "smash" && c.low.length ? `<ul class="hp-low">${c.low.map(x => `<li><i>${h(HY.SCALE[x.v])}</i>${h(x.text)}</li>`).join("")}</ul>` : ""}</li>`;
-  const kindWord = T.kind === "ee" ? "EE grade" : T.kind === "essay" ? "HL essay grade" : "IA grade";
+  const kindWord = T.kind === "ee" ? "EE grade" : T.kind === "tok" ? "TOK grade" : T.kind === "essay" ? "HL essay grade" : "IA grade";
   q$("#hpPanel").innerHTML = `
     <div class="hp-score"><div class="hp-grade"><small>Estimated ${h(kindWord)}</small><b>${h(r.grade)}</b></div>
       <div class="hp-tot"><b>${r.total}<small>/${r.max}</small></b><span>${Math.round(100 * f)}% of the marks · ${h(depthWord(f))}</span></div></div>
@@ -351,7 +352,7 @@ function setThumb(src){
 function setLabel(g, s){
   const G1 = q$("#hpLabG"), S1 = q$("#hpLabS"); if (!G1) return;
   G1.textContent = g || "IB"; S1.textContent = s || "honey";
-  const task = taskFor(), w = task ? (task.kind === "ee" ? "EE" : task.short === "HL essay" ? "HL" : "IA") : "IA";
+  const task = taskFor(), w = task ? (task.kind === "ee" ? "EE" : task.kind === "tok" ? "TOK" : task.short === "HL essay" ? "HL" : "IA") : "IA";
   ["#hpDocT", "#hpDocB"].forEach(id => { const t = q$(id); if (t) t.textContent = w; });
 }
 const ease = t => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);

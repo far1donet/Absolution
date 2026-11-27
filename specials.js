@@ -136,6 +136,17 @@ const FORMS = {
       + `<g transform="scale(${f1(1.12 + power * .05)})">${base}</g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(46, 20, (3 + k * .6).toFixed(1), (k * 1.1).toFixed(1), k % 2 ? fly : bird)).join(""));
   },
+  /* Theory of Knowledge: the owl of Minerva. A golden owl with its wings spread, the Sun behind it and questions in orbit */
+  tok(level, hue, power){
+    const q = k => `<text text-anchor="middle" y="5" font-family="Georgia,serif" font-size="15" font-weight="700" fill="${k % 2 ? "#fff6c8" : "#ffd25a"}">${["?","!","∴","∵","≠","∀"][k % 6]}</text>`;
+    const base = SUBJECTS.tok._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    const wing = d => `<path d="M${d * 16} -4 q${d * 30} -22 ${d * 44} -6 q${d * -8} 2 ${d * -10} 8 q${d * 6} 2 ${d * 6} 8 q${d * -10} 0 ${d * -12} 6 q${d * 2} 6 ${d * -2} 10 q${d * -14} -4 ${d * -26} 8z" fill="#e0ad2a" stroke="#fff2a8" stroke-width="1.4"/>`;
+    return avatarSVG(`<circle r="${f1(44 + power * 3)}" fill="#ffe58a" opacity=".18"/>` + glow(uid(), "#ffd25a", 56, .55)
+      + Array.from({length: 12}, (_, k) => { const a = k / 12 * 6.283; return `<path class="blink" style="animation-delay:-${(k * .15).toFixed(2)}s" d="M${f1(Math.cos(a) * 40)} ${f1(Math.sin(a) * 40)} L${f1(Math.cos(a) * 52)} ${f1(Math.sin(a) * 52)}" stroke="#ffd25a" stroke-width="2.4" stroke-linecap="round" opacity=".7"/>`; }).join("")
+      + `<g class="av-hover">${wing(-1)}${wing(1)}</g>`
+      + `<g transform="scale(${f1(1.06 + power * .05)})">${base}</g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(48, 18, (3 + k * .5).toFixed(1), (k * 1.2).toFixed(1), q(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -192,6 +203,7 @@ const SPECIAL = {
   psych:{name:"LUCID DREAMER", line:"You're awake inside the dream. You control it now.", glow:"#b07aff", trail:"#c9a3ff", sky:{kind:"glyph", c:["201 163 255", "255 242 168", "159 216 255"], n:56, chars:["z","☾","✦","?","!","∞","∿"], alpha:.65}, spread:{kind:"symbols", c:["#c9a3ff", "#fff2a8", "#9fd8ff"], chars:["z","Z","☾","✦","?","!","∞","∿","☯"]}},
   mathai:{name:"DRONE SWARM", line:"A whole swarm is surveying the world for you now.", glow:"#9ff5e8", trail:"#9ff5e8", sky:{kind:"glyph", c:["159 245 232", "255 210 90", "255 255 255"], n:56, chars:["σ","μ","Σ","x̄","r","χ²","%","∫","0","1"], alpha:.6}, spread:{kind:"symbols", c:["#9ff5e8", "#ffd25a", "#ffffff"], chars:["σ","μ","Σ","x̄","r","χ²","p","%","∫","≈"]}},
   ess: {name:"WORLD TREE", line:"Its roots now reach every ecosystem on Earth.", glow:"#8be08b", trail:"#ffd25a", sky:{kind:"firefly", c:["220 255 120", "139 224 139", "255 210 90"], n:60}, spread:{kind:"symbols", c:["#8be08b", "#ffd25a", "#9fd8ff"], chars:["✿","❀","❧","❦","✦","☘","•"]}},
+  tok: {name:"OWL OF MINERVA", line:"Wisdom takes flight at dusk. You've seen the Sun.", glow:"#ffd25a", trail:"#fff2a8", sky:{kind:"glyph", c:["255 210 90", "255 246 200", "255 255 255"], n:56, chars:["?","!","∴","∵","≠","∀","∃","¬"], alpha:.6, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ffd25a", "#fff2a8", "#ffffff"], chars:["?","!","∴","∵","≠","∀","∃","☉"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 
