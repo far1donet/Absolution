@@ -387,10 +387,14 @@ const GLOPO = {
   ],
 };
 
+// Sports, exercise and health science uses the same four criteria as the sciences' scientific investigation
+const SEHS = Object.assign({}, SCI, { id: "sehs", guide: "IB Sports, exercise and health science guide, first assessment 2026",
+  note: "Marked out of 24 (24% of the final grade), on the same four criteria as the sciences. Moderators stop reading at 3,000 words." });
+
 // English A: Literature's HL essay uses the same four criteria as Language and Literature's
 const LIT_ESSAY = Object.assign({}, ENG_ESSAY, { id: "litessay", guide: "IB Language A: literature guide, first assessment 2021" });
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, litessay: LIT_ESSAY, glopo: GLOPO, tokx: TOK_EXHIB, toke: TOK_ESSAY };
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, litessay: LIT_ESSAY, sehs: SEHS, glopo: GLOPO, tokx: TOK_EXHIB, toke: TOK_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -401,6 +405,7 @@ const SUBJECTS = {
   biz:  { name: "Business Management", ia: ["biz"], ee: true },
   econ: { name: "Economics", ia: ["econ"], ee: true },
   psych: { name: "Psychology", ia: ["psych"], ee: true },
+  sehs: { name: "Sports, exercise and health science", btn: "SEHS", ia: ["sehs"], ee: true },
   ess: { name: "Environmental systems and societies", ia: ["ess"], ee: true },
   hist: { name: "History", ia: ["hist27", "hist28"], ee: true, varLabel: "Exam session" },
   glopo: { name: "Global Politics", ia: ["glopo"], ee: true },
