@@ -192,6 +192,16 @@ const FORMS = {
       + `<g transform="scale(${f1(1.06 + power * .05)})">${base}</g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.8 + k * .5).toFixed(1), (k * 1.1).toFixed(1), medal(k))).join(""));
   },
+  /* Visual Arts: chroma. The brush turns gold inside a spinning colour wheel, with paint drops of every colour in orbit */
+  va(level, hue, power){
+    const drop = k => `<path d="M0 -7 q6 8 0 12 q-6 -4 0 -12z" fill="hsl(${(k * 47) % 360} 90% 60%)" stroke="#fff" stroke-width=".8"/>`;
+    const base = SUBJECTS.va._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    const wheel = Array.from({length: 12}, (_, k) => { const a0 = k / 12 * 6.283, a1 = (k + 1) / 12 * 6.283;
+      return `<path d="M${f1(Math.cos(a0) * 30)} ${f1(Math.sin(a0) * 30)} L${f1(Math.cos(a0) * 40)} ${f1(Math.sin(a0) * 40)} A40 40 0 0 1 ${f1(Math.cos(a1) * 40)} ${f1(Math.sin(a1) * 40)} L${f1(Math.cos(a1) * 30)} ${f1(Math.sin(a1) * 30)} A30 30 0 0 0 ${f1(Math.cos(a0) * 30)} ${f1(Math.sin(a0) * 30)}z" fill="hsl(${k * 30} 90% 58%)" opacity=".8"/>`; }).join("");
+    return avatarSVG(glow(uid(), "#ff7ad9", 56, .45) + `<g class="vspin" style="animation-duration:12s">${wheel}</g>`
+      + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
+      + Array.from({length: 3 + power}, (_, k) => orbit(50, 20, (2.6 + k * .4).toFixed(1), (k * .9).toFixed(1), drop(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -253,6 +263,7 @@ const SPECIAL = {
   es:  {name:"CHILE DE FUEGO", line:"¡Qué picante! The whole Spanish-speaking world can feel the heat.", glow:"#ff6a1a", trail:"#ffb03a", sky:{kind:"glyph", c:["255 106 26", "255 210 90", "255 58 138"], n:56, chars:["¡","¿","ñ","á","é","í","ó","ú","!","?"], alpha:.65, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ff6a1a", "#ffd25a", "#ff3a8a", "#3ac0ff"], chars:["¡","¿","ñ","✦","❀","★"]}},
   glopo:{name:"PAX MUNDI", line:"Every nation is at the table now.", glow:"#9fd8ff", trail:"#ffd25a", sky:{kind:"glyph", c:["159 216 255", "255 210 90", "255 255 255"], n:56, chars:["☮","★","⚖","✦","✌"], alpha:.6}, spread:{kind:"symbols", c:["#9fd8ff", "#ffd25a", "#ffffff", "#8be08b"], chars:["☮","★","⚖","✦","✌","❦"]}},
   sehs:{name:"SECOND WIND", line:"Your second wind kicks in. Nothing can catch you now.", glow:"#ff6a7a", trail:"#ffd25a", sky:{kind:"glyph", c:["255 106 122", "255 210 90", "255 255 255"], n:56, chars:["♥","⚡","✦","➚","★"], alpha:.6}, spread:{kind:"symbols", c:["#ff6a7a", "#ffd25a", "#ffffff", "#3a8ae8"], chars:["♥","⚡","✦","★","❤"]}},
+  va:  {name:"CHROMA", line:"Every colour there is, at the tip of your brush.", glow:"#ff7ad9", trail:"#9ff5e8", sky:{kind:"glyph", c:["255 58 138", "58 192 255", "244 208 58", "58 224 138"], n:60, chars:["●","◆","✦","✿","▲"], alpha:.6}, spread:{kind:"symbols", c:["#e8443a", "#ff9a1a", "#f4d03a", "#3ac08a", "#3a8ae8", "#8a3ae8"], chars:["●","◆","✦","✿","▲","■"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

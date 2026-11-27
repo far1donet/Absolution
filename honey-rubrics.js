@@ -417,6 +417,7 @@ const SUBJECTS = {
   tok:  { name: "Theory of Knowledge", ia: ["tokx", "toke"], ee: false, varLabel: "TOK task", iaNote: "TOK has two tasks: the exhibition, marked by your teacher, and the essay, marked by the IB. Pick one above. There's no extended essay in TOK." },
   fr:   { name: "French ab initio", ia: [], ee: false, none: "French ab initio can't go in the honey pot: its internal assessment is a live oral with your teacher, and the IB doesn't allow an extended essay in an ab initio language." },
   es:   { name: "Spanish ab initio", ia: [], ee: false, none: "Spanish ab initio can't go in the honey pot: its internal assessment is a live oral with your teacher, and the IB doesn't allow an extended essay in an ab initio language." },
+  va:   { name: "Visual arts", ia: [], ee: true, none: "Visual arts coursework is made of artworks, screens and video, so the honey pot can't read it. You can still mark a Visual arts extended essay here." },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },
 };
 
