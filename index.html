@@ -374,6 +374,7 @@ function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 <script src="subjects/fr.js"></script>
 <script src="subjects/eng.js"></script>
 <script src="subjects/math.js"></script>
+<script src="subjects/econ.js"></script>
 <script src="subjects/gk.js"></script>
 <script src="specials.js"></script>
 <script src="explain.js"></script>
@@ -388,6 +389,7 @@ function registerSubject(s){ SUBJECTS[s.key] = s; SUBJECT_ORDER.push(s.key); }
 <script src="qbank/geo.js"></script>
 <script src="qbank/fr.js"></script>
 <script src="qbank/eng.js"></script>
+<script src="qbank/econ.js"></script>
 <script src="qbank/gk.js"></script>
 <script>
 /* ================= ranks ================= */
@@ -1028,7 +1030,7 @@ function spreadHTML(sp, still){
   // pages and symbols are drawn as HTML so the letters and paper keep their shape at any screen width
   if (kind === "pages" || kind === "symbols"){
     const pages = kind === "pages", N = pages ? 8 + sp.n * 3 : 20 + sp.n * 5, oy2 = isV() ? 380 : 299;
-    const SYM = ["π","∑","∫","∞","√","θ","∂","λ","φ","Δ","e","i","±","≠","∈","ℝ","ℂ","x²","dy/dx","10¹⁰⁰"];
+    const SYM = cfg.chars || ["π","∑","∫","∞","√","θ","∂","λ","φ","Δ","e","i","±","≠","∈","ℝ","ℂ","x²","dy/dx","10¹⁰⁰"];
     let h = "";
     for (let i=0; i<N; i++){
       const a = r()*6.283, d = (pages ? 70 : 50) + r()*(pages ? 230 : 300), dx = Math.cos(a)*d*(isV() ? 1.3 : 1), dy = Math.sin(a)*d*.8, rot = f1((r()-.5)*(pages ? 70 : 40));

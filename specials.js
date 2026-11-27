@@ -99,6 +99,16 @@ const FORMS = {
       + `<path class="av-stache" d="M0 1 q-8 -4 -15 4 q-6 -3 -5 -8 q-3 9 6 11 q8 0 14 -4 q6 4 14 4 q9 -2 6 -11 q1 5 -5 8 q-7 -8 -15 -4z" fill="#3a2414"/><ellipse cx="0" cy="10" rx="4" ry="4.4" fill="#5a1a10"/>`
       + star(-28, -18, 4.4, "#fff6c8", .3) + star(28, -6, 3.6, "#fff6c8", .9) + star(-26, 20, 3.2, "#fff6c8", 1.4));
   },
+  /* Economics: the golden bull. Gold all over, the invisible hand rising behind it, coins orbiting and a chart rocketing up */
+  econ(level, hue, power){
+    const coin = `<g><circle r="5.5" fill="#e0ad2a" stroke="#fff2a8" stroke-width="1.2"/><text y="3" text-anchor="middle" font-size="7" font-weight="700" fill="#7a4f08" font-family="Chakra Petch,sans-serif">$</text></g>`;
+    const hand = `<g class="av-hover" opacity=".7"><path d="M-14 46 v-38 q0 -6 5 -6 q5 0 5 6 v-18 q0 -6 5 -6 q5 0 5 6 v14 q0 -6 5 -6 q5 0 5 6 v8 q0 -6 5 -6 q5 0 5 6 v28 q0 24 -22 24 q-20 0 -24 -14 l-11 -22 q-3 -6 3 -8 q4 -1 7 4z" fill="#ffe58a" fill-opacity=".25" stroke="#ffd25a" stroke-width="1.6" transform="translate(0 -6) scale(${f1(1 + power * .08)})"/></g>`;
+    const base = SUBJECTS.econ._base(10, hue);
+    return avatarSVG(glow(uid(), "#ffd25a", 52, .5) + hand
+      + `<g transform="scale(${f1(1.08 + power * .05)})">${base.replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "")}</g>`
+      + `<path class="blink" d="M-40 30 l14 -12 l10 6 l18 -26" stroke="#3ee089" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(46, 16, (2.4 + k * .5).toFixed(1), (k * .9).toFixed(1), coin)).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -151,12 +161,13 @@ const SPECIAL = {
   fr:  {name:"BAGUETTE ROYALE", line:"Vive la baguette ! The crown is yours.", glow:"#ffd25a", trail:"#ffe58a", sky:{kind:"petal", c:["0 85 164", "255 255 255", "239 65 53"], n:46}, spread:{kind:"ribbons", c:["#0055a4", "#ffffff", "#ef4135"]}},
   math:{name:"SCIPA PRIME", line:"Infinite precision. Every equation bends to you.", glow:"#ffd25a", trail:"#ffd25a", sky:{kind:"glyph", c:["255 210 90", "122 216 255", "255 255 255"], n:58, chars:["π","∑","∫","∞","√","θ","∂","λ","φ","e","i","10¹⁰⁰"], alpha:.75}, spread:{kind:"symbols", c:["#ffd25a", "#7ad8ff", "#ffffff"]}},
   eng: {name:"THE QUILL", line:"The pencil is gone. The quill writes whole pages now.", glow:"#9a5aff", trail:"#9a5aff", sky:{kind:"glyph", c:["90 50 170", "40 26 80", "190 140 30"], n:46, chars:["A","a","é","&","¶","§","?","!","“","”","Q","æ","—"], alpha:.55, blend:"source-over", font:"Georgia, serif"}, spread:{kind:"pages", c:["#5a2aa8", "#2a1a50"]}},
+  econ:{name:"GOLDEN BULL", line:"The invisible hand is on your side now.", glow:"#ffd25a", trail:"#3ee089", sky:{kind:"glyph", c:["255 210 90", "62 224 137", "255 246 200"], n:56, chars:["$","€","¥","£","₹","%","↑","₿"], alpha:.7}, spread:{kind:"symbols", c:["#ffd25a", "#3ee089", "#fff2a8"], chars:["$","€","¥","£","₹","%","↑","₿","▲"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 
 for (const k of Object.keys(FORMS)){
   const S = SUBJECTS[k]; if (!S) continue;
-  const base = S.avatar;
+  const base = S.avatar; S._base = base;
   S.avatar = (level, hue, power) => power > 0 ? FORMS[k](level, hue, Math.min(power, 4)) : base(level, hue);
   S.special = SPECIAL[k];
 }

@@ -121,6 +121,30 @@ const BIZ = {
   ],
 };
 
+const ECON = {
+  id: "econ", kind: "ia", title: "Portfolio commentary", short: "IA",
+  guide: "IB Economics guide, first assessment 2022",
+  limit: "800 words per commentary", words: 800,
+  note: "Each of your three commentaries is marked out of 14 (criteria A–E). The portfolio adds up to 3 marks for meeting the rubric requirements (criterion F), for 45 in all. Drop in one commentary at a time.",
+  criteria: [
+    { id: "A", name: "Diagrams", max: 3, focus: "Relevant, accurate and correctly labelled diagrams, each fully explained and linked to the article.",
+      look: ["The diagrams are relevant to the article and accurate.",
+             "They are fully and correctly labelled.",
+             "Each diagram is fully explained and applied to the situation in the article."] },
+    { id: "B", name: "Terminology", max: 2, focus: "Economic terminology relevant to the article, used appropriately throughout.",
+      look: ["Economic terms relevant to the article are used accurately throughout the commentary."] },
+    { id: "C", name: "Application and analysis", max: 3, focus: "Relevant economic theory applied to the article, with effective analysis.",
+      look: ["Relevant economic theory is applied to the article.",
+             "The analysis is effective and stays linked to the article throughout."] },
+    { id: "D", name: "Key concept", max: 3, focus: "One key concept identified and explained, with its link to the article developed.",
+      look: ["One key concept is identified and clearly linked to the article.",
+             "The link is developed through the commentary, not just mentioned at the start."] },
+    { id: "E", name: "Evaluation", max: 3, focus: "Judgements supported by effective and balanced reasoning.",
+      look: ["The commentary makes judgements supported by effective reasoning.",
+             "It weighs different perspectives, such as stakeholders, the short and long run, or the limits of a policy."] },
+  ],
+};
+
 const HIST27 = {
   id: "hist27", kind: "ia", title: "Historical investigation (exams in 2027)", short: "IA",
   guide: "IB History guide, first assessment 2017 (final exams 2027)",
@@ -243,7 +267,7 @@ const ENG_ESSAY = {
   ],
 };
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, engessay: ENG_ESSAY };
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, engessay: ENG_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -252,6 +276,7 @@ const SUBJECTS = {
   phys: { name: "Physics", ia: ["sci"], ee: true },
   cs:   { name: "Computer Science", ia: ["cs"], ee: true },
   biz:  { name: "Business Management", ia: ["biz"], ee: true },
+  econ: { name: "Economics", ia: ["econ"], ee: true },
   hist: { name: "History", ia: ["hist27", "hist28"], ee: true },
   geo:  { name: "Geography", ia: ["geo"], ee: true },
   math: { name: "Mathematics: analysis and approaches", ia: ["math"], ee: true },

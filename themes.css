@@ -66,3 +66,6 @@ body.in-class .fr-gauge{display:none}
 [data-world="eng"] #virus{filter:drop-shadow(0 6px 5px rgb(40 30 80 / .3))}
 [data-world="eng"] #virus.special{filter:drop-shadow(0 0 16px rgb(154 90 255 / .85))}
 [data-world="eng"] .tline span{text-shadow:0 0 5px #fbf8ef,0 0 2px #fbf8ef;filter:brightness(.6) saturate(1.5)}
+
+/* ---------- Economics: the bull's price chart climbing up the middle of the market ---------- */
+.ec-chart{position:absolute;left:50%;transform:translateX(-50%);width:min(56vw,340px);opacity:.28;pointer-events:none;filter:drop-shadow(0 0 6px #3ee089)}
