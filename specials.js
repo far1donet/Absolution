@@ -158,6 +158,16 @@ const FORMS = {
       + `<g class="drift" style="animation-duration:1.6s"><text x="-28" y="-2" font-family="Georgia,serif" font-size="11" font-style="italic" font-weight="700" fill="#ffb03a">a b c</text></g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(48, 18, (3 + k * .5).toFixed(1), (k * 1.2).toFixed(1), book(k))).join(""));
   },
+  /* Spanish ab initio: the chile de fuego. The chilli turns gold inside a ring of flames, with mini piñatas in orbit */
+  es(level, hue, power){
+    const pin = k => `<g transform="scale(.5)">${[0,1,2,3,4].map(j => { const a = (-90 + j * 72) * Math.PI / 180; return `<path d="M${f1(Math.cos(a - .5) * 9)} ${f1(Math.sin(a - .5) * 9)} L${f1(Math.cos(a) * 22)} ${f1(Math.sin(a) * 22)} L${f1(Math.cos(a + .5) * 9)} ${f1(Math.sin(a + .5) * 9)}z" fill="${["#ff3a8a","#ffb02e","#3ac0ff","#8a3aff","#3ae08a"][(j + k) % 5]}"/>`; }).join("")}<circle r="10" fill="#ffd25a"/></g>`;
+    const base = SUBJECTS.es._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    const flames = Array.from({length: 10}, (_, k) => { const a = k / 10 * 6.283, x = Math.cos(a) * 34, y = Math.sin(a) * 30;
+      return `<path class="blink" style="animation-delay:-${(k * .12).toFixed(2)}s;animation-duration:.9s" d="M${f1(x - 6)} ${f1(y)} q6 -16 6 -22 q6 10 6 22 q-6 6 -12 0z" fill="${k % 2 ? "#ff6a1a" : "#ffd25a"}" opacity=".85" transform="rotate(${f1(a * 180 / Math.PI + 90)} ${f1(x)} ${f1(y)})"/>`; }).join("");
+    return avatarSVG(glow(uid(), "#ff6a1a", 56, .55) + `<g class="av-hover">${flames}</g>`
+      + `<g transform="scale(${f1(1.08 + power * .05)})">${base}</g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.8 + k * .5).toFixed(1), (k * 1.1).toFixed(1), pin(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -216,6 +226,7 @@ const SPECIAL = {
   ess: {name:"WORLD TREE", line:"Its roots now reach every ecosystem on Earth.", glow:"#8be08b", trail:"#ffd25a", sky:{kind:"firefly", c:["220 255 120", "139 224 139", "255 210 90"], n:60}, spread:{kind:"symbols", c:["#8be08b", "#ffd25a", "#9fd8ff"], chars:["✿","❀","❧","❦","✦","☘","•"]}},
   tok: {name:"OWL OF MINERVA", line:"Wisdom takes flight at dusk. You've seen the Sun.", glow:"#ffd25a", trail:"#fff2a8", sky:{kind:"glyph", c:["255 210 90", "255 246 200", "255 255 255"], n:56, chars:["?","!","∴","∵","≠","∀","∃","¬"], alpha:.6, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ffd25a", "#fff2a8", "#ffffff"], chars:["?","!","∴","∵","≠","∀","∃","☉"]}},
   lit: {name:"BOOKWYRM", line:"The worm became a wyrm. It devours whole libraries now.", glow:"#ffb03a", trail:"#ffd27a", sky:{kind:"glyph", c:["255 210 122", "244 234 208", "255 176 58"], n:56, chars:["❦","❧","☙","✦","❝","❞","§"], alpha:.6, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ffd27a", "#f4ead0", "#ffb03a"], chars:["❦","❧","☙","❝","❞","✒","✦"]}},
+  es:  {name:"CHILE DE FUEGO", line:"¡Qué picante! The whole Spanish-speaking world can feel the heat.", glow:"#ff6a1a", trail:"#ffb03a", sky:{kind:"glyph", c:["255 106 26", "255 210 90", "255 58 138"], n:56, chars:["¡","¿","ñ","á","é","í","ó","ú","!","?"], alpha:.65, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ff6a1a", "#ffd25a", "#ff3a8a", "#3ac0ff"], chars:["¡","¿","ñ","✦","❀","★"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

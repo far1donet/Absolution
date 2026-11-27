@@ -378,6 +378,7 @@ const SUBJECTS = {
   lit:  { name: "English A: literature", btn: "English Literature", ia: ["litessay"], ee: true, iaNote: "The individual oral is spoken, so the honey pot marks your HL essay instead." },
   tok:  { name: "Theory of Knowledge", ia: ["tokx", "toke"], ee: false, varLabel: "TOK task", iaNote: "TOK has two tasks: the exhibition, marked by your teacher, and the essay, marked by the IB. Pick one above. There's no extended essay in TOK." },
   fr:   { name: "French ab initio", ia: [], ee: false, none: "French ab initio can't go in the honey pot: its internal assessment is a live oral with your teacher, and the IB doesn't allow an extended essay in an ab initio language." },
+  es:   { name: "Spanish ab initio", ia: [], ee: false, none: "Spanish ab initio can't go in the honey pot: its internal assessment is a live oral with your teacher, and the IB doesn't allow an extended essay in an ab initio language." },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },
 };
 
