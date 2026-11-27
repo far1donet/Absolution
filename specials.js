@@ -202,6 +202,16 @@ const FORMS = {
       + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
       + Array.from({length: 3 + power}, (_, k) => orbit(50, 20, (2.6 + k * .4).toFixed(1), (k * .9).toFixed(1), drop(k))).join(""));
   },
+  /* Design Technology: bright spark. The idea blazes gold inside turning gears, with blueprints and tools in orbit */
+  dt(level, hue, power){
+    const gear = (r, n, c) => { let d = ""; for (let k = 0; k < n * 2; k++){ const a = k / (n * 2) * 6.283, rr = k % 2 ? r : r + 5; d += (k ? "L" : "M") + f1(Math.cos(a) * rr) + " " + f1(Math.sin(a) * rr); } return `<path d="${d}z" fill="none" stroke="${c}" stroke-width="3"/>`; };
+    const tool = k => k % 2 ? `<g transform="scale(.6) rotate(30)"><rect x="-2" y="-2" width="4" height="16" fill="#c9c9c9"/><path d="M-6 -2 a6 6 0 1 1 12 0 l-3 -1 v-3 h-6 v3z" fill="#c9c9c9"/></g>` : `<g transform="scale(.6)"><rect x="-9" y="-7" width="18" height="14" fill="#1a3a7a" stroke="#9fd8ff"/><path d="M-6 3 l4 -6 l4 4 l4 -5" stroke="#fff" stroke-width="1.4" fill="none"/></g>`;
+    const base = SUBJECTS.dt._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    return avatarSVG(glow(uid(), "#ffd25a", 58, .55)
+      + `<g class="vspin" style="animation-duration:9s">${gear(36, 12, "#ffd25a")}</g><g class="vspin" style="animation-duration:6s;animation-direction:reverse">${gear(24, 8, "#9fd8ff")}</g>`
+      + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.8 + k * .5).toFixed(1), (k * 1.1).toFixed(1), tool(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -264,6 +274,7 @@ const SPECIAL = {
   glopo:{name:"PAX MUNDI", line:"Every nation is at the table now.", glow:"#9fd8ff", trail:"#ffd25a", sky:{kind:"glyph", c:["159 216 255", "255 210 90", "255 255 255"], n:56, chars:["☮","★","⚖","✦","✌"], alpha:.6}, spread:{kind:"symbols", c:["#9fd8ff", "#ffd25a", "#ffffff", "#8be08b"], chars:["☮","★","⚖","✦","✌","❦"]}},
   sehs:{name:"SECOND WIND", line:"Your second wind kicks in. Nothing can catch you now.", glow:"#ff6a7a", trail:"#ffd25a", sky:{kind:"glyph", c:["255 106 122", "255 210 90", "255 255 255"], n:56, chars:["♥","⚡","✦","➚","★"], alpha:.6}, spread:{kind:"symbols", c:["#ff6a7a", "#ffd25a", "#ffffff", "#3a8ae8"], chars:["♥","⚡","✦","★","❤"]}},
   va:  {name:"CHROMA", line:"Every colour there is, at the tip of your brush.", glow:"#ff7ad9", trail:"#9ff5e8", sky:{kind:"glyph", c:["255 58 138", "58 192 255", "244 208 58", "58 224 138"], n:60, chars:["●","◆","✦","✿","▲"], alpha:.6}, spread:{kind:"symbols", c:["#e8443a", "#ff9a1a", "#f4d03a", "#3ac08a", "#3a8ae8", "#8a3ae8"], chars:["●","◆","✦","✿","▲","■"]}},
+  dt:  {name:"BRIGHT SPARK", line:"Your idea is in every home on Earth now.", glow:"#ffd25a", trail:"#9fd8ff", sky:{kind:"glyph", c:["255 210 90", "159 216 255", "255 255 255"], n:56, chars:["⚙","✦","▲","●","◆"], alpha:.6}, spread:{kind:"symbols", c:["#ffd25a", "#9fd8ff", "#ffffff", "#ff8a1a"], chars:["⚙","✦","▲","●","◆","♻"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

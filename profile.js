@@ -8,7 +8,7 @@ const q$ = s => document.querySelector(s);
 const TIERS = ["gem","rootkit","trojan","adware","spam","blocked"];
 const TCOL = {gem:"#c98bff", rootkit:"#ff5470", trojan:"#ff9d2e", adware:"#f5d042", spam:"#a9bac4", blocked:"#5b6b75"};
 const SIGN = {cs:"The Virus", bio:"The Microbe", chem:"The Atom", phys:"The Cannon", biz:"The Money Bottle", hist:"The Time Traveller", geo:"The Pirate Captain",
-  fr:"La Baguette", eng:"The Pencil", math:"Scipa", econ:"The Bull", psych:"The Dreamer", mathai:"The Drone", ess:"The Seed", tok:"The Owl", lit:"The Bookworm", es:"El Chile", glopo:"The Dove", sehs:"The Heart", va:"The Brush", gk:"The Alien"};
+  fr:"La Baguette", eng:"The Pencil", math:"Scipa", econ:"The Bull", psych:"The Dreamer", mathai:"The Drone", ess:"The Seed", tok:"The Owl", lit:"The Bookworm", es:"El Chile", glopo:"The Dove", sehs:"The Heart", va:"The Brush", dt:"The Bright Idea", gk:"The Alien"};
 const BANNERS = {night:["#0b1424","#1d3560","Night"], sunset:["#3a1240","#ff7a4a","Sunset"], ocean:["#06283a","#1a8aa8","Ocean"], forest:["#0e2416","#3a8a4a","Forest"],
   ember:["#2a0a06","#d8401a","Ember"], aurora:["#0a1a2a","#5dffb0","Aurora"], galaxy:["#10062a","#b07aff","Galaxy"], paper:["#efe6d2","#d8c49a","Paper"]};
 const NOT_IB = new Set(["gk"]);
