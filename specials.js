@@ -262,6 +262,16 @@ const FORMS = {
       + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.6 + k * .5).toFixed(1), (k * 1.1).toFixed(1), sym(k))).join(""));
   },
+  /* Dance: étoile. The pointe shoe glows inside a whirl of turning ribbons, with petals and sparkles in orbit */
+  dance(level, hue, power){
+    const ring = Array.from({length: 8}, (_, k) => { const a = k / 8 * 6.283, x = f1(Math.cos(a) * 40), y = f1(Math.sin(a) * 40); return `<path d="M${x} ${y} q${f1(-Math.sin(a) * 14)} ${f1(Math.cos(a) * 14)} ${f1(Math.cos(a + .6) * 40 - x)} ${f1(Math.sin(a + .6) * 40 - y)}" stroke="${k % 2 ? "#ff9ad5" : "#ffd25a"}" stroke-width="3" fill="none" stroke-linecap="round"/>`; }).join("");
+    const sym = k => `<text text-anchor="middle" y="5" font-size="14" fill="${["#ff9ad5", "#ffd25a", "#ffffff"][k % 3]}">${["✦", "❀", "✦", "◆"][k % 4]}</text>`;
+    const base = SUBJECTS.dance._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    return avatarSVG(glow(uid(), "#ff9ad5", 58, .55)
+      + `<g class="vspin" style="animation-duration:6s">${ring}</g>`
+      + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.4 + k * .5).toFixed(1), (k * 1.1).toFixed(1), sym(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -330,6 +340,7 @@ const SPECIAL = {
   film:{name:"AUTEUR", line:"Your name goes above the title now.", glow:"#ffd25a", trail:"#ffffff", sky:{kind:"glyph", c:["255 210 90", "255 255 255", "255 58 90"], n:56, chars:["★","▶","●","◆"], alpha:.6}, spread:{kind:"symbols", c:["#ffd25a", "#ffffff", "#ff3a5a", "#9fd8ff"], chars:["★","▶","●","◆","✦"]}},
   music:{name:"MAESTRO", line:"The whole orchestra follows your baton now.", glow:"#9ff5e8", trail:"#ffd25a", sky:{kind:"glyph", c:["159 245 232", "255 210 90", "255 255 255"], n:56, chars:["♪","♫","♩","♬"], alpha:.6}, spread:{kind:"symbols", c:["#9ff5e8", "#ffd25a", "#ffffff", "#ff7ad9"], chars:["♪","♫","♩","♬","♯"]}},
   thtr:{name:"LEADING LIGHT", line:"Your name is up in lights now.", glow:"#ffcf6a", trail:"#ff5a6e", sky:{kind:"glyph", c:["255 207 106", "255 255 255", "255 90 110"], n:56, chars:["★","✦","♦","☾"], alpha:.6}, spread:{kind:"symbols", c:["#ffcf6a", "#ffffff", "#ff5a6e", "#c8102e"], chars:["★","✦","♦","☾","●"]}},
+  dance:{name:"ÉTOILE", line:"The whole world is your stage now.", glow:"#ff9ad5", trail:"#ffd25a", sky:{kind:"glyph", c:["255 154 213", "255 210 90", "255 255 255"], n:56, chars:["✦","❀","♪","◆"], alpha:.6}, spread:{kind:"symbols", c:["#ff9ad5", "#ffd25a", "#ffffff", "#c86aff"], chars:["✦","❀","♪","◆","●"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

@@ -11,7 +11,7 @@ const h = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;"
 const st = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }, del(k){ try { localStorage.removeItem(k); } catch(e){} } };
 const PREF = "oiac-honey-pick", DRAFT = "oiac-honey-draft", PAST = "oiac-honey-history";
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-const ORDER = ["bio","chem","phys","cs","biz","econ","psych","sehs","ess","hist","glopo","phil","geo","math","mathai","eng","lit","fr","es","va","music","thtr","film","dt","ds","tok","gk"];
+const ORDER = ["bio","chem","phys","cs","biz","econ","psych","sehs","ess","hist","glopo","phil","geo","math","mathai","eng","lit","fr","es","va","music","thtr","dance","film","dt","ds","tok","gk"];
 const VERDICT = { smash: ["Smashing it", "🔥"], track: ["On track", "✓"], work: ["Still to work on", "⚒"] };
 const n0 = n => Number(n).toLocaleString();
 const size = b => b < 1048576 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1048576).toFixed(1)} MB`;
