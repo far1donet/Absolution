@@ -415,6 +415,37 @@ const PHIL = {
   ],
 };
 
+// World religions: the investigative study (SL)
+const REL = {
+  id: "rel", kind: "ia", title: "Investigative study", short: "IA",
+  guide: "IB World religions guide (SL)",
+  limit: "1,500 to 1,800 words", words: 1800,
+  note: "Marked out of 30 (25% of the final grade), written under five compulsory headings. World religions is an SL course.",
+  criteria: [
+    { id: "A", name: "Rationale and preliminary research", max: 8, focus: "A clear, focused research question about a religious practice, community or belief, justified by wide, relevant preliminary research.",
+      look: ["The research question is clear and focused on a specific religious practice, community or belief.",
+             "The choice of topic is justified with a clear rationale.",
+             "Wide, relevant preliminary research is shown and referenced.",
+             "The preliminary research is summarized and linked to the question."] },
+    { id: "B", name: "Plan for study", max: 3, focus: "A plan whose scope and methods fit the research question.",
+      look: ["The plan sets out the scope of the investigation.",
+             "The methods (e.g. interviews, observation, visits) are appropriate to the question."] },
+    { id: "C", name: "Summary of significant findings", max: 6, focus: "The most significant findings, presented clearly and linked to the question and plan.",
+      look: ["The most significant findings are presented clearly.",
+             "The findings are linked back to the research question and the plan.",
+             "The findings are supported with evidence from the investigation."] },
+    { id: "D", name: "Critical reflection and evaluation", max: 10, focus: "Critical evaluation of the methods, sources and findings, leading to a reasoned conclusion.",
+      look: ["The methods and sources are evaluated critically.",
+             "Strengths and limitations of the investigation are discussed.",
+             "Possible bias, in the sources and in your own perspective, is reflected on.",
+             "It reaches a reasoned conclusion that answers the research question.",
+             "It reflects on what was learned about the religion and about studying religion."] },
+    { id: "E", name: "References and format", max: 3, focus: "Within the word limit, under the five required headings, with consistent referencing.",
+      look: ["It stays within 1,500–1,800 words and uses the five required headings.",
+             "One referencing system is used consistently for every source."] },
+  ],
+};
+
 // Sports, exercise and health science uses the same four criteria as the sciences' scientific investigation
 const SEHS = Object.assign({}, SCI, { id: "sehs", guide: "IB Sports, exercise and health science guide, first assessment 2026",
   note: "Marked out of 24 (24% of the final grade), on the same four criteria as the sciences. Moderators stop reading at 3,000 words." });
@@ -422,7 +453,7 @@ const SEHS = Object.assign({}, SCI, { id: "sehs", guide: "IB Sports, exercise an
 // English A: Literature's HL essay uses the same four criteria as Language and Literature's
 const LIT_ESSAY = Object.assign({}, ENG_ESSAY, { id: "litessay", guide: "IB Language A: literature guide, first assessment 2021" });
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, litessay: LIT_ESSAY, sehs: SEHS, glopo: GLOPO, phil: PHIL, tokx: TOK_EXHIB, toke: TOK_ESSAY };
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, litessay: LIT_ESSAY, sehs: SEHS, glopo: GLOPO, phil: PHIL, rel: REL, tokx: TOK_EXHIB, toke: TOK_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -453,6 +484,7 @@ const SUBJECTS = {
   music: { name: "Music", ia: [], ee: true, none: "Music coursework mixes writing with recordings, scores and performances, and its criteria aren't published openly, so check them with your teacher. You can still mark a Music extended essay here." },
   thtr: { name: "Theatre", ia: [], ee: true, none: "Theatre's tasks are presentations, performances and a production proposal whose criteria aren't published openly, so check them with your teacher. You can still mark a Theatre extended essay here." },
   dance: { name: "Dance", ia: [], ee: true, none: "Dance coursework is mostly filmed choreography and performance, and the criteria for its written dance investigation aren't published openly, so check them with your teacher. You can still mark a Dance extended essay here." },
+  rel:  { name: "World religions", ia: ["rel"], ee: true },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },
 };
 
