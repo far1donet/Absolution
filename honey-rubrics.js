@@ -448,6 +448,7 @@ const SUBJECTS = {
   va:   { name: "Visual arts", ia: [], ee: true, none: "Visual arts coursework is made of artworks, screens and video, so the honey pot can't read it. You can still mark a Visual arts extended essay here." },
   dt:   { name: "Design technology", ia: [], ee: true, none: "The new design project (first assessed in 2027) isn't in the honey pot yet, because its full criteria aren't published openly, so check them with your teacher. You can still mark a Design technology extended essay here." },
   phil: { name: "Philosophy", ia: ["phil"], ee: true },
+  ds:   { name: "Digital society", ia: [], ee: true, none: "The Digital society inquiry project is marked mainly on a recorded multimedia presentation, so the honey pot can't read it. You can still mark a Digital society extended essay here." },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },
 };
 
