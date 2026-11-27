@@ -109,6 +109,16 @@ const FORMS = {
       + `<path class="blink" d="M-40 30 l14 -12 l10 6 l18 -26" stroke="#3ee089" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
       + Array.from({length: 2 + power}, (_, k) => orbit(46, 16, (2.4 + k * .5).toFixed(1), (k * .9).toFixed(1), coin)).join(""));
   },
+  /* Psychology: the lucid dreamer. The brain wakes inside the dream: a glowing third eye, a halo of moons and stars */
+  psych(level, hue, power){
+    const star = `<path d="M0 -5 L1.4 -1.4 5 0 1.4 1.4 0 5 -1.4 1.4 -5 0 -1.4 -1.4z" fill="#fff2a8"/>`, moon = `<path d="M3 -6 a6 6 0 1 0 0 12 a7.5 7.5 0 0 1 0 -12z" fill="#c9a3ff"/>`;
+    const base = SUBJECTS.psych._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    return avatarSVG(glow(uid(), "#b07aff", 54, .55)
+      + `<circle r="${f1(40 + power * 3)}" fill="none" stroke="#c9a3ff" stroke-width="1.4" stroke-dasharray="2 6" class="vspin" style="animation-duration:9s"/>`
+      + `<g transform="scale(${f1(1.06 + power * .05)})">${base}</g>`
+      + `<g class="blink" style="animation-duration:2.2s"><path d="M-9 -16 q9 -9 18 0 q-9 9 -18 0z" fill="#fff6c8" stroke="#ffd25a" stroke-width="1.4"/><circle cy="-16" r="3.2" fill="#7a3ab0"/></g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(50, 22, (3 + k * .6).toFixed(1), (k * 1.2).toFixed(1), k % 2 ? moon : star)).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -162,6 +172,7 @@ const SPECIAL = {
   math:{name:"SCIPA PRIME", line:"Infinite precision. Every equation bends to you.", glow:"#ffd25a", trail:"#ffd25a", sky:{kind:"glyph", c:["255 210 90", "122 216 255", "255 255 255"], n:58, chars:["π","∑","∫","∞","√","θ","∂","λ","φ","e","i","10¹⁰⁰"], alpha:.75}, spread:{kind:"symbols", c:["#ffd25a", "#7ad8ff", "#ffffff"]}},
   eng: {name:"THE QUILL", line:"The pencil is gone. The quill writes whole pages now.", glow:"#9a5aff", trail:"#9a5aff", sky:{kind:"glyph", c:["90 50 170", "40 26 80", "190 140 30"], n:46, chars:["A","a","é","&","¶","§","?","!","“","”","Q","æ","—"], alpha:.55, blend:"source-over", font:"Georgia, serif"}, spread:{kind:"pages", c:["#5a2aa8", "#2a1a50"]}},
   econ:{name:"GOLDEN BULL", line:"The invisible hand is on your side now.", glow:"#ffd25a", trail:"#3ee089", sky:{kind:"glyph", c:["255 210 90", "62 224 137", "255 246 200"], n:56, chars:["$","€","¥","£","₹","%","↑","₿"], alpha:.7}, spread:{kind:"symbols", c:["#ffd25a", "#3ee089", "#fff2a8"], chars:["$","€","¥","£","₹","%","↑","₿","▲"]}},
+  psych:{name:"LUCID DREAMER", line:"You're awake inside the dream. You control it now.", glow:"#b07aff", trail:"#c9a3ff", sky:{kind:"glyph", c:["201 163 255", "255 242 168", "159 216 255"], n:56, chars:["z","☾","✦","?","!","∞","∿"], alpha:.65}, spread:{kind:"symbols", c:["#c9a3ff", "#fff2a8", "#9fd8ff"], chars:["z","Z","☾","✦","?","!","∞","∿","☯"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

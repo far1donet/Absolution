@@ -145,6 +145,31 @@ const ECON = {
   ],
 };
 
+const PSY = {
+  id: "psych", kind: "ia", title: "Research proposal", short: "IA",
+  guide: "IB Psychology guide, first assessment 2027",
+  limit: "2,200 words", words: 2200,
+  note: "Marked out of 24 at SL and HL. You design a study using one of the methods from your class practicals, but you don't carry it out. The criterion names come from teachers' guides to the new course, so check the full descriptors with your teacher.",
+  criteria: [
+    { id: "A", name: "Introduction", max: 6, focus: "A focused research question, grounded in relevant psychological theory and research, with a clear aim.",
+      look: ["The research question is focused and clearly stated.",
+             "It is grounded in relevant psychological theory, studies and concepts.",
+             "The aim, and the hypothesis or expected findings, are clear."] },
+    { id: "B", name: "Research methodology", max: 6, focus: "A suitable research method and design, with clearly defined variables or focus, justified for the question.",
+      look: ["The chosen method (experiment, interview, observation or survey) suits the research question.",
+             "The variables or the focus of the study are clearly defined and operationalized.",
+             "The choice of method, design and sample is justified."] },
+    { id: "C", name: "Data collection", max: 6, focus: "A clear, workable plan for collecting data, including sampling, materials and ethics.",
+      look: ["The procedure is described in enough detail for someone to carry it out.",
+             "The sample, materials and how data will be recorded are explained.",
+             "Ethical considerations are addressed and built into the procedure."] },
+    { id: "D", name: "Discussion", max: 6, focus: "A forward-looking discussion of what the study could show, its strengths and limitations, and how it could be improved.",
+      look: ["Strengths and limitations of the proposed study are discussed.",
+             "It considers how the data would be analysed and what the possible findings would mean.",
+             "It links back to theory and suggests improvements or further research."] },
+  ],
+};
+
 const HIST27 = {
   id: "hist27", kind: "ia", title: "Historical investigation (exams in 2027)", short: "IA",
   guide: "IB History guide, first assessment 2017 (final exams 2027)",
@@ -267,7 +292,7 @@ const ENG_ESSAY = {
   ],
 };
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, engessay: ENG_ESSAY };
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, engessay: ENG_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -277,6 +302,7 @@ const SUBJECTS = {
   cs:   { name: "Computer Science", ia: ["cs"], ee: true },
   biz:  { name: "Business Management", ia: ["biz"], ee: true },
   econ: { name: "Economics", ia: ["econ"], ee: true },
+  psych: { name: "Psychology", ia: ["psych"], ee: true },
   hist: { name: "History", ia: ["hist27", "hist28"], ee: true },
   geo:  { name: "Geography", ia: ["geo"], ee: true },
   math: { name: "Mathematics: analysis and approaches", ia: ["math"], ee: true },

@@ -35,7 +35,7 @@ function Jelly(){
 const STYLE = {
   cs:{kind:"bit", c:"93 255 176", n:46}, bio:{kind:"cell", c:"255 120 140", n:22}, chem:{kind:"jitter", c:"160 232 255", n:54},
   phys:{kind:"wind", c:"235 242 255", n:30}, biz:{kind:"glint", c:"255 216 90", n:32}, hist:{kind:"dust", c:"255 214 160", n:42},
-  geo:{kind:"spray", c:"200 242 255", n:36}, econ:{kind:"glyph", c:"62 224 137", n:26, chars:["$","€","¥","£","%","↑"], alpha:.32}, fr:{kind:"petal", c:"255 214 150", n:28}, gk:{kind:"star", c:"255 255 255", n:90},
+  geo:{kind:"spray", c:"200 242 255", n:36}, econ:{kind:"glyph", c:"62 224 137", n:26, chars:["$","€","¥","£","%","↑"], alpha:.32}, psych:{kind:"glyph", c:"201 163 255", n:24, chars:["z","?","!","∿","☾"], alpha:.3}, fr:{kind:"petal", c:"255 214 150", n:28}, gk:{kind:"star", c:"255 255 255", n:90},
   ember:{kind:"ember", c:"255 140 60", n:44}, dirt:{kind:"dust", c:"210 170 120", n:34}, firefly:{kind:"firefly", c:"220 255 120", n:24},
   air:{kind:"dust", c:"255 255 255", n:30}, gold:{kind:"glint", c:"255 220 120", n:40},
 };
