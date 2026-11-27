@@ -451,6 +451,7 @@ const SUBJECTS = {
   ds:   { name: "Digital society", ia: [], ee: true, none: "The Digital society inquiry project is marked mainly on a recorded multimedia presentation, so the honey pot can't read it. You can still mark a Digital society extended essay here." },
   film: { name: "Film", ia: [], ee: true, none: "Film's coursework is made of films, a reel and recorded presentations, and the textual analysis criteria aren't published openly, so check them with your teacher. You can still mark a Film extended essay here." },
   music: { name: "Music", ia: [], ee: true, none: "Music coursework mixes writing with recordings, scores and performances, and its criteria aren't published openly, so check them with your teacher. You can still mark a Music extended essay here." },
+  thtr: { name: "Theatre", ia: [], ee: true, none: "Theatre's tasks are presentations, performances and a production proposal whose criteria aren't published openly, so check them with your teacher. You can still mark a Theatre extended essay here." },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },
 };
 
