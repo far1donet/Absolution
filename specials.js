@@ -242,6 +242,16 @@ const FORMS = {
       + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.6 + k * .5).toFixed(1), (k * 1.1).toFixed(1), sym(k))).join(""));
   },
+  /* Music: maestro. The quaver glows inside a turning ring of notes, with more notes in orbit */
+  music(level, hue, power){
+    const ring = Array.from({length: 12}, (_, k) => { const a = k / 12 * 6.283; return `<text x="${f1(Math.cos(a) * 40)}" y="${f1(Math.sin(a) * 40 + 5)}" text-anchor="middle" font-size="13" fill="${k % 2 ? "#ffd25a" : "#9ff5e8"}">${"♪♫♩♬"[k % 4]}</text>`; }).join("");
+    const sym = k => `<text text-anchor="middle" y="5" font-size="15" fill="${["#ffd25a", "#9ff5e8", "#ffffff"][k % 3]}">${"♪♫♩♬"[k % 4]}</text>`;
+    const base = SUBJECTS.music._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    return avatarSVG(glow(uid(), "#9ff5e8", 58, .55)
+      + `<g class="vspin" style="animation-duration:12s">${ring}</g>`
+      + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.6 + k * .5).toFixed(1), (k * 1.1).toFixed(1), sym(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -308,6 +318,7 @@ const SPECIAL = {
   phil:{name:"SOPHIA", line:"Wisdom itself. Socrates would still have questions.", glow:"#c8b8ff", trail:"#ffe58a", sky:{kind:"glyph", c:["200 184 255", "255 229 138", "255 255 255"], n:56, chars:["?","∴","∞","Φ","Σ"], alpha:.6}, spread:{kind:"symbols", c:["#c8b8ff", "#ffe58a", "#ffffff", "#9fd8ff"], chars:["?","∴","∞","Φ","Σ","Ω"]}},
   ds:  {name:"VIRAL", line:"Everyone on Earth has seen you now.", glow:"#ff4fd8", trail:"#3ac0ff", sky:{kind:"glyph", c:["255 79 216", "58 192 255", "255 255 255"], n:56, chars:["♥","#","@","★","▲"], alpha:.6}, spread:{kind:"symbols", c:["#ff4fd8", "#3ac0ff", "#ffffff", "#ff3a5a"], chars:["♥","#","@","★","▲","✓"]}},
   film:{name:"AUTEUR", line:"Your name goes above the title now.", glow:"#ffd25a", trail:"#ffffff", sky:{kind:"glyph", c:["255 210 90", "255 255 255", "255 58 90"], n:56, chars:["★","▶","●","◆"], alpha:.6}, spread:{kind:"symbols", c:["#ffd25a", "#ffffff", "#ff3a5a", "#9fd8ff"], chars:["★","▶","●","◆","✦"]}},
+  music:{name:"MAESTRO", line:"The whole orchestra follows your baton now.", glow:"#9ff5e8", trail:"#ffd25a", sky:{kind:"glyph", c:["159 245 232", "255 210 90", "255 255 255"], n:56, chars:["♪","♫","♩","♬"], alpha:.6}, spread:{kind:"symbols", c:["#9ff5e8", "#ffd25a", "#ffffff", "#ff7ad9"], chars:["♪","♫","♩","♬","♯"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 
