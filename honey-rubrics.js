@@ -355,10 +355,42 @@ const TOK_ESSAY = {
   ],
 };
 
+// Global Politics: criterion names follow teachers' guides to the 2026 course; criterion F is HL only
+const GLOPO = {
+  id: "glopo", kind: "ia", title: "Engagement project", short: "IA", levels: true,
+  guide: "IB Global Politics guide, first assessment 2026",
+  limit: "2,000 words, plus a 400-word recommendation at HL", words: 2000,
+  note: "Marked out of 24 at SL and 30 at HL, where criterion F marks a recommendation of up to 400 words. Worth 30% of the SL grade and 20% at HL.",
+  criteria: [
+    { id: "A", name: "Explanation and justification", max: 4, focus: "A clearly explained political issue and inquiry question, with a justified choice of engagement linked to the course.",
+      look: ["The political issue and the inquiry question are clearly explained.",
+             "The choice of engagement is justified, and its link to the course is clear."] },
+    { id: "B", name: "Process", max: 3, focus: "A well-planned process of engagement and research, drawing on relevant, varied sources and stakeholders.",
+      look: ["The engagement and the research were well planned and carried out.",
+             "Sources are relevant and varied, including different stakeholders' perspectives."] },
+    { id: "C", name: "Analysis and synthesis", max: 8, focus: "Analysis that brings the engagement, research, key concepts and theories together into a coherent argument.",
+      look: ["The political issue is analysed in depth, not just described.",
+             "Your engagement and your research are brought together (synthesized).",
+             "Key concepts and relevant theories are used to explain the issue.",
+             "Different perspectives on the issue are analysed."] },
+    { id: "D", name: "Evaluation and reflection", max: 6, focus: "Evaluation of the evidence, perspectives and conclusions, with reflection on the engagement and the limits of the inquiry.",
+      look: ["Evidence and perspectives are evaluated, not just presented.",
+             "It reaches a reasoned conclusion that answers the inquiry question.",
+             "It reflects on the engagement and the limits of the inquiry."] },
+    { id: "E", name: "Communication", max: 3, focus: "A clear, well-structured report that uses political terminology accurately and references its sources.",
+      look: ["The report is clear and well structured.",
+             "Political terminology is used accurately and sources are referenced."] },
+    { id: "F", name: "Recommendation (HL)", max: 6, hl: true, focus: "HL only: a recommendation of up to 400 words that addresses the political issue and is justified by the inquiry.",
+      look: ["The recommendation is clear, specific and addresses the political issue.",
+             "It is justified by the findings of the inquiry.",
+             "It considers how feasible it is and its likely impact on stakeholders."] },
+  ],
+};
+
 // English A: Literature's HL essay uses the same four criteria as Language and Literature's
 const LIT_ESSAY = Object.assign({}, ENG_ESSAY, { id: "litessay", guide: "IB Language A: literature guide, first assessment 2021" });
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, litessay: LIT_ESSAY, tokx: TOK_EXHIB, toke: TOK_ESSAY };
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, litessay: LIT_ESSAY, glopo: GLOPO, tokx: TOK_EXHIB, toke: TOK_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -371,6 +403,7 @@ const SUBJECTS = {
   psych: { name: "Psychology", ia: ["psych"], ee: true },
   ess: { name: "Environmental systems and societies", ia: ["ess"], ee: true },
   hist: { name: "History", ia: ["hist27", "hist28"], ee: true, varLabel: "Exam session" },
+  glopo: { name: "Global Politics", ia: ["glopo"], ee: true },
   geo:  { name: "Geography", ia: ["geo"], ee: true },
   math: { name: "Mathematics: analysis and approaches", btn: "Maths AA", ia: ["math"], ee: true },
   mathai: { name: "Mathematics: applications and interpretation", btn: "Maths AI", ia: ["mathai"], ee: true },
@@ -385,6 +418,8 @@ const SUBJECTS = {
 // the rating scale for each statement
 const SCALE = ["Not yet", "Partly", "Mostly", "Fully"];
 // the statements that apply (Maths criterion E has one more at HL)
+// the criteria that apply (Global Politics adds an HL-only recommendation)
+const crits = (T, level) => T.criteria.filter(c => !c.hl || level === "HL");
 const looks = (c, level) => c.look.filter(l => typeof l === "string" || !l.hl || level === "HL").map(l => typeof l === "string" ? l : l.text);
 // a criterion's mark: the share of "Fully" across its statements, on the IB's scale for that criterion
 const mark = (max, ratings) => { const r = (ratings || []).filter(x => x >= 0 && x <= 3); return r.length ? Math.round(max * r.reduce((a, b) => a + b, 0) / (3 * r.length) + 1e-9) : 0; };
@@ -396,6 +431,6 @@ const grade = (kind, got, max) => { const f = max ? got / max : 0; return ((kind
 // each criterion: smashing it, on track, or still to work on
 const verdict = (m, max) => { const f = max ? m / max : 0; return f >= 0.8 ? "smash" : f >= 0.5 ? "track" : "work"; };
 
-const HONEY = { TASKS, SUBJECTS, SCALE, looks, mark, IA_BANDS, EE_BANDS, grade, verdict, MAX_MB: 40 };
+const HONEY = { TASKS, SUBJECTS, SCALE, crits, looks, mark, IA_BANDS, EE_BANDS, grade, verdict, MAX_MB: 40 };
 if (typeof module !== "undefined" && module.exports) module.exports = HONEY; else root.HONEY = HONEY;
 })(typeof window !== "undefined" ? window : this);

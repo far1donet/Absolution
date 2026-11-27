@@ -168,6 +168,18 @@ const FORMS = {
       + `<g transform="scale(${f1(1.08 + power * .05)})">${base}</g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(50, 18, (2.8 + k * .5).toFixed(1), (k * 1.1).toFixed(1), pin(k))).join(""));
   },
+  /* Global Politics: Pax Mundi. A golden dove in an olive wreath, the planet behind it and the world's flags in orbit */
+  glopo(level, hue, power){
+    const fl = k => { const c = [["#c8102e","#fff","#012169"],["#009b3a","#fedf00","#002776"],["#de2910","#ffde00","#de2910"],["#0055a4","#fff","#ef4135"],["#ff9933","#fff","#138808"],["#006847","#fff","#ce1126"]][k % 6];
+      return `<g><rect x="-8" y="-6" width="16" height="4" fill="${c[0]}"/><rect x="-8" y="-2" width="16" height="4" fill="${c[1]}"/><rect x="-8" y="2" width="16" height="4" fill="${c[2]}"/></g>`; };
+    const base = SUBJECTS.glopo._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    const wreath = Array.from({length: 16}, (_, k) => { const a = (110 + k * 20) * Math.PI / 180, x = Math.cos(a) * 38, y = Math.sin(a) * 38;
+      return `<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="3" ry="7" transform="rotate(${f1(a * 180 / Math.PI + 90)} ${f1(x)} ${f1(y)})" fill="${k % 2 ? "#ffd25a" : "#e0ad2a"}"/>`; }).join("");
+    return avatarSVG(`<circle r="${f1(30 + power * 2)}" fill="#1a5a9a" opacity=".55"/><path d="M-20 -12 q14 -12 28 -2 q8 14 -6 22 q-18 4 -22 -20z" fill="#3a9a4a" opacity=".55"/>` + glow(uid(), "#9fd8ff", 56, .45)
+      + `<g class="vspin" style="animation-duration:40s">${wreath}</g>`
+      + `<g transform="scale(${f1(1.04 + power * .05)})">${base}</g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(50, 20, (3 + k * .5).toFixed(1), (k * 1.1).toFixed(1), fl(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -227,6 +239,7 @@ const SPECIAL = {
   tok: {name:"OWL OF MINERVA", line:"Wisdom takes flight at dusk. You've seen the Sun.", glow:"#ffd25a", trail:"#fff2a8", sky:{kind:"glyph", c:["255 210 90", "255 246 200", "255 255 255"], n:56, chars:["?","!","∴","∵","≠","∀","∃","¬"], alpha:.6, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ffd25a", "#fff2a8", "#ffffff"], chars:["?","!","∴","∵","≠","∀","∃","☉"]}},
   lit: {name:"BOOKWYRM", line:"The worm became a wyrm. It devours whole libraries now.", glow:"#ffb03a", trail:"#ffd27a", sky:{kind:"glyph", c:["255 210 122", "244 234 208", "255 176 58"], n:56, chars:["❦","❧","☙","✦","❝","❞","§"], alpha:.6, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ffd27a", "#f4ead0", "#ffb03a"], chars:["❦","❧","☙","❝","❞","✒","✦"]}},
   es:  {name:"CHILE DE FUEGO", line:"¡Qué picante! The whole Spanish-speaking world can feel the heat.", glow:"#ff6a1a", trail:"#ffb03a", sky:{kind:"glyph", c:["255 106 26", "255 210 90", "255 58 138"], n:56, chars:["¡","¿","ñ","á","é","í","ó","ú","!","?"], alpha:.65, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ff6a1a", "#ffd25a", "#ff3a8a", "#3ac0ff"], chars:["¡","¿","ñ","✦","❀","★"]}},
+  glopo:{name:"PAX MUNDI", line:"Every nation is at the table now.", glow:"#9fd8ff", trail:"#ffd25a", sky:{kind:"glyph", c:["159 216 255", "255 210 90", "255 255 255"], n:56, chars:["☮","★","⚖","✦","✌"], alpha:.6}, spread:{kind:"symbols", c:["#9fd8ff", "#ffd25a", "#ffffff", "#8be08b"], chars:["☮","★","⚖","✦","✌","❦"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 

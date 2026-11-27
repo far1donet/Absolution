@@ -11,7 +11,7 @@ const h = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;"
 const st = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }, del(k){ try { localStorage.removeItem(k); } catch(e){} } };
 const PREF = "oiac-honey-pick", DRAFT = "oiac-honey-draft", PAST = "oiac-honey-history";
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-const ORDER = ["bio","chem","phys","cs","biz","econ","psych","ess","hist","geo","math","mathai","eng","lit","fr","es","tok","gk"];
+const ORDER = ["bio","chem","phys","cs","biz","econ","psych","ess","hist","glopo","geo","math","mathai","eng","lit","fr","es","tok","gk"];
 const VERDICT = { smash: ["Smashing it", "🔥"], track: ["On track", "✓"], work: ["Still to work on", "⚒"] };
 const n0 = n => Number(n).toLocaleString();
 const size = b => b < 1048576 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1048576).toFixed(1)} MB`;
@@ -62,6 +62,7 @@ function taskFor(){
   return HY.TASKS[s.ia.includes(v) ? v : s.ia[0]];
 }
 const level = T => T.levels ? P.level : null;
+const crits = T => HY.crits(T, level(T));   // HL-only criteria drop out at SL
 const draftKey = T => `${T.id}|${level(T) || ""}|${P.file ? P.file.name : ""}`;
 function saveDraft(T){ st.set(DRAFT, {key: draftKey(T), r: P.r}); }
 function loadDraft(T){ const d = st.get(DRAFT); P.r = d && d.key === draftKey(T) && d.r && typeof d.r === "object" ? d.r : {}; }
@@ -114,12 +115,12 @@ function taskBox(T){
   const s = HY.SUBJECTS[P.subject], vars = [];
   if (P.kind === "ia" && s.ia.length > 1) vars.push(`<div class="hp-seg sm" role="group" aria-label="${h(s.varLabel || "Exam session")}">${s.ia.map(id => `<button data-hvar="var:${id}" aria-pressed="${T.id === id}">${h(HY.TASKS[id].variant || HY.TASKS[id].title)}</button>`).join("")}</div>`);
   if (T.levels) vars.push(`<div class="hp-seg sm" role="group" aria-label="Level"><button data-hvar="level:SL" aria-pressed="${P.level === "SL"}">SL</button><button data-hvar="level:HL" aria-pressed="${P.level === "HL"}">HL</button></div>`);
-  const max = T.criteria.reduce((a, c) => a + c.max, 0);
+  const max = crits(T).reduce((a, c) => a + c.max, 0);
   return `<div class="hp-task">
     <div class="hp-task-h"><b>${h(s.name)} · ${h(T.kind === "ee" ? "Extended essay" : T.title.replace(/ \(.*\)$/, ""))}</b><small>${h(T.guide)} · ${h(T.limit)} · out of ${max}</small></div>
     ${vars.join("")}
     ${P.kind === "ia" && s.iaNote ? `<p class="hp-note">${h(s.iaNote)}</p>` : ""}
-    <details class="hp-crit"><summary>The criteria you'll mark it on</summary><ul>${T.criteria.map(c => `<li><b>${h(c.id)} · ${h(c.name)}</b> <span>(${c.max})</span><small>${h(c.focus)}</small></li>`).join("")}</ul><p class="hp-note">${h(T.note)}</p></details>
+    <details class="hp-crit"><summary>The criteria you'll mark it on</summary><ul>${crits(T).map(c => `<li><b>${h(c.id)} · ${h(c.name)}</b> <span>(${c.max})</span><small>${h(c.focus)}</small></li>`).join("")}</ul><p class="hp-note">${h(T.note)}</p></details>
   </div>`;
 }
 // facts about the file for this task: over the word limit, too many pages, a scan with no text
@@ -211,12 +212,12 @@ function paintMark(i, first){
   const T = taskFor(); if (!T || !G) return;
   if (G.phase !== "reading"){ G.phase = "reading"; G.doc.vis = true; G.drop = performance.now(); G.from = G.doc.y; G.landed = false; }
   setLabel();
-  const c = T.criteria[i], L = HY.looks(c, level(T)), r = P.r[c.id] = (P.r[c.id] || []).slice(0, L.length);
-  const done = k => { const cc = T.criteria[k], rr = P.r[cc.id] || []; return HY.looks(cc, level(T)).every((_, j) => rr[j] >= 0); };
-  const last = i === T.criteria.length - 1;
+  const c = crits(T)[i], L = HY.looks(c, level(T)), r = P.r[c.id] = (P.r[c.id] || []).slice(0, L.length);
+  const done = k => { const cc = crits(T)[k], rr = P.r[cc.id] || []; return HY.looks(cc, level(T)).every((_, j) => rr[j] >= 0); };
+  const last = i === crits(T).length - 1;
   q$("#hpPanel").innerHTML = `
-    <div class="hp-steps" role="group" aria-label="Criteria">${T.criteria.map((cc, k) => `<button class="hp-dot${k === i ? " on" : ""}${done(k) ? " done" : ""}" data-hstep="${k}" aria-label="Criterion ${h(cc.id)}: ${h(cc.name)}${done(k) ? ", marked" : ""}" ${k === i ? 'aria-current="step"' : ""}>${h(cc.id)}</button>`).join("")}</div>
-    <div class="hp-crit-h"><span class="hp-cl big">${h(c.id)}</span><div><small>Criterion ${i + 1} of ${T.criteria.length} · out of ${c.max}</small><b>${h(c.name)}</b></div></div>
+    <div class="hp-steps" role="group" aria-label="Criteria">${crits(T).map((cc, k) => `<button class="hp-dot${k === i ? " on" : ""}${done(k) ? " done" : ""}" data-hstep="${k}" aria-label="Criterion ${h(cc.id)}: ${h(cc.name)}${done(k) ? ", marked" : ""}" ${k === i ? 'aria-current="step"' : ""}>${h(cc.id)}</button>`).join("")}</div>
+    <div class="hp-crit-h"><span class="hp-cl big">${h(c.id)}</span><div><small>Criterion ${i + 1} of ${crits(T).length} · out of ${c.max}</small><b>${h(c.name)}</b></div></div>
     <p class="hp-note">${h(c.focus)}</p>
     ${first || i === 0 ? `<p class="hp-tip">Be your own strictest moderator: choose <b>Fully</b> only when you can point to the page that shows it.</p>` : ""}
     <div class="hp-qs">${L.map((text, j) => `
@@ -229,7 +230,7 @@ function paintMark(i, first){
     s.textContent = all ? `That's ${HY.mark(c.max, r)} out of ${c.max} for criterion ${c.id}.` : `Rate each statement to go on (${r.filter(x => x >= 0).length} of ${L.length}).`;
     b.disabled = !all; };
   q$("#hpPanel").querySelectorAll(".hp-q input").forEach(inp => inp.onchange = () => { const j = +inp.name.slice(3); r[j] = +inp.value; saveDraft(T); sofar(); });
-  q$("#hpPanel").querySelectorAll("[data-hstep]").forEach(b => b.onclick = () => { const k = +b.dataset.hstep; if (k <= i || T.criteria.slice(0, k).every((_, m) => done(m))) paintMark(k); });
+  q$("#hpPanel").querySelectorAll("[data-hstep]").forEach(b => b.onclick = () => { const k = +b.dataset.hstep; if (k <= i || crits(T).slice(0, k).every((_, m) => done(m))) paintMark(k); });
   q$("#hpBack").onclick = () => { if (i) paintMark(i - 1); else { G.phase = "hover"; paintPick(); } };
   q$("#hpNext").onclick = () => last ? finish(T) : paintMark(i + 1);
   sofar();
@@ -243,7 +244,7 @@ function paintMark(i, first){
 /* ================= step 3: it sinks, and the marks ================= */
 function finish(T){
   const lv = level(T);
-  const criteria = T.criteria.map(c => { const L = HY.looks(c, lv), r = P.r[c.id] || [], m = HY.mark(c.max, r);
+  const criteria = crits(T).map(c => { const L = HY.looks(c, lv), r = P.r[c.id] || [], m = HY.mark(c.max, r);
     return {id: c.id, name: c.name, max: c.max, mark: m, verdict: HY.verdict(m, c.max), low: L.map((text, j) => ({text, v: r[j]})).filter(x => x.v <= 1)}; });
   const total = criteria.reduce((a, c) => a + c.mark, 0), max = criteria.reduce((a, c) => a + c.max, 0);
   const res = {task: T.id, subject: P.subject, level: lv, file: P.file ? P.file.name : "", total, max, grade: HY.grade(T.kind, total, max), at: Date.now()};
