@@ -11,7 +11,7 @@ const h = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;"
 const st = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }, del(k){ try { localStorage.removeItem(k); } catch(e){} } };
 const PREF = "oiac-honey-pick", DRAFT = "oiac-honey-draft", PAST = "oiac-honey-history";
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-const ORDER = ["bio","chem","phys","cs","biz","econ","psych","ess","hist","geo","math","mathai","eng","fr","tok","gk"];
+const ORDER = ["bio","chem","phys","cs","biz","econ","psych","ess","hist","geo","math","mathai","eng","lit","fr","tok","gk"];
 const VERDICT = { smash: ["Smashing it", "🔥"], track: ["On track", "✓"], work: ["Still to work on", "⚒"] };
 const n0 = n => Number(n).toLocaleString();
 const size = b => b < 1048576 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1048576).toFixed(1)} MB`;
@@ -73,7 +73,7 @@ function paintPick(msg){
   const T = taskFor(), S = HY.SUBJECTS[P.subject];
   const subjBtn = k => { const s = HY.SUBJECTS[k], game = typeof SUBJECTS !== "undefined" && SUBJECTS[k];
     const ic = game && game.avatar ? `<span class="hp-ic">${game.avatar(3, game.bands[2].hue)}</span>` : "";
-    return `<button class="hp-subj${ok(k) ? "" : " off"}" data-hsubj="${k}" aria-pressed="${k === P.subject}">${ic}<span>${h(s.name.replace(/:.*$/, ""))}</span></button>`; };
+    return `<button class="hp-subj${ok(k) ? "" : " off"}" data-hsubj="${k}" aria-pressed="${k === P.subject}">${ic}<span>${h(s.btn || s.name.replace(/:.*$/, ""))}</span></button>`; };
   const none = S && !T ? (S.none || (P.kind === "ee" ? "This subject can't be used for an extended essay." : "This subject has no written internal assessment.")) : "";
   const fileLine = !P.file ? `<b>Drop your PDF here</b><small>or tap to choose one</small>`
     : `<b>📄 ${h(P.file.name)}</b><small>${P.reading ? "Reading it on this device…" : [size(P.file.size),P.pages ? `${P.pages} page${P.pages === 1 ? "" : "s"}` : "", P.words != null && !P.scanned ? `about ${n0(P.words)} words in the main text` : "", "tap to change"].filter(Boolean).join(" · ")}</small>`;
@@ -286,7 +286,7 @@ function pastList(skipAt){
   if (!rows.length){ box.innerHTML = ""; return; }
   box.innerHTML = `<div class="hp-past-h"><h3 class="hp-h">Earlier in the honey pot</h3><button class="mini" id="hpForget">Forget these</button></div>
     <ul class="hp-past">${rows.map(x => { const T = HY.TASKS[x.task], s = HY.SUBJECTS[x.subject];
-      return `<li><span><b>${h(s ? s.name.replace(/:.*$/, "") : x.subject)} · ${h(T.kind === "ee" ? "EE" : T.short)}${x.level ? " " + h(x.level) : ""}</b><small>${h(x.file || "")} · ${new Date(x.at).toLocaleDateString([], {day: "numeric", month: "short"})}</small></span><span class="hp-pg">${h(x.grade)}<small>${x.total}/${x.max}</small></span></li>`; }).join("")}</ul>
+      return `<li><span><b>${h(s ? s.btn || s.name.replace(/:.*$/, "") : x.subject)} · ${h(T.kind === "ee" ? "EE" : T.short)}${x.level ? " " + h(x.level) : ""}</b><small>${h(x.file || "")} · ${new Date(x.at).toLocaleDateString([], {day: "numeric", month: "short"})}</small></span><span class="hp-pg">${h(x.grade)}<small>${x.total}/${x.max}</small></span></li>`; }).join("")}</ul>
     <p class="hp-fine">Saved on this device only.</p>`;
   q$("#hpForget").onclick = () => { st.del(PAST); box.innerHTML = ""; };
 }

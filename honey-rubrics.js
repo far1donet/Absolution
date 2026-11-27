@@ -355,7 +355,10 @@ const TOK_ESSAY = {
   ],
 };
 
-const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, tokx: TOK_EXHIB, toke: TOK_ESSAY };
+// English A: Literature's HL essay uses the same four criteria as Language and Literature's
+const LIT_ESSAY = Object.assign({}, ENG_ESSAY, { id: "litessay", guide: "IB Language A: literature guide, first assessment 2021" });
+
+const TASKS = { ee: EE, sci: SCI, cs: CS, biz: BIZ, econ: ECON, psych: PSY, ess: ESS_IA, hist27: HIST27, hist28: HIST28, geo: GEO, math: MATH, mathai: MATHAI, engessay: ENG_ESSAY, litessay: LIT_ESSAY, tokx: TOK_EXHIB, toke: TOK_ESSAY };
 
 // which tasks each subject offers: the first is its internal assessment (or coursework essay)
 const SUBJECTS = {
@@ -369,9 +372,10 @@ const SUBJECTS = {
   ess: { name: "Environmental systems and societies", ia: ["ess"], ee: true },
   hist: { name: "History", ia: ["hist27", "hist28"], ee: true, varLabel: "Exam session" },
   geo:  { name: "Geography", ia: ["geo"], ee: true },
-  math: { name: "Mathematics: analysis and approaches", ia: ["math"], ee: true },
-  mathai: { name: "Mathematics: applications and interpretation", ia: ["mathai"], ee: true },
-  eng:  { name: "English A: language and literature", ia: ["engessay"], ee: true, iaNote: "The individual oral is spoken, so the honey pot marks your HL essay instead." },
+  math: { name: "Mathematics: analysis and approaches", btn: "Maths AA", ia: ["math"], ee: true },
+  mathai: { name: "Mathematics: applications and interpretation", btn: "Maths AI", ia: ["mathai"], ee: true },
+  eng:  { name: "English A: language and literature", btn: "English Lang & Lit", ia: ["engessay"], ee: true, iaNote: "The individual oral is spoken, so the honey pot marks your HL essay instead." },
+  lit:  { name: "English A: literature", btn: "English Literature", ia: ["litessay"], ee: true, iaNote: "The individual oral is spoken, so the honey pot marks your HL essay instead." },
   tok:  { name: "Theory of Knowledge", ia: ["tokx", "toke"], ee: false, varLabel: "TOK task", iaNote: "TOK has two tasks: the exhibition, marked by your teacher, and the essay, marked by the IB. Pick one above. There's no extended essay in TOK." },
   fr:   { name: "French ab initio", ia: [], ee: false, none: "French ab initio can't go in the honey pot: its internal assessment is a live oral with your teacher, and the IB doesn't allow an extended essay in an ab initio language." },
   gk:   { name: "General knowledge", ia: [], ee: false, none: "General knowledge isn't an IB subject, so there's nothing to mark." },

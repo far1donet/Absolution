@@ -147,6 +147,17 @@ const FORMS = {
       + `<g transform="scale(${f1(1.06 + power * .05)})">${base}</g>`
       + Array.from({length: 2 + power}, (_, k) => orbit(48, 18, (3 + k * .5).toFixed(1), (k * 1.2).toFixed(1), q(k))).join(""));
   },
+  /* English A Literature: the Bookwyrm. The worm grows dragon wings made of pages and horns, breathing a stream of letters */
+  lit(level, hue, power){
+    const book = k => `<g transform="rotate(${k * 40})"><rect x="-6" y="-8" width="12" height="16" rx="1.5" fill="${["#8a1a1a","#1a3a8a","#3a7a4a","#e0ad2a"][k % 4]}" stroke="#fff2a8" stroke-width="1"/><path d="M-3 -4 h6" stroke="#fff2a8" stroke-width="1"/></g>`;
+    const base = SUBJECTS.lit._base(10, hue).replace(/^<svg[^>]*><g class="bob"><g transform="translate\(37 37\)">/, "").replace(/<\/g><\/g><\/svg>$/, "");
+    const wing = d => Array.from({length: 5}, (_, k) => `<path d="M${d * 8} -6 L${d * (30 + k * 3)} ${-34 + k * 12} L${d * (36 + k * 2)} ${-26 + k * 12}z" fill="${k % 2 ? "#f4ead0" : "#e8dcc0"}" stroke="#b07a2a" stroke-width="1"/>`).join("");
+    return avatarSVG(glow(uid(), "#ffb03a", 56, .5)
+      + `<g class="av-hover">${wing(-1)}${wing(1)}</g>`
+      + `<g transform="scale(${f1(1.06 + power * .05)})">${base}<path d="M-9 -24 l-4 -10 l7 6z M9 -24 l4 -10 l-7 6z" fill="#e0ad2a" stroke="#8a5a08" stroke-width="1"/></g>`
+      + `<g class="drift" style="animation-duration:1.6s"><text x="-28" y="-2" font-family="Georgia,serif" font-size="11" font-style="italic" font-weight="700" fill="#ffb03a">a b c</text></g>`
+      + Array.from({length: 2 + power}, (_, k) => orbit(48, 18, (3 + k * .5).toFixed(1), (k * 1.2).toFixed(1), book(k))).join(""));
+  },
   /* General knowledge: the mothership. A huge saucer with a chasing ring of lights, a beam and escort ships */
   gk(level, hue, power){
     const lights = Array.from({length: 11}, (_, k) => { const a = k / 11 * 6.283; return `<circle class="blink" style="animation-delay:-${(k * .1).toFixed(2)}s;animation-duration:1.1s" cx="${f1(Math.cos(a) * 33)}" cy="${f1(6 + Math.sin(a) * 6)}" r="2.6" fill="hsl(${(k * 33) % 360} 95% 65%)"/>`; }).join("");
@@ -204,6 +215,7 @@ const SPECIAL = {
   mathai:{name:"DRONE SWARM", line:"A whole swarm is surveying the world for you now.", glow:"#9ff5e8", trail:"#9ff5e8", sky:{kind:"glyph", c:["159 245 232", "255 210 90", "255 255 255"], n:56, chars:["σ","μ","Σ","x̄","r","χ²","%","∫","0","1"], alpha:.6}, spread:{kind:"symbols", c:["#9ff5e8", "#ffd25a", "#ffffff"], chars:["σ","μ","Σ","x̄","r","χ²","p","%","∫","≈"]}},
   ess: {name:"WORLD TREE", line:"Its roots now reach every ecosystem on Earth.", glow:"#8be08b", trail:"#ffd25a", sky:{kind:"firefly", c:["220 255 120", "139 224 139", "255 210 90"], n:60}, spread:{kind:"symbols", c:["#8be08b", "#ffd25a", "#9fd8ff"], chars:["✿","❀","❧","❦","✦","☘","•"]}},
   tok: {name:"OWL OF MINERVA", line:"Wisdom takes flight at dusk. You've seen the Sun.", glow:"#ffd25a", trail:"#fff2a8", sky:{kind:"glyph", c:["255 210 90", "255 246 200", "255 255 255"], n:56, chars:["?","!","∴","∵","≠","∀","∃","¬"], alpha:.6, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ffd25a", "#fff2a8", "#ffffff"], chars:["?","!","∴","∵","≠","∀","∃","☉"]}},
+  lit: {name:"BOOKWYRM", line:"The worm became a wyrm. It devours whole libraries now.", glow:"#ffb03a", trail:"#ffd27a", sky:{kind:"glyph", c:["255 210 122", "244 234 208", "255 176 58"], n:56, chars:["❦","❧","☙","✦","❝","❞","§"], alpha:.6, font:"Georgia, serif"}, spread:{kind:"symbols", c:["#ffd27a", "#f4ead0", "#ffb03a"], chars:["❦","❧","☙","❝","❞","✒","✦"]}},
   gk:  {name:"MOTHERSHIP", line:"The whole fleet has arrived.", glow:"#9ff5c8", trail:"#9ff5c8", sky:{kind:"star", c:["255 255 255", "200 170 255", "159 245 200"], n:130}, spread:{kind:"rings", c:["#b07aff", "#9ff5c8", "#ffffff"]}},
 };
 
